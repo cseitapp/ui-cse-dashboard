@@ -14,6 +14,16 @@ export default defineNuxtConfig({
       },
     },
   },
+  runtimeConfig: {
+    // Backend API URL (can be HTTP)
+    VITE_URL_PATH_TICKET: process.env.VITE_URL_PATH_TICKET,
+
+    // Public (frontend can read if needed)
+    public: {
+      VITE_URL_PATH_TICKET: process.env.VITE_URL_PATH_TICKET,
+    },
+  },
+  compatibilityDate: '2025-07-15',
   css: ['~~/assets/css/main.css'],
   app: {
     head: {
