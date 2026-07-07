@@ -1,144 +1,186 @@
 <template>
   <v-container>
+    <v-card rounded="lg" elevation="0" border :loading="loading" color="#FDFBF7">
+      <v-card-text>
+        <div class="d-flex justify-center">
+          <v-img src="/assets/images/logo_cse.png" width="100px" height="100px" />
+        </div>
+        <h2 class="mb-8 text-center gold-gradient-text">ລາຍງານການບໍລິຫານຈັດການນ້ຳ ແລະ ການຜະລິດ</h2>
+        <div v-if="loading" class="d-flex justify-center py-8">
+          <v-progress-circular indeterminate color="primary" />
+        </div>
 
-    <h3>ລາຍງານ ພະລັງງານ ແລະ ລະດັບນ້ຳ</h3>
+        <template v-else-if="chartData.length > 0">
+          <v-row>
+            <v-col v-for="item in chartData" :key="item.CODE" cols="12" sm="6" md="4" lg="3">
+              <v-card rounded="lg" elevation="0" hover class="cursor-pointer text-center border-sm rounded-lg"
+                color="#FDFBF7"
+                @click="router.push(`/${item.CODE}?name=${encodeURIComponent(item.branch?.BR_NAME || '')}`)">
+                <v-card-title class="text-center">
+                  <b class="text-primary">{{ item.branch?.BR_NAME }}</b>
+                </v-card-title>
+                <v-card-subtitle class="text-center">
+                  <v-chip color="primary" variant="tonal">{{ currentYear }}</v-chip>
+                </v-card-subtitle>
+                <v-divider class="my-2"></v-divider>
+                <div class="ma-3">
 
-    <!-- 📅 DATE RANGE -->
-    <v-row class="mt-2 d-flex align-center" >
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model="startDate"
-          label="Start Date"
-          type="date"
-          density="comfortable"
-        />
-      </v-col>
+                  <v-row>
+                    <!-- Total Energy -->
+                    <v-col cols="6" class="d-flex justify-center">
+                      <div class="d-flex flex-column align-center">
+                        <v-tooltip text="ພະລັງງານ" location="top">
+                          <template v-slot:activator="{ props }">
+                            <v-icon v-bind="props" icon="mdi-lightning-bolt" size="2rem" color="primary" class="mb-2" />
+                          </template>
+                        </v-tooltip>
 
-      <v-col cols="12" md="3" >
-        <v-text-field
-        density="comfortable"
-          v-model="endDate"
-          label="End Date"
-          type="date"
-        />
-      </v-col>
+                        <v-chip label rounded="lg" variant="tonal" color="primary">
+                          {{ formatNumber(item.total_power_year) }} MW
+                        </v-chip>
+                      </div>
+                    </v-col>
 
-      <v-col cols="12" md="3" class="d-flex align-center">
-        <v-btn color="primary" @click="loadData">
-          Search
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row class="mb-2">
+                    <!-- Energy Plan -->
+                    <v-col cols="6" class="d-flex justify-center">
+                      <div class="d-flex flex-column align-center">
+                        <v-tooltip text="ແຜນພະລັງງານ" location="top">
+                          <template v-slot:activator="{ props }">
+                            <v-icon v-bind="props" icon="mdi-bullseye-arrow" size="2rem" color="primary" class="mb-2" />
+                          </template>
+                        </v-tooltip>
 
-  <!-- 📅 Quick Filters -->
-  <v-col cols="12" md="6">
-    <v-btn-group density="compact">
-      <v-btn :color="active === 'today' ? 'primary' : ''" @click="setRange('today')">Today</v-btn>
-      <v-btn :color="active === '3days' ? 'primary' : ''" @click="setRange('3days')">3 Days</v-btn>
-      <v-btn :color="active === '7days' ? 'primary' : ''" @click="setRange('7days')">7 Days</v-btn>
-    </v-btn-group>
-  </v-col>
+                        <v-chip label rounded="lg" variant="tonal" color="primary">
+                          {{ formatNumber(item.energy_plan) || '-' }} MW
+                        </v-chip>
+                      </div>
+                    </v-col>
+                  </v-row>
+                </div>
+                <v-divider class="my-3"></v-divider>
+                <div class="ma-3">
+                  <v-row>
 
-</v-row>
-    <!-- 📊 DATA TABLE -->
-    <v-data-table
-      :headers="headers"
-      :items="data"
-      :loading="loading"
-      class="elevation-2"
-    >
-      <template #item.datetime="{ item }">
-        {{ formatDate(item.datetime) }}
-      </template>
+                    <v-col cols="6" class="d-flex justify-center">
+                      <div class="d-flex flex-column align-center">
+                        <v-tooltip text="ລາຍຮັບ" location="top">
+                          <template v-slot:activator="{ props }">
+                            <v-icon v-bind="props" icon="mdi-currency-usd" size="2rem" color="warning" class="mb-2" />
+                          </template>
+                        </v-tooltip>
 
-      <template #item.created_at="{ item }">
-        {{ formatDate(item.created_at) }}
-      </template>
+                        <v-chip variant="tonal" label rounded="lg" color="yellow-darken-4">
+                          {{ formatNumber(item.cost_total) || '-' }} $
+                        </v-chip>
+                      </div>
+                    </v-col>
+                    <v-col cols="6" class="d-flex justify-center">
+                      <div class="d-flex flex-column align-center">
+                        <v-tooltip text="ແຜນລາຍຮັບ" location="top">
+                          <template v-slot:activator="{ props }">
+                            <v-icon v-bind="props" icon="mdi-cash-multiple" size="2rem" color="warning" class="mb-2" />
+                          </template>
+                        </v-tooltip>
 
-      <template #item.total_power="{ item }">
-        <strong>{{ item.total_power }}</strong>
-      </template>
-    </v-data-table>
+                        <v-chip variant="tonal" label rounded="lg" color="yellow-darken-4">
+                          {{ formatNumber(item.cost_total_plan) || '-' }} $
+                        </v-chip>
+                      </div>
+                    </v-col>
+                  </v-row>
+                </div>
 
+              </v-card>
+            </v-col>
+          </v-row>
+        </template>
+
+        <div v-else class="text-center py-8">
+          ບໍ່ມີຂໍ້ມູນ
+        </div>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
-<script setup>
-import { ref } from "vue";
-import axios from "axios";
 
+<script setup>
+import { ref, computed } from "vue";
+import axios from "axios";
+import { useAuthUser } from "~~/composables/useAuth";
+
+const router = useRouter();
+
+definePageMeta({
+  middleware: "auth",
+  layout: "default",
+});
+
+// ─── State ────────────────────────────────────────────────
 const data = ref([]);
 const loading = ref(false);
-const active = ref("today");
+const selectedDate = ref(new Date().toISOString().slice(0, 10));
+const currentYear = new Date().getFullYear(); // 2026
+// ─── Computed ─────────────────────────────────────────────
+const chartData = computed(() =>
+  data.value.filter((d) => d.total_power_year > 0)
+);
+const formatNumber = (val) => {
+  if (val == null) return "-";
 
-const startDate = ref("2026-03-27");
-const endDate = ref("2026-04-27");
+  const num = Number(val);
 
-const headers = [
-  { title: "ID", key: "id" },
-  { title: "ວັນ ແລະ ເວລາ", key: "datetime" },
-  { title: "ເຂື່ອນຫຼັກ", key: "Main_dam" },
-  { title: "ເຂື່ອນອ່ວາຍນ້ຳ", key: "diversion_dam" },
-  { title: "ກຳລັງຜະລິດຈັກເບີ 1", key: "unit1_power" },
-  { title: "ກຳລັງຜະລິດຈັກເບີ 2", key: "unit2_power" },
-  { title: "ລວມກຳລັງຜະລິດ", key: "total_power" },
-  { title: "ອັດຕາການນ້ຳໃຊ້ນ້ຳຈັກເບີ 1", key: "unit1_water" },
-  { title: "ອັດຕາການນ້ຳໃຊ້ນ້ຳຈັກເບີ 2", key: "unit2_water" },
-  { title: "ວັນ ແລະ ເວລາ ອັບໂຫຼດ", key: "created_at" },
-];
+  if (Math.abs(num) >= 1_000_000) {
+    // e.g. 1500000 -> "1.5M", 1000000 -> "1M"
+    const millions = num / 1_000_000;
+    const formatted = millions.toFixed(3).replace(/\.0$/, "");
+    return `${formatted}M`;
+  }
 
+  if (Math.abs(num) >= 1_000) {
+    // e.g. 1500 -> "1.5K", 1000 -> "1K"
+    const thousands = num / 1_000;
+    const formatted = thousands.toFixed(3).replace(/\.0$/, "");
+    return `${formatted}K`;
+  }
+
+  return num
+    .toFixed(3)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+
+// ─── API ──────────────────────────────────────────────────
 const loadData = async () => {
   loading.value = true;
-
   try {
-    const res = await axios.get("/api/energy", {
-      params: {
-        start: startDate.value,
-        end: endDate.value,
-      },
+    const res = await axios.get("/api/energy/all", {
+      params: { dateselect: selectedDate.value },
     });
-
-    data.value = res.data.data;
+    data.value = Array.isArray(res.data.data) ? res.data.data : [];
+    console.log(data.value)
   } catch (err) {
     console.error(err);
+    data.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-const formatDate = (date) => {
-  if (!date) return "-";
-  return new Date(date).toLocaleString();
-};
 
-const setRange = (type) => {
-  active.value = type;
-  const today = new Date();
-
-  let start = new Date();
-
-  if (type === "today") {
-    start = new Date();
-  }
-
-  if (type === "3days") {
-    start.setDate(today.getDate() - 3);
-  }
-
-  if (type === "7days") {
-    start.setDate(today.getDate() - 7);
-  }
-
-  startDate.value = formatInputDate(start);
-  endDate.value = formatInputDate(today);
-
-  loadData();
-};
-
-// format YYYY-MM-DD for input
-const formatInputDate = (date) => {
-  return date.toISOString().split("T")[0];
-};
-
+// ─── Init ─────────────────────────────────────────────────
 loadData();
 </script>
+<style scoped>
+.gold-gradient-text {
+  background: linear-gradient(90deg,
+      #cb9b51 22%,
+      #f6e27a 45%,
+      #f6e27a 55%,
+      #cb9b51 78%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* fallback for browsers without -webkit prefix support */
+}
+</style>

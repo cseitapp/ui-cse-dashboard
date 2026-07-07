@@ -7,18 +7,25 @@ export default defineEventHandler(async (event) => {
     const formData = await readMultipartFormData(event)
 
     if (!formData) {
-      throw new Error('No file uploaded')
+      throw new Error('No form data received')
     }
 
-    const file = formData.find(f => f.name === 'file')
-
-    if (!file) {
-      throw new Error('File is required')
-    }
-
-    // ✅ Create new FormData for external API
     const form = new FormData()
-    form.append('file', file.data, file.filename)
+
+    for (const part of formData) {
+      if (!part.name) continue
+
+      if (part.filename) {
+        // ✅ File field
+        form.append(part.name, part.data, {
+          filename: part.filename,
+          contentType: part.type,
+        })
+      } else {
+        // ✅ Text fields (dam_id, old_file, date, code, section, status, created_by ...)
+        form.append(part.name, part.data.toString())
+      }
+    }
 
     const res = await energy.post('/api/files/upload', form, {
       headers: form.getHeaders()
@@ -31,7 +38,6 @@ export default defineEventHandler(async (event) => {
 
   } catch (error: any) {
     console.error('Upload Error:', error.response?.data || error.message)
-
     return {
       success: false,
       message: error.message,

@@ -1,18 +1,24 @@
-
 import { energy } from "../utils/energy";
+
 export default defineEventHandler(async (event) => {
     const query = getQuery(event);
-    const start = query.start;
-    const end = query.end;
+
     try {
-        const res = await energy.get("api/data/range", {
-            params: {
-                start,
-                end,
-            },
+        const res = await energy.get("api/data", {
+            params: query, // optional: pass query to API
         });
-        return res.data;
+
+        return {
+            success: true,
+            data: res.data,
+        };
+
     } catch (error) {
         console.error("API Error:", error.message);
+
+        throw createError({
+            statusCode: 500,
+            statusMessage: error.message || "Internal Server Error",
+        });
     }
 });

@@ -6,7 +6,6 @@ export const useAuthUser = () => {
   const user = useState<any>('user', () => null)
   return user
 }
-
 //call username
 export const fetchUser = async (event?: any) => {
   const user = useAuthUser()
@@ -31,6 +30,8 @@ export const useLogin = async (username: string, password: string) => {
 
     // Axios puts the response data in res.data
     if (res.data.success) {
+      ///create api for check user in DB if no create new if have modify
+      const userRes = await axios.post('/api/user', res.data.user)
       useAuthUser().value = res.data.user
       const roleId = res.data.user.ROLE_ID
       if (roleId) {
@@ -45,8 +46,8 @@ export const useLogin = async (username: string, password: string) => {
           console.error('Failed to fetch menu after login', menuErr)
           localStorage.removeItem('menu')
         }
+      }
     }
-  }
     return res.data
   } catch (err: any) {
     // If API returns error response, try to get message

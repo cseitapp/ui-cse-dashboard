@@ -8,7 +8,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="d-flex align-center justify-center" height="300">
+    <v-main class="d-flex align-center justify-center" height="100vh">
       <v-container>
         <slot />
       </v-container>
