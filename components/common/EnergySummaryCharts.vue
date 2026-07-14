@@ -73,19 +73,19 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: {
       position: 'top',
-      labels: { font: { family: "'Noto Serif Lao', serif", size: 13 } },
+      labels: { font: { family: "'Noto Sans Lao', sans-serif", size: 13 } },
     },
     title: {
       display: true,
       text: props.title,
-      font: { family: "'Noto Serif Lao', serif", size: 18 },
+      font: { family: "'Noto Sans Lao', sans-serif", size: 18 },
     },
     datalabels: {
       anchor: 'center',
       align: 'center',
       color: '#fff',
       font: {
-        family: "'Noto Serif Lao', serif",
+        family: "'Noto Sans Lao', sans-serif",
         size: 11,
         weight: 'bold',
       },
@@ -97,12 +97,12 @@ const chartOptions = computed(() => ({
   },
   scales: {
     x: {
-      ticks: { font: { family: "'Noto Serif Lao', serif", size: 13 } },
+      ticks: { font: { family: "'Noto Sans Lao', sans-serif", size: 13 } },
     },
     y: {
       beginAtZero: true,
       ticks: {
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
         callback: val => val.toLocaleString(),
       },
     },

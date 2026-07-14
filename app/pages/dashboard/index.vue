@@ -2,7 +2,7 @@
   <v-container>
     <h3>ລາຍງານ ພະລັງງານ ແລະ ລະດັບນ້ຳ</h3>
 
-    <v-card class="mb-3" elevation="0" rounded="lg" color="#FDFBF7">
+    <v-card class="mb-3" elevation="0" rounded="lg" >
       <!-- 📅 DATE RANGE -->
       <v-row class="ma-0 mt-5" >
         <v-col cols="12" md="3" v-if="role === 'ADMIN' || role === 'DIRECTOR'">
@@ -23,14 +23,14 @@
         </v-col>
 
         <v-col cols="12" md="3">
-          <v-btn color="blue-grey" @click="loadData">ຄົ້ນຫາ</v-btn>
+          <v-btn color="primary" prepend-icon="mdi-magnify" variant="outlined" @click="loadData">ຄົ້ນຫາ</v-btn>
         </v-col>
       </v-row>
     </v-card>
 
     <v-row class="mb-2">
       <v-col cols="12" md="6">
-        <v-btn-group :border="true" density="compact" color="#FDFBF7">
+        <v-btn-group :border="true" density="compact" >
           <v-btn v-for="range in quickRanges" :key="range.key" :color="active === range.key ? 'primary' : ''"
             @click="setRange(range.key, range.days)">
             {{ range.label }}
@@ -40,7 +40,7 @@
     </v-row>
 
     <!-- 📊 DATA TABLE -->
-    <v-data-table :headers="headers" color="#FDFBF7" :items="data" :loading="loading" class="elevation-0 mt-4 rounded-lg border">
+    <v-data-table :headers="headers"  :items="data" :loading="loading" class="elevation-0 mt-4 rounded-lg border">
       <template #item.datetime="{ item }">{{ formatDisplay(item.datetime) }}</template>
       <template #item.created_at="{ item }">{{ formatDisplay(item.created_at) }}</template>
       <template #item.unit1_power="{ item }">{{ formatNumber(item.unit1_power) }}</template>

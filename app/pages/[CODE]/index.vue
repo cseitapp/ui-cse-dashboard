@@ -1,10 +1,10 @@
 <template>
     <v-container fluid class="pa-2">
-        <v-card elevation="0" rounded="lg" color="#FDFBF7">
+        <v-card elevation="0" rounded="lg" >
             <v-row class="ma-0 ps-5" :align="'center'">
                 <v-col>
                     <v-row :align="'center'">
-                        <v-btn icon="mdi-arrow-left" variant="tonal" color="blue-grey" @click="$router.back()" />
+                        <v-btn icon="mdi-arrow-left" variant="tonal" color="primary" @click="$router.back()" />
                         <v-col>
                             <v-row class="ma-0">
                                 <div class="pr-3">
@@ -23,7 +23,7 @@
                         <!-- <v-col></v-col> -->
                     </v-row>
                 </v-col>
-                <v-col v-if="mobile" class="text-end" cols="12" md="8" lg="6">
+                <v-col v-if="mobile" class="text-end" cols="6" md="8" lg="6">
                     <v-btn color="primary" variant="tonal" prepend-icon="mdi-filter" @click="showFilter = true">
                         ຄົ້ນຫາຂໍ້ມູນ
                     </v-btn>
@@ -114,7 +114,7 @@
                                     </v-menu>
                                 </v-col>
                                 <v-col>
-                                    <v-btn color="blue-grey" @click="onSearch">ຄົ້ນຫາ</v-btn>
+                                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onSearch">ຄົ້ນຫາ</v-btn>
                                 </v-col>
                             </v-row>
                         </v-card-text>
@@ -206,7 +206,7 @@
                             </v-menu>
                         </v-col>
                         <v-col>
-                            <v-btn variant="flat" color="blue-grey" @click="onSearch">ຄົ້ນຫາ</v-btn>
+                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify" @click="onSearch">ຄົ້ນຫາ</v-btn>
                         </v-col>
                     </v-row>
                 </v-col>
@@ -222,30 +222,30 @@
                 <v-btn variant="text" @click="dialog = false">ປິດ</v-btn>
             </template>
         </InfoDialog>
-        <h3 class="text-center my-3">I. ການຜະລິດ ແລະ ລາຍຮັບ</h3>
+        <h3 class="my-3">I. ການຜະລິດ ແລະ ລາຍຮັບ</h3>
         <v-row>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4" color="#FDFBF7" style="height: 450px">
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
                     <EnergyLineChart :allData="allData" title="ພະລັງງານ " :activeType="activeType" />
                 </v-card>
             </v-col>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4" color="#FDFBF7" style="height: 450px">
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
                     <EnergyLineChart :allData="COST" :fields="['total_cost']" yAxisLabel="ໂດລ້າ"
-                        :fieldLabels="{ total_cost: 'ມູນຄ່າລາຍຮັບ' }" :colors="{ total_cost: '#D4AF37' }"
+                        :fieldLabels="{ total_cost: 'ມູນຄ່າລາຍຮັບ' }" :colors="{ total_cost: '#FFD700' }"
                         title="ລາຍຮັບ " />
                 </v-card>
             </v-col>
         </v-row>
-        <h3 class="text-center my-3">II. ການບໍລິຫານຈັດການນ້ຳ</h3>
+        <h3 class=" my-3">II. ການບໍລິຫານຈັດການນ້ຳ</h3>
         <v-row>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" color="#FDFBF7" class="border-sm pa-4" style="height: 450px">
+                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
                     <EnergyLineChart title="ປະລິມານນ້ຳຝົນ (ຖ້າຂໍ້ມູນ)" />
                 </v-card>
             </v-col>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" color="#FDFBF7" class="border-sm pa-4" style="height: 450px">
+                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
                     <EnergyLineChart :allData="water_data" :fields="['total_inflow', 'total_outflow']" yAxisLabel="MCM"
                         :fieldLabels="{ total_inflow: 'ນ້ຳເຂົ້າ', total_outflow: 'ນ້ຳອອກ' }"
                         title="ບໍລິມາດນ້ຳເຂົ້າອ່າງ/ບໍລິມາດນ້ຳອອກ" />
@@ -253,14 +253,14 @@
                         plan-field="total_outflow" data-label="ນ້ຳເຂົ້າ" plan-label="ນ້ຳອອກ" /> -->
                 </v-card>
             </v-col>
-            <v-col cols="12" sm="12" md="12" lg="12">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4" color="#FDFBF7" style="height: 450px">
+            <!-- <v-col cols="12" sm="12" md="12" lg="12">
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
                     <LineCompareChart :allData="water_level" title="ລະດັບນ້ຳ" dataField="Main_dam"
                         planField="diversion_dam" dataLabel="ເຂື່ອນຫຼັກ" planLabel="ເຂື່ອນອ່ວຍນ້ຳ" />
                 </v-card>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" sm="12" md="12" lg="12">
-                <v-card rounded="lg" elevation="0" color="#FDFBF7" class="border-sm pa-4" style="height: 450px">
+                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
                     <EChart :data="water_level" title="ລະດັບນ້ຳ" x-field="datetime" data-field="Main_dam"
                         plan-field="diversion_dam" data-label="ເຂື່ອນຫຼັກ" plan-label="ເຂື່ອນອ່ວຍນ້ຳ" />
                 </v-card>
@@ -414,7 +414,7 @@ const onSearch = () => {
     loadCost()
     loadWaterData()
 }
-const activeType = ref('Y')
+const activeType = ref('D')
 const onTypeChange = (type) => {
     const { start_date, end_date } = setDateRange(moment(), type)
 
@@ -512,7 +512,6 @@ const loadSummary = async () => {
         loading.value = false
     }
 }
-
 const setDateRange = (date, type) => {
     switch (type) {
         case 'Y':
@@ -522,18 +521,19 @@ const setDateRange = (date, type) => {
             }
         case 'M':
             return {
-                start_date: moment(date).startOf('month').format('YYYY-MM-DD'),
-                end_date: moment(date).endOf('month').format('YYYY-MM-DD'),
+                start_date: moment(date).startOf('year').format('YYYY-MM-DD'),
+                end_date: moment(date).endOf('year').format('YYYY-MM-DD'),
             }
         case 'W':
             return {
-                start_date: moment(date).startOf('week').format('YYYY-MM-DD'),
-                end_date: moment(date).endOf('week').format('YYYY-MM-DD'),
+                start_date: moment(date).startOf('month').format('YYYY-MM-DD'),
+                end_date: moment(date).endOf('month').format('YYYY-MM-DD'),
             }
         case 'D':
+            // Default "D" now represents the current month range
             return {
-                start_date: moment(date).format('YYYY-MM-DD'),
-                end_date: moment(date).format('YYYY-MM-DD'),
+                start_date: moment(date).startOf('month').format('YYYY-MM-DD'),
+                end_date: moment(date).endOf('month').format('YYYY-MM-DD'),
             }
         case 'H':
             return {

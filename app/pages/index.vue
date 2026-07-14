@@ -1,105 +1,93 @@
 <template>
-  <v-container>
-    <v-card rounded="lg" elevation="0" border :loading="loading" color="#FDFBF7">
-      <v-card-text>
-        <div class="d-flex justify-center">
-          <v-img src="/assets/images/logo_cse.png" width="100px" height="100px" />
-        </div>
-        <h2 class="mb-8 text-center gold-gradient-text">ລາຍງານການບໍລິຫານຈັດການນ້ຳ ແລະ ການຜະລິດ</h2>
-        <div v-if="loading" class="d-flex justify-center py-8">
-          <v-progress-circular indeterminate color="primary" />
-        </div>
+  <v-container fluid>
+    <!-- <v-card rounded="lg" elevation="0" border :loading="loading" > -->
+    <v-card-text>
+      <div class="d-flex justify-center">
+        <v-img src="/assets/images/logo_cse.png" width="100px" height="100px" />
+      </div>
+      <h2 class="mb-8 text-center gold-gradient-text">ລາຍງານການບໍລິຫານຈັດການນ້ຳ ແລະ ການຜະລິດ</h2>
+      <div v-if="loading" class="d-flex justify-center py-8">
+        <v-progress-circular indeterminate color="primary" />
+      </div>
 
-        <template v-else-if="chartData.length > 0">
-          <v-row>
-            <v-col v-for="item in chartData" :key="item.CODE" cols="12" sm="6" md="4" lg="3">
-              <v-card rounded="lg" elevation="0" hover class="cursor-pointer text-center border-sm rounded-lg"
-                color="#FDFBF7"
-                @click="router.push(`/${item.CODE}?name=${encodeURIComponent(item.branch?.BR_NAME || '')}`)">
-                <v-card-title class="text-center">
-                  <b class="text-primary">{{ item.branch?.BR_NAME }}</b>
-                </v-card-title>
-                <v-card-subtitle class="text-center">
+      <template v-else-if="chartData.length > 0">
+        <v-row>
+          <v-col v-for="item in chartData" :key="item.CODE" cols="12" sm="6" md="4" lg="3">
+            <v-card rounded="lg" elevation="0" hover class="cursor-pointer text-center border-sm rounded-lg"
+              
+              @click="router.push(`/${item.CODE}?name=${encodeURIComponent(item.branch?.BR_NAME || '')}`)">
+              <v-card-text class="text-center">
+                <div class="d-flex align-center">
+                  <!-- <v-icon icon="mdi mdi-waterfall" size="2rem" color="grey" class="mx-4" /> -->
+                  <Icon name="game-icons:waterfall" size="3rem" class="text-grey mx-4" />
+                  <!-- <Icon name="mdi:home" /> -->
+
+                  <div class="text-left">
+                    <h3><b>{{ item.branch?.BR_NAME }}</b></h3>
+                    <h4 class="text-grey"><b>{{ item.branch?.BR_NAME_EN }}</b></h4>
+                  </div>
+                </div>
+              </v-card-text>
+              <!-- <v-card-subtitle class="text-center">
                   <v-chip color="primary" variant="tonal">{{ currentYear }}</v-chip>
                 </v-card-subtitle>
-                <v-divider class="my-2"></v-divider>
-                <div class="ma-3">
+                <v-divider class="my-2"></v-divider> -->
+              <div class="ma-3">
 
-                  <v-row>
-                    <!-- Total Energy -->
-                    <v-col cols="6" class="d-flex justify-center">
-                      <div class="d-flex flex-column align-center">
-                        <v-tooltip text="ພະລັງງານ" location="top">
-                          <template v-slot:activator="{ props }">
-                            <v-icon v-bind="props" icon="mdi-lightning-bolt" size="2rem" color="primary" class="mb-2" />
-                          </template>
-                        </v-tooltip>
+                <v-row>
+                  <!-- Total Energy -->
+                  <v-col cols="6" class="d-flex justify-center">
+                    
+                      <v-tooltip text="ພະລັງງານ" location="top">
+                        <template v-slot:activator="{ props }">
+                          <v-card v-bind="props" elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
+                            <v-card-text>
+                              <!-- <v-icon icon="mdi-lightning-bolt" size="2rem" color="grey" class="mb-2" /> -->
+                              <Icon name="streamline-sharp:hydro-energy-remix" size="2rem" class="text-grey mb-2" />
+                              <p class="text-primary">{{ formatNumber(item.total_power_year) }} MW</p>
+                              <v-divider class="my-1"></v-divider>
+                              <p class="text-warning"> {{ formatNumber(item.cost_total) || '-' }} $</p>
+                            </v-card-text>
+                          </v-card>
+                        </template>
+                      </v-tooltip>
 
-                        <v-chip label rounded="lg" variant="tonal" color="primary">
-                          {{ formatNumber(item.total_power_year) }} MW
-                        </v-chip>
-                      </div>
-                    </v-col>
+                  </v-col>
 
-                    <!-- Energy Plan -->
-                    <v-col cols="6" class="d-flex justify-center">
-                      <div class="d-flex flex-column align-center">
-                        <v-tooltip text="ແຜນພະລັງງານ" location="top">
-                          <template v-slot:activator="{ props }">
-                            <v-icon v-bind="props" icon="mdi-bullseye-arrow" size="2rem" color="primary" class="mb-2" />
-                          </template>
-                        </v-tooltip>
+                  <!-- Energy Plan -->
+                  <v-col cols="6" class="d-flex justify-center">
+                   
+                      <v-tooltip text="ແຜນພະລັງງານ" location="top">
+                        <template v-slot:activator="{ props }">
+                          <v-card v-bind="props" elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
+                            <v-card-text>
+                              <!-- <v-icon icon="mdi-bullseye-arrow" size="2rem" color="grey" class="mb-2" /> -->
+                              <Icon name="octicon:goal-24" size="2rem" class="text-grey mb-2" />
 
-                        <v-chip label rounded="lg" variant="tonal" color="primary">
-                          {{ formatNumber(item.energy_plan) || '-' }} MW
-                        </v-chip>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </div>
-                <v-divider class="my-3"></v-divider>
-                <div class="ma-3">
-                  <v-row>
+                              <p class="text-primary">{{ formatNumber(item.energy_plan) || '-' }} MW</p>
+                              <v-divider class="my-1"></v-divider>
+                              <p class="text-warning"> {{ formatNumber(item.cost_total_plan) || '-' }} $</p>
+                            </v-card-text>
+                          </v-card>
+                        </template>
+                      </v-tooltip>
 
-                    <v-col cols="6" class="d-flex justify-center">
-                      <div class="d-flex flex-column align-center">
-                        <v-tooltip text="ລາຍຮັບ" location="top">
-                          <template v-slot:activator="{ props }">
-                            <v-icon v-bind="props" icon="mdi-currency-usd" size="2rem" color="warning" class="mb-2" />
-                          </template>
-                        </v-tooltip>
+                      <!-- <v-chip label rounded="lg" variant="tonal" color="primary">
+                        {{ formatNumber(item.energy_plan) || '-' }} MW
+                      </v-chip> -->
+                  </v-col>
+                </v-row>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
 
-                        <v-chip variant="tonal" label rounded="lg" color="yellow-darken-4">
-                          {{ formatNumber(item.cost_total) || '-' }} $
-                        </v-chip>
-                      </div>
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-center">
-                      <div class="d-flex flex-column align-center">
-                        <v-tooltip text="ແຜນລາຍຮັບ" location="top">
-                          <template v-slot:activator="{ props }">
-                            <v-icon v-bind="props" icon="mdi-cash-multiple" size="2rem" color="warning" class="mb-2" />
-                          </template>
-                        </v-tooltip>
-
-                        <v-chip variant="tonal" label rounded="lg" color="yellow-darken-4">
-                          {{ formatNumber(item.cost_total_plan) || '-' }} $
-                        </v-chip>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </div>
-
-              </v-card>
-            </v-col>
-          </v-row>
-        </template>
-
-        <div v-else class="text-center py-8">
-          ບໍ່ມີຂໍ້ມູນ
-        </div>
-      </v-card-text>
-    </v-card>
+      <div v-else class="text-center py-8">
+        ບໍ່ມີຂໍ້ມູນ
+      </div>
+    </v-card-text>
+    <!-- </v-card> -->
   </v-container>
 </template>
 

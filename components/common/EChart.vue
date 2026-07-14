@@ -59,14 +59,14 @@ const option = computed(() => ({
     title: {
         text: props.title,
         textStyle: {
-            fontFamily: "'Noto Serif Lao', serif",
+            fontFamily: "'Noto Sans Lao', sans-serif",
             fontSize: 18
         }
     },
     tooltip: {
         trigger: 'axis',
         textStyle: {
-            fontFamily: "'Noto Serif Lao', serif",
+            fontFamily: "'Noto Sans Lao', sans-serif",
             fontSize: 13
         }
     },
@@ -77,14 +77,14 @@ const option = computed(() => ({
                 yAxisIndex: 'none'
             },
             dataView: { readOnly: false },
-            magicType: { type: ['line', 'bar'] },
+            magicType: {},
             restore: {},
             saveAsImage: {}
         }
     },
     legend: {
         textStyle: {
-            fontFamily: "'Noto Serif Lao', serif",
+            fontFamily: "'Noto Sans Lao', sans-serif",
             fontSize: 13
         },
         data: [props.dataLabel, props.planLabel]
@@ -97,7 +97,7 @@ const option = computed(() => ({
     xAxis: {
         type: 'category',
         textStyle: {
-            fontFamily: "'Noto Serif Lao', serif",
+            fontFamily: "'Noto Sans Lao', sans-serif",
             fontSize: 13
         },
         data: sortedData.value.map(i => i[props.xField])
@@ -106,7 +106,7 @@ const option = computed(() => ({
         type: 'value',
         scale: true,
         textStyle: {
-            fontFamily: "'Noto Serif Lao', serif",
+            fontFamily: "'Noto Sans Lao', sans-serif",
             fontSize: 13
         }
     },
@@ -119,11 +119,12 @@ const option = computed(() => ({
             name: props.dataLabel,
             type: 'line',
             smooth: true,
+            areaStyle: {},
             data: sortedData.value.map(i => Number(i[props.dataField])),
             markPoint: {
                 symbolSize: 60,
                 label: {
-                    fontFamily: "'Noto Serif Lao', serif",
+                    fontFamily: "'Noto Sans Lao', sans-serif",
                     fontSize: 11,
                     color: '#fff'
                 },
@@ -137,11 +138,12 @@ const option = computed(() => ({
             name: props.planLabel,
             type: 'line',
             smooth: true,
+            areaStyle: {},
             data: sortedData.value.map(i => Number(i[props.planField])),
             markPoint: {
                 symbolSize: 60,
                 label: {
-                    fontFamily: "'Noto Serif Lao', serif",
+                    fontFamily: "'Noto Sans Lao', sans-serif",
                     fontSize: 11,
                     color: '#fff'
                 },

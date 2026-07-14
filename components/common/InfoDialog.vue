@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="model" max-width="100%">
     <v-card rounded="lg">
-      <v-card-title class="text-center">{{ title }}</v-card-title>
+      <v-card-title class="text-center"><h5>{{ title }}</h5></v-card-title>
       <v-divider />
 
       <v-card-text>

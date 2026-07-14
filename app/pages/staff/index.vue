@@ -14,7 +14,7 @@
 
 
     <v-dialog v-model="dialog" max-width="450px">
-      <v-card rounded="lg" color="#FDFBF7">
+      <v-card rounded="lg" >
         <v-card-title>
           <span v-if="isEdit">ແກ້ໄຂແຜນພະລັງງານ</span>
           <span v-else>ສ້າງແຜນພະລັງງານ</span>
@@ -65,7 +65,7 @@
       </v-card>
     </v-dialog>
 
-    <v-card class="mx-0 my-3" rounded="lg" elevation="0" color="#FDFBF7">
+    <v-card class="mx-0 my-3" rounded="lg" elevation="0" >
       <v-row>
         <v-col cols="12">
           <v-tabs v-model="activeTab" color="primary" align-tabs="center">
@@ -101,7 +101,7 @@
           </v-col>
 
           <v-col cols="6" md="3" lg="2" class="mt-2">
-            <v-btn color="blue-grey" variant="flat" @click="fetchPlan('Y')" prepend-icon="mdi-magnify">
+            <v-btn color="primary" variant="outlined" @click="fetchPlan('Y')" prepend-icon="mdi-magnify">
               ຄົ້ນຫາ
             </v-btn>
           </v-col>
@@ -116,7 +116,7 @@
 
         <v-row v-else-if="plans.length">
           <v-col v-for="item in plans" :key="item.dam_code" cols="12" sm="6" md="4" lg="3">
-            <v-card elevation="0" rounded="lg" class="border" color="#FDFBF7">
+            <v-card elevation="0" rounded="lg" class="border" >
               <v-card-item class="text-center">
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
@@ -153,7 +153,7 @@
           </v-col>
 
           <v-col cols="6" md="3" lg="2" class="mt-2">
-            <v-btn color="blue-grey" variant="outlined" @click="fetchPlan('M')" prepend-icon="mdi-magnify">
+            <v-btn color="primary" variant="outlined" @click="fetchPlan('M')" prepend-icon="mdi-magnify">
               ຄົ້ນຫາ
             </v-btn>
           </v-col>
@@ -168,7 +168,7 @@
 
         <v-row v-else-if="plans.length">
           <v-col v-for="item in plans" :key="item.dam_code" cols="12" sm="6" md="4" lg="3">
-            <v-card elevation="0" rounded="lg" class="border" color="#FDFBF7">
+            <v-card elevation="0" rounded="lg" class="border" >
               <v-card-item class="text-center">
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
@@ -207,7 +207,7 @@
           </v-col>
 
           <v-col cols="6" md="3" lg="2" class="mt-2">
-            <v-btn color="blue-grey" variant="outlined" @click="fetchPlan('W')" prepend-icon="mdi-magnify">
+            <v-btn color="primary" variant="outlined" @click="fetchPlan('W')" prepend-icon="mdi-magnify">
               ຄົ້ນຫາ
             </v-btn>
           </v-col>
@@ -222,7 +222,7 @@
 
         <v-row v-else-if="plans.length">
           <v-col v-for="item in plans" :key="item.dam_code" cols="12" sm="6" md="4" lg="3">
-            <v-card elevation="0" rounded="lg" class="border" color="#FDFBF7">
+            <v-card elevation="0" rounded="lg" class="border" >
               <v-card-item class="text-center">
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
@@ -259,7 +259,7 @@
           </v-col>
 
           <v-col cols="6" md="3" lg="2" class="mt-2">
-            <v-btn color="blue-grey" variant="outlined" @click="fetchPlan('D')" prepend-icon="mdi-magnify">
+            <v-btn color="primary" variant="outlined" @click="fetchPlan('D')" prepend-icon="mdi-magnify">
               ຄົ້ນຫາ
             </v-btn>
           </v-col>
@@ -274,7 +274,7 @@
 
         <v-row v-else-if="plans.length">
           <v-col v-for="item in plans" :key="item.dam_code" cols="12" sm="6" md="4" lg="3">
-            <v-card elevation="0" rounded="lg" class="border" color="#FDFBF7">
+            <v-card elevation="0" rounded="lg" class="border" >
               <v-card-item class="text-center">
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"

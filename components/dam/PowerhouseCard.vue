@@ -16,7 +16,7 @@
                                 <h5 class="text-primary">{{ metric.label }}</h5>
                                 <v-divider class="py-1"></v-divider>
                                 <div>
-                                    <h4>{{ metric.value }} <span class="ml-1">{{ metric.unit }}</span></h4>
+                                    {{ metric.value }} <span class="ml-1">{{ metric.unit }}</span>
                                 </div>
                             </div>
                         </v-col>

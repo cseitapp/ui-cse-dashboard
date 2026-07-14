@@ -1,5 +1,8 @@
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 export default defineNuxtConfig({
+   modules: [
+    "@nuxt/icon",
+  ],
   //...
   build: {
     transpile: ['vuetify'],
@@ -32,9 +35,11 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Serif+Lao&display=swap' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@500&family=Noto+Serif+Lao:wght@100..900&display=swap' },
         { rel: 'icon', type: 'image/png', href: '/logo.png' },
 
       ]
     }
   },
+ 
 })

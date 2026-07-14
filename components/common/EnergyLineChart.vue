@@ -112,14 +112,14 @@ const chartOptions = computed(() => ({
     legend: {
       position: 'top',
       labels: {
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
     },
     title: {
       display: !!props.title,
       text: props.title,
       font: {
-        family: "'Noto Serif Lao', serif",
+        family: "'Noto Sans Lao', sans-serif",
         size: 18,
       },
     },
@@ -129,7 +129,7 @@ const chartOptions = computed(() => ({
       color: '#fff',
       rotation: -90,
       font: {
-        family: "'Noto Serif Lao', serif",
+        family: "'Noto Sans Lao', sans-serif",
         size: 11,
         weight: 'bold',
       },
@@ -153,10 +153,10 @@ const chartOptions = computed(() => ({
       title: {
         display: true,
         text: 'ໄລຍະເວລາ',
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
       ticks: {
-        font: { family: "'Noto Serif Lao', serif", size: 12 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 12 },
         maxTicksLimit: 12,
         autoSkip: true,
         maxRotation: 45,
@@ -168,10 +168,10 @@ const chartOptions = computed(() => ({
       title: {
         display: true,
         text: props.yAxisLabel,
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
       ticks: {
-        font: { family: "'Noto Serif Lao', serif", size: 12 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 12 },
         callback: val => val.toLocaleString(),
       },
     },

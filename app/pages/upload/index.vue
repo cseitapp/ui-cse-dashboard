@@ -1,99 +1,98 @@
 <template>
   <!-- Page Title -->
-    <v-row class="ma-0" :align="'center'">
-      <v-col>
-        <h3 >ເພີ່ມຂໍ້ມູນ</h3>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-row :align="'center'">
-          <v-col cols="2" class="text-center"> <v-card rounded="lg" elevation="2"><v-btn icon="mdi-chevron-left"
-                variant="text" density="comfortable" @click="prevDate" /></v-card></v-col>
-          <v-col cols="8"> <v-menu v-model="menu" :close-on-content-click="false">
-              <template v-slot:activator="{ props }">
-                <v-text-field rounded="lg" variant="solo" density="comfortable" prepend-inner-icon="mdi-calendar" color="primary"
-                  label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
-              </template>
+  <v-row class="ma-0" :align="'center'">
+    <v-col>
+      <h3>ເພີ່ມຂໍ້ມູນ</h3>
+    </v-col>
+    <v-col cols="12" md="4">
+      <v-row :align="'center'">
+        <v-col cols="2" class="text-center"><v-chip color="primary" size="large">
+            <v-btn icon="mdi-chevron-left" variant="text" density="comfortable" @click="prevDate" /></v-chip></v-col>
+        <v-col cols="8"> <v-menu v-model="menu" :close-on-content-click="false">
+            <template v-slot:activator="{ props }">
+              <v-text-field rounded="lg" variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar"
+                color="primary" label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
+            </template>
 
-              <v-date-picker :model-value="selectedDate" hide-header color="primary"
-                @update:model-value="onDateChange" />
-            </v-menu></v-col>
-          <v-col cols="2">
-            <v-card rounded="lg" class="text-center" elevation="2"><v-btn icon="mdi-chevron-right" variant="text" 
-                density="comfortable" @click="nextDate" /></v-card>
+            <v-date-picker :model-value="selectedDate" hide-header elevation="1" color="primary" @update:model-value="onDateChange" />
+          </v-menu></v-col>
+        <v-col cols="2">
+          <v-chip color="primary" size="large">
+            <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextDate" /></v-chip>
 
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+        </v-col>
+      </v-row>
+    </v-col>
+  </v-row>
 
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top right">
-      {{ snackbar.message }}
-    </v-snackbar>
+  <!-- Snackbar -->
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top right">
+    {{ snackbar.message }}
+  </v-snackbar>
 
-    <!-- Vuetify Card wrapping the table -->
-    <v-card class="rounded-lg" color="#FDFBF7">
-      <v-data-table :headers="headers" :items="tableRows" density="default" hide-default-footer :loading="loading">
-        <!-- Status column -->
-        <template #item.status="{ item }">
-          <v-chip :color="statusColor(item.status)" size="small" variant="tonal" class="font-semibold text-xs">
-            {{ item.status }}
-          </v-chip>
-        </template>
+  <!-- Vuetify Card wrapping the table -->
+  <v-card class="rounded-lg" elevation="0">
+    <v-data-table :headers="headers" :items="tableRows" density="default" hide-default-footer :loading="loading">
+      <!-- Status column -->
+      <template #item.status="{ item }">
+        <v-chip :color="getStatus(item.status).color" size="small" variant="tonal" class="font-semibold text-xs">
+          {{ getStatus(item.status).label }}
+        </v-chip>
+      </template>
 
-        <!-- Manage column — per-row file state -->
-        <template #item.manage="{ item, index }">
+      <!-- Manage column — per-row file state -->
+      <template #item.manage="{ item, index }">
 
-          <!-- Hidden file input per row -->
-          <input :ref="el => fileRefs[index] = el" type="file" accept=".xlsx,.xls,.csv" style="display: none"
-            @change="handleFileChange($event, index)" />
+        <!-- Hidden file input per row -->
+        <input :ref="el => fileRefs[index] = el" type="file" accept=".xlsx,.xls,.csv" style="display: none"
+          @change="handleFileChange($event, index)" />
 
-          <!-- Upload trigger button -->
-          <v-btn color="success" size="small" prepend-icon="mdi-microsoft-excel" :loading="isUploading[index]"
-            @click="triggerFileInput(index)">
-            ອັບໂຫຼດ
-          </v-btn>
+        <!-- Upload trigger button -->
+        <v-btn color="success" size="small" prepend-icon="mdi-microsoft-excel" :loading="isUploading[index]"
+          @click="triggerFileInput(index)">
+          ອັບໂຫຼດ
+        </v-btn>
 
-          <!-- Selected file chip (only for this row) -->
-          <v-chip v-if="selectedFiles[index]" class="mt-2 ml-1" color="success" variant="tonal" size="small"
-            prepend-icon="mdi-file-excel" closable @click:close="clearFile(index)">
-            {{ selectedFiles[index].name }}
-          </v-chip>
+        <!-- Selected file chip (only for this row) -->
+        <v-chip v-if="selectedFiles[index]" class="mt-2 ml-1" color="success" variant="tonal" size="small"
+          prepend-icon="mdi-file-excel" closable @click:close="clearFile(index)">
+          {{ selectedFiles[index].name }}
+        </v-chip>
 
-          <!-- Submit button (only shown for this row after file selected) -->
-          <v-btn v-if="selectedFiles[index]" class="mt-2 ml-1" color="primary" size="small" prepend-icon="mdi-upload"
-            :loading="isUploading[index]" @click="submitFile(index, item)">
-            ອັບໂຫລດ
-          </v-btn>
+        <!-- Submit button (only shown for this row after file selected) -->
+        <v-btn v-if="selectedFiles[index]" class="mt-2 ml-1" color="primary" size="small" prepend-icon="mdi-upload"
+          :loading="isUploading[index]" @click="submitFile(index, item)">
+          ອັບໂຫລດ
+        </v-btn>
 
-        </template>
+      </template>
 
-        <template #item.date="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">
-            {{ formatDate(item.date) }}
-          </div>
-        </template>
-        <template #item.section="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">
-            {{ item.section }}
-          </div>
-        </template>
+      <template #item.date="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">
+          {{ formatDate(item.date) }}
+        </div>
+      </template>
+      <template #item.section="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">
+          {{ item.section }}
+        </div>
+      </template>
 
-        <!-- Created At -->
-        <template #item.created_at="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">
-            {{ (item.created_at) }}
-          </div>
-        </template>
+      <!-- Created At -->
+      <template #item.created_at="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">
+          {{ (item.created_at) }}
+        </div>
+      </template>
 
-        <!-- Modify At -->
-        <template #item.modify_at="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">
-            {{ (item.modify_at) }}
-          </div>
-        </template>
-      </v-data-table>
-    </v-card>
+      <!-- Modify At -->
+      <template #item.modify_at="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">
+          {{ (item.modify_at) }}
+        </div>
+      </template>
+    </v-data-table>
+  </v-card>
 </template>
 
 <script setup>
@@ -242,21 +241,24 @@ const submitFile = async (index, item) => {
   }
 }
 
-// Returns Vuetify chip color per status label
-const statusColor = (status) => {
-  const map = {
-    Uploaded: 'success',
-    None: 'default',
+const STATUS = {
+  1: {
+    label: 'ອັບໂຫລດແລ້ວ',
+    color: 'success'
+  },
+  2: {
+    label: 'ມີການແກ້ໄຂ',
+    color: 'warning'
+  },
+  default: {
+    label: 'ບໍ່ມີການອັບໂຫລດ',
+    color: 'default'
   }
-  return map[status] ?? 'default'
 }
 
-// Map API status value to display label
-const statusLabel = (apiStatus) => {
-  if (apiStatus === 1) return 'ອັບໂຫລດແລ້ວ'
-  return 'ບໍ່ມີການອັບໂຫລດ'
+const getStatus = (status) => {
+  return STATUS[status] ?? STATUS.default
 }
-
 // Section time-range label: interval = 24 / code_name
 const sectionLabel = (index) => {
   const interval = Math.floor(24 / code_name.value)
@@ -310,6 +312,7 @@ const fetchData = async () => {
       },
     })
     const apiData = res.data.data
+    // console.log(apiData)
 
     apiData.forEach((item) => {
       const row = tableRows.value.find(r =>
@@ -319,11 +322,11 @@ const fetchData = async () => {
       )
       if (row) {
         row.file = item.file ?? row.file
-        row.status = statusLabel(item.status)
+        row.status = item.status ?? row.status
         row.created_by = item.created_name_la ?? row.created_by
         row.created_at = item.created_at ?? row.created_at
-        row.modify_by = item.modify_by ?? row.modify_by
-        row.modify_at = item.modified_name_la ?? row.modify_at
+        row.modify_by = item.modified_name_la ?? row.modify_at
+        row.modify_at = item.modify_at ?? row.modify_at
         row.e_id = item.e_id ?? row.e_id
       }
     })

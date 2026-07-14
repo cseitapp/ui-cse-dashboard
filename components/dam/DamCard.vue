@@ -5,11 +5,11 @@
     class="mb-3"
     rounded="lg"
     flat
-    style="border: 2px solid #B0BEC5"
+    style="border: 1px solid #B0BEC5"
   >
     <v-card-item class="text-center">
       <v-card-title >
-        <h5>{{ dam.dam_station }}</h5>
+        <h6>{{ dam.dam_station }}</h6>
       </v-card-title>
     </v-card-item>
 
@@ -24,7 +24,7 @@
                 <h5 class="text-primary">{{ metric.label }}</h5>
                 <v-divider class="py-1"></v-divider>
                 <div>
-                  <h4>{{ metric.value }} <span class="ml-1">{{ metric.unit }}</span></h4>
+                  {{ metric.value }} <span class="ml-1">{{ metric.unit }}</span>
                 </div>
               </div>
             </v-col>

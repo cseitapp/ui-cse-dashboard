@@ -5,11 +5,13 @@
       </v-col>
       <v-col cols="12" md="4">
         <v-row  :align="'center'">
-          <v-col cols="2" class="text-center"> <v-card rounded="lg" elevation="2"><v-btn icon="mdi-chevron-left"
-                variant="text" density="comfortable" @click="prevDate" /></v-card></v-col>
+          <v-col cols="2" class="text-center"><v-chip color="primary" size="large">
+            <v-btn icon="mdi-chevron-left"
+                variant="text" density="comfortable" @click="prevDate" />
+          </v-chip></v-col>
           <v-col cols="8"> <v-menu v-model="menu" :close-on-content-click="false">
               <template v-slot:activator="{ props }">
-                <v-text-field variant="solo" density="comfortable" prepend-inner-icon="mdi-calendar" color="primary" rounded="lg"
+                <v-text-field variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar" color="primary" rounded="lg"
                   label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
               </template>
 
@@ -17,9 +19,9 @@
                 @update:model-value="onDateChange" />
             </v-menu></v-col>
           <v-col cols="2">
-            <v-card rounded="lg" class="text-center" elevation="2"><v-btn icon="mdi-chevron-right" variant="text"
-                density="comfortable" @click="nextDate" /></v-card>
-
+            <v-chip color="primary" size="large">
+              <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextDate" />
+            </v-chip>
           </v-col>
         </v-row>
       </v-col>
@@ -32,7 +34,7 @@
 
 
     <!-- Vuetify Card wrapping the table -->
-    <v-card class="rounded-lg" elevation="0" color="#FDFBF7">
+    <v-card class="rounded-lg" elevation="0" >
       <v-data-table :headers="headers" :items="tableRows" density="default" hide-default-footer :items-per-page="-1"
         :loading="loading">
 

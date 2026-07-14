@@ -81,13 +81,13 @@ const chartOptions = computed(() => ({
     legend: {
       position: 'top',
       labels: {
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
     },
     title: {
       display: !!props.title,
       text: props.title,
-      font: { family: "'Noto Serif Lao', serif", size: 18 },
+      font: { family: "'Noto Sans Lao', sans-serif", size: 18 },
     },
     tooltip: {
       callbacks: {
@@ -105,7 +105,7 @@ const chartOptions = computed(() => ({
   scales: {
     x: {
       ticks: {
-        font: { family: "'Noto Serif Lao', serif", size: 12 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 12 },
         maxTicksLimit: 12,
         autoSkip: true,
         maxRotation: 45,
@@ -117,10 +117,10 @@ const chartOptions = computed(() => ({
       title: {
         display: true,
         text: 'ລະດັບນ້ຳ (m)',
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
       ticks: {
-        font: { family: "'Noto Serif Lao', serif", size: 12 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 12 },
         callback: val => val.toLocaleString(),
       },
     },

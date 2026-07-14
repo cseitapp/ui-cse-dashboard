@@ -58,23 +58,23 @@ const chartOptions = computed(() => ({
     legend: {
       position: 'right',
       labels: {
-        font: { family: "'Noto Serif Lao', serif", size: 13 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 13 },
       },
     },
     title: {
       display: true,
       text: props.title,
-      font: { family: "'Noto Serif Lao', serif", size: 18 },
+      font: { family: "'Noto Sans Lao', sans-serif", size: 18 },
     },
   },
   scales: {
     r: {
       ticks: {
         backdropColor: 'transparent',
-        font: { family: "'Noto Serif Lao', serif", size: 11 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 11 },
       },
       pointLabels: {
-        font: { family: "'Noto Serif Lao', serif", size: 12 },
+        font: { family: "'Noto Sans Lao', sans-serif", size: 12 },
       },
     },
   },

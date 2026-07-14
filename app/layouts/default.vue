@@ -1,10 +1,12 @@
 <template>
   <v-card>
     <v-layout>
-      <v-app-bar color="#f2ebda">
+      <v-app-bar elevation="1">
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-toolbar-title><v-img src="/assets/images/logo_cse.png" width="15%" /></v-toolbar-title>
+        <v-toolbar-title>
+          <v-img src="/assets/images/logo_cse.png" class="w-100" style="max-width: 200px;" />
+        </v-toolbar-title>
 
         <v-avatar class="d-none d-lg-block">
           <v-img alt="John" :src="`/api/image/${PROFILE}/${user.PICTURE}`" />
@@ -16,7 +18,7 @@
         </div>
       </v-app-bar>
 
-      <v-navigation-drawer v-model="drawer" color="#f2ebda" :location="$vuetify.display.mobile ? 'left' : undefined">
+      <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'left' : undefined">
         <v-list>
           <v-list-item class="px-0" v-for="item in groupedMenu" :key="item.MENU_ID" :active="false">
             <v-list-item-title class="px-2">
@@ -56,7 +58,7 @@
                 <v-divider></v-divider>
                 <v-card-actions>
                   <v-btn variant="flat" @click="confirmDialog = false">ປິດ</v-btn>
-                  <v-btn variant="elevated" color="error" @click="handleLogoutConfirm">ອອກຈາກລະບົບ</v-btn>
+                  <v-btn variant="tonal" color="error" @click="handleLogoutConfirm">ອອກຈາກລະບົບ</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -64,7 +66,7 @@
         </template>
       </v-navigation-drawer>
 
-      <v-main style="background-color: #F7F4EB; min-height: 100vh;">
+      <v-main style="background-color: #f4f6f9; min-height: 100vh;">
         <v-container fluid>
           <slot />
         </v-container>
