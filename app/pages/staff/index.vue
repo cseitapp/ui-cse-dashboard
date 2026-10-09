@@ -318,7 +318,7 @@ import { ref, watch } from 'vue'
 import AppDatePicker from '~~/components/common/AppDatePicker.vue'
 import moment from 'moment';
 import { useAuthUser } from '~~/composables/useAuth';
-import { formatNumber } from '~~/components/common/formatnumber.js'
+import { formatNumber } from "~~/components/common/formatNumber";
 import axios from 'axios';
 definePageMeta({
   middleware: "auth",
