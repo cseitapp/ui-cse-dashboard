@@ -1,19 +1,20 @@
-version: "3.8"
 services:
-  dashboard:    
-    image: dashboard
+  api:    
+    image: ui-cse-dashboard:v0.1
     build:
       context: .
       dockerfile: ./Dockerfile
     environment:
       NODE_ENV: production
     restart: always
-    ports:
-      - 4455:4455
+  # ports:
+  #   - 2288:2288
   nginx:
     container_name: nginx-ui-cse-dashboard
     image: nginx:latest
     volumes:
       - ./conf.d:/etc/nginx/conf.d
     depends_on:
-      - dashboard
+      - api
+    ports:
+      - 4455:4455
