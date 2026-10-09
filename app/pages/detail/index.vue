@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="pa-2">
-        <v-card elevation="0" rounded="lg" >
+        <v-card elevation="0" rounded="lg">
             <v-row class="ma-0 ps-5" :align="'center'">
                 <v-col>
                     <v-row :align="'center'">
@@ -9,7 +9,7 @@
                             <v-row class="ma-0">
                                 <div class="pr-3">
                                     <h3 class="font-weight-bold">{{ branchName }}</h3>
-                                    <div>ID: {{ code }}</div>
+                                    <div>ລະຫັດເຂື່ອນ: {{ code }}</div>
                                 </div>
                                 <v-tooltip text="ຂໍ້ມູນທົ່ວໄປຂອງເຂື່ອນ">
                                     <template v-slot:activator="{ props }">
@@ -41,7 +41,7 @@
                                         <v-btn value="M">ເດືອນ</v-btn>
                                         <v-btn value="W">ອາທິດ</v-btn>
                                         <v-btn value="D">ວັນ</v-btn>
-                                        <v-btn value="H">ຊົ່ວໂມງ</v-btn>
+                                        <!-- <v-btn value="H">ຊົ່ວໂມງ</v-btn> -->
                                     </v-btn-toggle>
                                 </v-col>
                                 <v-col v-for="picker in datePickers" :key="picker.label" cols="12" lg="3">
@@ -114,7 +114,8 @@
                                     </v-menu>
                                 </v-col>
                                 <v-col>
-                                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onSearch">ຄົ້ນຫາ</v-btn>
+                                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify"
+                                        @click="onSearch">ຄົ້ນຫາ</v-btn>
                                 </v-col>
                             </v-row>
                         </v-card-text>
@@ -138,7 +139,7 @@
                                 <v-btn value="M">ເດືອນ</v-btn>
                                 <v-btn value="W">ອາທິດ</v-btn>
                                 <v-btn value="D">ວັນ</v-btn>
-                                <v-btn value="H">ຊົ່ວໂມງ</v-btn>
+                                <!-- <v-btn value="H">ຊົ່ວໂມງ</v-btn> -->
                             </v-btn-toggle>
                         </v-col>
                         <v-col v-for="picker in datePickers" :key="picker.label" cols="12" lg="2">
@@ -171,8 +172,8 @@
                                         </v-row>
                                         <!-- Prev / Next decade navigation -->
                                         <div class="d-flex justify-space-between mt-3">
-                                            <v-btn size="small" variant="text" @click="yearOffset -= 12">‹ ກ່ອນ</v-btn>
-                                            <v-btn size="small" variant="text" @click="yearOffset += 12">ຕໍ່ໄປ ›</v-btn>
+                                            <v-btn size="small" variant="text" @click="yearOffset -= 5">‹ ກ່ອນ</v-btn>
+                                            <v-btn size="small" variant="text" @click="yearOffset += 5">ຕໍ່ໄປ ›</v-btn>
                                         </div>
                                     </v-card>
                                 </template>
@@ -206,7 +207,8 @@
                             </v-menu>
                         </v-col>
                         <v-col>
-                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify" @click="onSearch">ຄົ້ນຫາ</v-btn>
+                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify"
+                                @click="onSearch">ຄົ້ນຫາ</v-btn>
                         </v-col>
                     </v-row>
                 </v-col>
@@ -225,46 +227,50 @@
         <h3 class="my-3">I. ການຜະລິດ ແລະ ລາຍຮັບ</h3>
         <v-row>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
-                    <EnergyLineChart :allData="allData" title="ພະລັງງານ " :activeType="activeType" />
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <BarChart title="ພະລັງງານ (GWh)" unit="GWh" :labels="labels" :series="energySeries" />
                 </v-card>
             </v-col>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
-                    <EnergyLineChart :allData="COST" :fields="['total_cost']" yAxisLabel="ໂດລ້າ"
-                        :fieldLabels="{ total_cost: 'ມູນຄ່າລາຍຮັບ' }" :colors="{ total_cost: '#FFD700' }"
-                        title="ລາຍຮັບ " />
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <BarChart title="ລາຍຮັບ (MUSD)" unit="MUSD" :labels="labels" :series="revenueSeries" />
                 </v-card>
             </v-col>
         </v-row>
         <h3 class=" my-3">II. ການບໍລິຫານຈັດການນ້ຳ</h3>
         <v-row>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
-                    <EnergyLineChart title="ປະລິມານນ້ຳຝົນ (ຖ້າຂໍ້ມູນ)" />
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <BarChart title="ປະລິມານນ້ຳເຂົ້າ (MCM)" unit="MCM" :labels="labels" :series="inflowSeries" />
                 </v-card>
             </v-col>
             <v-col v-bind="colProps">
-                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
-                    <EnergyLineChart :allData="water_data" :fields="['total_inflow', 'total_outflow']" yAxisLabel="MCM"
-                        :fieldLabels="{ total_inflow: 'ນ້ຳເຂົ້າ', total_outflow: 'ນ້ຳອອກ' }"
-                        title="ບໍລິມາດນ້ຳເຂົ້າອ່າງ/ບໍລິມາດນ້ຳອອກ" />
-                    <!-- <EChart :data="water_data" title="ລະດັບນ້ຳ" x-field="period" data-field="total_inflow"
-                        plan-field="total_outflow" data-label="ນ້ຳເຂົ້າ" plan-label="ນ້ຳອອກ" /> -->
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <EChart :data="allData" title="ປະລິມານນ້ຳເຂົ້າ ແລະ ປະລິມານນ້ຳອອກ (MCM)" x-field="PERIOD_LABEL" :series="[
+                        { field: 'SUM_INFLOW_ACTUAL', label: 'ປະລິມານນ້ຳເຂົ້າ' },
+                        { field: 'SUM_OUTFLOW', label: 'ປະລິມານນ້ຳອອກ' }
+                    ]" />
                 </v-card>
             </v-col>
-            <!-- <v-col cols="12" sm="12" md="12" lg="12">
-                <v-card rounded="lg" elevation="0" class="border-sm pa-4"  style="height: 450px">
-                    <LineCompareChart :allData="water_level" title="ລະດັບນ້ຳ" dataField="Main_dam"
-                        planField="diversion_dam" dataLabel="ເຂື່ອນຫຼັກ" planLabel="ເຂື່ອນອ່ວຍນ້ຳ" />
-                </v-card>
-            </v-col> -->
             <v-col cols="12" sm="12" md="12" lg="12">
-                <v-card rounded="lg" elevation="0"  class="border-sm pa-4" style="height: 450px">
-                    <EChart :data="water_level" title="ລະດັບນ້ຳ" x-field="datetime" data-field="Main_dam"
-                        plan-field="diversion_dam" data-label="ເຂື່ອນຫຼັກ" plan-label="ເຂື່ອນອ່ວຍນ້ຳ" />
-                </v-card>
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
 
+                    <EChart :data="water_data" title="ລະດັບນ້ຳຂອງເຂື່ອນ (MASL)" x-field="D_DATE" :series="[
+                        { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ' },
+                        { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ' },
+                        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383' }
+                    ]" />
+                </v-card>
+            </v-col>
+            <v-col cols="12" sm="12" md="12" lg="12">
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <EChart :data="water_data" title="ບໍລິມາດນ້ຳຂອງເຂື່ອນ (MCM)" x-field="D_DATE" :series="[
+                        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ' },
+                        { field: 'D_DIVERSION_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ' },
+                        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດການນຳໃຊ້ນ້ຳເຂື່ອນຫຼັກ', color: '#1914B3' },
+                        { field: 'D_DIVERSION_USE_VOLUME', label: 'ບໍລິມາດການນຳໃຊ້ນ້ຳເຂື່ອນອ່ວາຍນ້ຳ', color: '#38C25D' }
+                    ]" />
+                </v-card>
             </v-col>
         </v-row>
 
@@ -277,11 +283,30 @@ import axios from 'axios'
 import moment from 'moment'
 import EnergyLineChart from '~~/components/common/EnergyLineChart.vue'
 import InfoDialog from '~~/components/common/InfoDialog.vue'
-import LineCompareChart from '~~/components/common/LineCompareChart.vue'
 import { useDisplay } from 'vuetify'
 import EChart from '~~/components/common/EChart.vue'
+import BarChart from '~~/components/common/BarChart.vue'
 
+const labels = computed(() => allData.value.map((r) => r.PERIOD_LABEL));
 
+const energySeries = computed(() => [
+    { name: "ແຜນ", data: allData.value.map((r) => r.SUM_PLAN_ENERGY), color: "#90a4ae" },
+    { name: "ຕົວຈິງ", data: allData.value.map((r) => r.SUM_ACTUAL_ENERGY), color: "#1976d2" },
+]);
+
+const revenueSeries = computed(() => [
+    { name: "ແຜນ", data: allData.value.map((r) => r.SUM_PLAN_REVENUE), color: "#a5d6a7" },
+    { name: "ຕົວຈິງ", data: allData.value.map((r) => r.SUM_ACTUAL_REVENUE), color: "#2e7d32" },
+]);
+
+const inflowSeries = computed(() => [
+    { name: "ແຜນນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_PLAN), color: "#4dd0e6" },
+    { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0c2" },
+]);
+const inflowOutFlowSeries = computed(() => [
+    { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0e6" },
+    { name: "ຕົວຈິງນ້ຳອອກ", data: allData.value.map((r) => r.SUM_OUTFLOW), color: "#a5d6a7" },
+]);
 // ─── Route ───────────────────────────────────────────────
 const route = useRoute()
 const dialog = ref(false)
@@ -290,10 +315,10 @@ const dialog = ref(false)
 const { mobile } = useDisplay()
 const showFilter = ref(false)
 
-const code = route.params.CODE
+const item = JSON.parse(route.query.item);
+const code = item.D_DAM
 const loading = ref(false)
-const branchName = decodeURIComponent(route.query.name || code)
-const summary = ref([])
+const branchName = item.branch.BR_NAME
 definePageMeta({
     middleware: "auth",
     layout: "default",
@@ -408,10 +433,8 @@ const normalizePickerDate = (val, type, isEnd) => {
 }
 
 const onSearch = () => {
-    loadSummary()
+
     loadAlldata()
-    loadWaterLevel()
-    loadCost()
     loadWaterData()
 }
 const activeType = ref('D')
@@ -430,7 +453,7 @@ const onTypeChange = (type) => {
 }
 const allData = ref([])
 const loadAlldata = async () => {
-    const res = await axios.get("/api/energy/detail", {
+    const res = await axios.get("/api/data/period", {
         params: withTypeParams({
             start: startPicker.date.value,
             end: endPicker.date.value,
@@ -439,79 +462,22 @@ const loadAlldata = async () => {
         }),
     });
     allData.value = res.data.data;
-    // console.log(allData.value)
+    // console.log("allData", allData.value)
 }
-const COST = ref([])
 
-const loadCost = async () => {
-    loading.value = true;
-    try {
-        const res = await axios.get("/api/cost/summary", {
-            params: withTypeParams({
-                start_date: startPicker.date.value,
-                end_date: endPicker.date.value,
-                dam_code: code,
-                type: activeType.value,
-            }),
-        });
-        COST.value = res.data.data
-        // console.log(COST.value)
-    } catch (err) {
-        console.error(err);
-        COST.value = [];
-    } finally {
-        loading.value = false;
-    }
-}
-const water_level = ref([])
-const loadWaterLevel = async () => {
-    const res = await axios.get("/api/energy/water", {
-        params: withTypeParams({
-            start: startPicker.date.value,
-            end: endPicker.date.value,
-            code: code,
-            type: activeType.value,
-        }),
-    });
-    water_level.value = res.data.data.data;
-    // console.log(water_level.value)
-}
 const water_data = ref([])
 const loadWaterData = async () => {
-    const res = await axios.get("/api/water/data", {
+    const res = await axios.get("/api/data/dam", {
         params: withTypeParams({
             start: startPicker.date.value,
             end: endPicker.date.value,
-            code: code,
-            type: activeType.value,
+            code: code
         }),
     });
     water_data.value = res.data.data;
-    // console.log("water",water_data.value)
+    // console.log("water", water_data.value)
 }
-const loadSummary = async () => {
-    loading.value = true
-    try {
-        const start_date = datePickers[0].date.value
-        const end_date = datePickers[1].date.value
-        // console.log(start_date, end_date)
 
-        const res = await axios.get('/api/energy/summary', {
-            params: withTypeParams({
-                start_date,
-                end_date,
-                type: activeType.value,
-                dam_code: code,
-            }),
-        })
-        summary.value = res.data.data.data
-        // console.log(summary.value)
-    } catch (err) {
-        console.error(err)
-    } finally {
-        loading.value = false
-    }
-}
 const setDateRange = (date, type) => {
     switch (type) {
         case 'Y':
@@ -551,8 +517,7 @@ const setDateRange = (date, type) => {
 // ─── Init ─────────────────────────────────────────────────
 onMounted(() => {
     onTypeChange(activeType.value)
-    loadWaterLevel()  // ADD THIS
-    loadCost()
+    loadAlldata()
     loadWaterData()
 })
 </script>

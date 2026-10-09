@@ -3,85 +3,161 @@
     <!-- <v-card rounded="lg" elevation="0" border :loading="loading" > -->
     <v-card-text>
       <div class="d-flex justify-center">
-        <v-img src="/assets/images/logo_cse.png" width="100px" height="100px" />
+        <v-img src="/assets/images/logo_cse.png" min-width="100px" height="100px" />
       </div>
       <h2 class="mb-8 text-center gold-gradient-text">ລາຍງານການບໍລິຫານຈັດການນ້ຳ ແລະ ການຜະລິດ</h2>
       <div v-if="loading" class="d-flex justify-center py-8">
         <v-progress-circular indeterminate color="primary" />
       </div>
 
-      <template v-else-if="chartData.length > 0">
-        <v-row>
-          <v-col v-for="item in chartData" :key="item.CODE" cols="12" sm="6" md="4" lg="3">
-            <v-card rounded="lg" elevation="0" hover class="cursor-pointer text-center border-sm rounded-lg"
-              
-              @click="router.push(`/${item.CODE}?name=${encodeURIComponent(item.branch?.BR_NAME || '')}`)">
-              <v-card-text class="text-center">
-                <div class="d-flex align-center">
-                  <!-- <v-icon icon="mdi mdi-waterfall" size="2rem" color="grey" class="mx-4" /> -->
-                  <Icon name="game-icons:waterfall" size="3rem" class="text-grey mx-4" />
-                  <!-- <Icon name="mdi:home" /> -->
-
-                  <div class="text-left">
-                    <h3><b>{{ item.branch?.BR_NAME }}</b></h3>
-                    <h4 class="text-grey"><b>{{ item.branch?.BR_NAME_EN }}</b></h4>
-                  </div>
-                </div>
-              </v-card-text>
-              <!-- <v-card-subtitle class="text-center">
-                  <v-chip color="primary" variant="tonal">{{ currentYear }}</v-chip>
-                </v-card-subtitle>
-                <v-divider class="my-2"></v-divider> -->
-              <div class="ma-3">
-
-                <v-row>
-                  <!-- Total Energy -->
-                  <v-col cols="6" class="d-flex justify-center">
-                    
-                      <v-tooltip text="ພະລັງງານ" location="top">
-                        <template v-slot:activator="{ props }">
-                          <v-card v-bind="props" elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
-                            <v-card-text>
-                              <!-- <v-icon icon="mdi-lightning-bolt" size="2rem" color="grey" class="mb-2" /> -->
-                              <Icon name="streamline-sharp:hydro-energy-remix" size="2rem" class="text-grey mb-2" />
-                              <p class="text-primary">{{ formatNumber(item.total_power_year) }} MW</p>
-                              <v-divider class="my-1"></v-divider>
-                              <p class="text-warning"> {{ formatNumber(item.cost_total) || '-' }} $</p>
-                            </v-card-text>
-                          </v-card>
-                        </template>
-                      </v-tooltip>
-
-                  </v-col>
-
-                  <!-- Energy Plan -->
-                  <v-col cols="6" class="d-flex justify-center">
-                   
-                      <v-tooltip text="ແຜນພະລັງງານ" location="top">
-                        <template v-slot:activator="{ props }">
-                          <v-card v-bind="props" elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
-                            <v-card-text>
-                              <!-- <v-icon icon="mdi-bullseye-arrow" size="2rem" color="grey" class="mb-2" /> -->
-                              <Icon name="octicon:goal-24" size="2rem" class="text-grey mb-2" />
-
-                              <p class="text-primary">{{ formatNumber(item.energy_plan) || '-' }} MW</p>
-                              <v-divider class="my-1"></v-divider>
-                              <p class="text-warning"> {{ formatNumber(item.cost_total_plan) || '-' }} $</p>
-                            </v-card-text>
-                          </v-card>
-                        </template>
-                      </v-tooltip>
-
-                      <!-- <v-chip label rounded="lg" variant="tonal" color="primary">
-                        {{ formatNumber(item.energy_plan) || '-' }} MW
-                      </v-chip> -->
-                  </v-col>
-                </v-row>
-              </div>
-            </v-card>
-          </v-col>
-        </v-row>
-      </template>
+      <template v-else-if="sortedData.length > 0">
+  <v-row>
+    <v-col v-for="item in sortedData" :key="item.D_DAM" cols="12" sm="12" md="12" :lg="isAll(item) ? 12 : 6">
+      <v-card rounded="lg" elevation="0" :hover="!isAll(item)"
+        class="text-center border-sm rounded-lg" :class="{ 'cursor-pointer': !isAll(item) }"
+        @click="!isAll(item) && gotoDetail(item)">
+        <v-card-text class="text-center">
+          <div class="d-flex align-center">
+            <Icon :name="isAll(item) ? 'mdi:sigma' : 'game-icons:waterfall'" size="3rem" class="text-grey mx-4" />
+ 
+            <div class="text-left">
+              <h3><b>{{ isAll(item) ? 'ລວມທຸກເຂື່ອນ' : item.branch?.BR_NAME }}</b></h3>
+              <h4 class="text-grey"><b>{{ isAll(item) ? 'ລາຍງານພະລັງງານ ແລະ ລາຍຮັບ' : item.branch?.BR_NAME_EN }}</b></h4>
+            </div>
+            <div class="text-right ml-auto">
+              <h3>
+                <v-chip :color="getStatus(getPercent(item)).color" variant="tonal" class="ml-2">
+                  {{ getStatus(getPercent(item)).text }}
+                  <template v-if="getPercent(item) !== null">
+                    ({{ getPercent(item) }}%)
+                  </template>
+                </v-chip>
+              </h3>
+            </div>
+          </div>
+        </v-card-text>
+        <div class="ma-3">
+          <v-row>
+            <!-- Total Energy -->
+            <v-col cols="6" class="d-flex justify-center">
+              <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12" class="d-flex align-center justify-center">
+                      <Icon name="streamline-sharp:hydro-energy-remix" size="2.5rem" class="text-primary mr-2" />
+                      <h3>ພະລັງງານຜະລິດຕົວຈິງ</h3>
+                    </v-col>
+                    <v-divider></v-divider>
+                    <v-col cols="12">
+                      <v-row class="text-primary d-flex align-center">
+                        <v-col cols="6">
+                          <p>ພະລັງງານປີ: {{ item.YEAR_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.YEAR_ACTUAL_ENERGY) }}
+                            GWh</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-col cols="12">
+                      <v-row class="text-primary d-flex align-center">
+                        <v-col cols="6">
+                          <p>ລາຍຮັບປີ: {{ item.YEAR_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.YEAR_ACTUAL_REVENUE)
+                          || '-'
+                            }}
+                            MUSD</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-divider></v-divider>
+                    <v-col cols="12">
+                      <v-row class="text-primary d-flex align-center">
+                        <v-col cols="6">
+                          <p>ພະລັງງານເດືອນ: {{ item.MONTH_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.MONTH_ACTUAL_ENERGY)
+                            }}
+                            GWh</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-col cols="12">
+                      <v-row class="text-primary d-flex align-center">
+                        <v-col cols="6">
+                          <p>ລາຍຮັບເດືອນ: {{ item.MONTH_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.MONTH_ACTUAL_REVENUE)
+                          || '-'
+                            }}
+                            MUSD</v-chip></v-col>
+                      </v-row></v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+            </v-col>
+ 
+            <!-- Energy Plan -->
+            <v-col cols="6" class="d-flex justify-center">
+              <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12" class="d-flex align-center justify-center">
+                      <Icon name="octicon:goal-24" size="2.5rem" class="text-success mr-2" />
+                      <h3>ແຜນພະລັງງານຜະລິດ</h3>
+                    </v-col>
+                    <v-divider></v-divider>
+                    <v-col cols="12">
+                      <v-row class="text-success d-flex align-center">
+                        <v-col cols="6">
+                          ແຜນພະລັງງານປີ: {{ item.YEAR_NO }}
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.YEAR_PLAN_ENERGY) ||
+                          '-' }}
+                            GWh</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-col cols="12">
+                      <v-row class="text-success d-flex align-center">
+                        <v-col cols="6">
+                          <p>ແຜນລາຍຮັບປີ: {{ item.YEAR_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.YEAR_PLAN_REVENUE) ||
+                          '-'
+                        }}
+                            MUSD</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-divider></v-divider>
+                    <v-col cols="12">
+                      <v-row class="text-success d-flex align-center">
+                        <v-col cols="6">
+                          <p>ແຜນພະລັງງານເດືອນ: {{ item.MONTH_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.MONTH_PLAN_ENERGY)
+                            }}
+                            GWh</v-chip></v-col>
+                      </v-row></v-col>
+                    <v-col cols="12">
+                      <v-row class="text-success d-flex align-center">
+                        <v-col cols="6">
+                          <p>ແຜນລາຍຮັບເດືອນ: {{ item.MONTH_NO }}</p>
+                        </v-col>
+                        <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
+                          formatNumber(item.MONTH_PLAN_REVENUE)
+                          || '-'
+                            }}
+                            MUSD</v-chip></v-col>
+                      </v-row></v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+      </v-card>
+    </v-col>
+  </v-row>
+</template>
 
       <div v-else class="text-center py-8">
         ບໍ່ມີຂໍ້ມູນ
@@ -94,7 +170,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import axios from "axios";
-import { useAuthUser } from "~~/composables/useAuth";
+import { formatNumber } from "~~/components/common/formatNumber";
 
 const router = useRouter();
 
@@ -107,51 +183,51 @@ definePageMeta({
 const data = ref([]);
 const loading = ref(false);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
-const currentYear = new Date().getFullYear(); // 2026
-// ─── Computed ─────────────────────────────────────────────
-const chartData = computed(() =>
-  data.value.filter((d) => d.total_power_year > 0)
-);
-const formatNumber = (val) => {
-  if (val == null) return "-";
+const damSelectd = ref("")
 
-  const num = Number(val);
+const getPercent = (item) => {
+  const used = Number(item.YEAR_ACTUAL_ENERGY) || 0
+  const plan = Number(item.YEAR_PLAN_ENERGY) || 0
+  if (plan <= 0) return null                 // no plan set
+  return Math.round((used / plan) * 10000) / 100   // 2 decimals
+}
 
-  if (Math.abs(num) >= 1_000_000) {
-    // e.g. 1500000 -> "1.5M", 1000000 -> "1M"
-    const millions = num / 1_000_000;
-    const formatted = millions.toFixed(3).replace(/\.0$/, "");
-    return `${formatted}M`;
-  }
-
-  if (Math.abs(num) >= 1_000) {
-    // e.g. 1500 -> "1.5K", 1000 -> "1K"
-    const thousands = num / 1_000;
-    const formatted = thousands.toFixed(3).replace(/\.0$/, "");
-    return `${formatted}K`;
-  }
-
-  return num
-    .toFixed(3)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-};
-
-
+const getStatus = (percent) => {
+  if (percent === null) return { color: 'grey', text: '-' }
+  if (percent > 100) return { color: 'success', text: 'ເກີນແຜນ' }
+  if (percent >= 70) return { color: 'warning', text: 'ໃກ້ຄຽງແຜນ' }
+  return { color: 'error', text: 'ຍັງບໍ່ຮອດແຜນ' }
+}
 // ─── API ──────────────────────────────────────────────────
 const loadData = async () => {
   loading.value = true;
   try {
-    const res = await axios.get("/api/energy/all", {
-      params: { dateselect: selectedDate.value },
+    const res = await axios.get("/api/data/sum", {
+      params: {
+        dateselect: selectedDate.value,
+        dam: damSelectd.value
+      },
     });
-    data.value = Array.isArray(res.data.data) ? res.data.data : [];
-    console.log(data.value)
+    data.value = res.data.data
   } catch (err) {
     console.error(err);
     data.value = [];
   } finally {
     loading.value = false;
   }
+};
+
+const isAll = (item) => item.D_DAM === 'ALL'
+ 
+// ALL first, then the rest in their original order
+const sortedData = computed(() =>
+  [...data.value].sort((a, b) => Number(isAll(b)) - Number(isAll(a)))
+)
+ 
+
+
+const gotoDetail = (item) => {
+  router.push({ path: `/detail`, query: { item: JSON.stringify(item) } });
 };
 
 

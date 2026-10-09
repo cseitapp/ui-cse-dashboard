@@ -2,8 +2,6 @@
   <v-dialog v-model="model" max-width="100%">
     <v-card rounded="lg">
       <v-card-title class="text-center"><h5>{{ title }}</h5></v-card-title>
-      <v-divider />
-
       <v-card-text>
         <!-- Loading -->
         <div v-if="loading" class="d-flex justify-center pa-6">

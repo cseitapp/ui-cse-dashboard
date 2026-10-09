@@ -9,7 +9,7 @@
                     </v-col>
 
                     <v-col cols="12" md="6">
-                        <v-text-field v-model="form.power" label="Power" suffix="MW" type="number" variant="outlined"
+                        <v-text-field v-model="form.power" label="Power" suffix="kWh" type="number" variant="outlined"
                             rounded="lg" density="compact" />
                     </v-col>
 

@@ -1,14 +1,13 @@
 <template>
-    <v-card v-for="ph in data" :key="ph.id" class="mb-3" rounded="lg" flat style="border: 2px solid #B0BEC5">
+    <v-card v-for="ph in data" :key="ph.id" class="mb-3" rounded="lg" flat style="border: 1px solid #B0BEC5">
         <v-card-item class="text-center">
             <v-card-title>
-                <h5>{{ ph.dam_code }} Powerhouse</h5>
+                <h6>{{ ph.dam_code }} Powerhouse</h6>
             </v-card-title>
         </v-card-item>
 
         <v-card-text>
-            <v-row style="height: 400px;" class="d-flex align-center justify-center">
-                <!-- LEFT: metrics -->
+            <!-- <v-row style="height: 400px;" class="d-flex align-center justify-center">
                 <v-col cols="12" md="6">
                     <v-row dense>
                         <v-col v-for="metric in phMetrics(ph)" :key="metric.label" cols="6">
@@ -24,10 +23,28 @@
                 </v-col>
 
 
-                <!-- RIGHT: image -->
                 <v-col cols="12" md="6" class="d-flex align-center justify-center">
                     <v-img v-if="ph.img" :src="ph.img" max-height="260" rounded="lg" cover />
-                    <!-- placeholder when no image -->
+                    <div v-else class="img-placeholder rounded-lg d-flex flex-column align-center justify-center ga-2">
+                        <v-icon size="48" color="amber-lighten-3">mdi-image-off-outline</v-icon>
+                        <span class="text-caption text-medium-emphasis">No image available</span>
+                    </div>
+                </v-col>
+            </v-row> -->
+            <v-row>
+                <v-col v-for="metric in phMetrics(ph)" :key="metric.label" cols="3">
+                    <div class="metric-card pa-1 rounded text-center">
+                        <h5 class="text-primary">{{ metric.label }}</h5>
+                        <!-- <v-divider class="py-1"></v-divider> -->
+                        <div>
+                            <h5>{{ metric.value }} {{ metric.unit }}</h5>
+                        </div>
+                    </div>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col cols="12" md="12" class="d-flex align-center justify-center">
+                    <v-img v-if="ph.img" :src="ph.img" max-height="260" rounded="lg" cover />
                     <div v-else class="img-placeholder rounded-lg d-flex flex-column align-center justify-center ga-2">
                         <v-icon size="48" color="amber-lighten-3">mdi-image-off-outline</v-icon>
                         <span class="text-caption text-medium-emphasis">No image available</span>
@@ -53,7 +70,7 @@ const formatDate = (iso) => {
 const phMetrics = (p) => [
     { label: 'engine_type', value: p.type_engine, unit: '' },
     { label: 'COD', value: formatDate(p.COD), unit: '' },
-    { label: 'Power', value: p.power, unit: 'MW' },
+    { label: 'Power', value: p.power, unit: 'kWh' },
     { label: 'Engines', value: p.number_engine, unit: '' },
     { label: 'Height', value: p.height, unit: 'm' },
     { label: 'Water usage', value: p.water_usage, unit: 'm³/s' },

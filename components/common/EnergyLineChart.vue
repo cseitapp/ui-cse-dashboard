@@ -38,11 +38,11 @@ const props = defineProps({
   },
   yAxisLabel: {
     type: String,
-    default: 'MW',
+    default: 'GWh',
   },
   fields: {
     type: Array,
-    default: () => ['total_power', 'energy_planning'],
+    default: () => ['SUM_ACTUAL_ENERGY', 'SUM_PLAN_ENERGY'],
   },
   fieldLabels: {
     type: Object,
@@ -69,7 +69,7 @@ const props = defineProps({
 // Fields actually rendered — drops energy_planning for D/H granularity
 const visibleFields = computed(() =>
   ['D', 'H'].includes(props.activeType)
-    ? props.fields.filter(f => f !== 'energy_planning')
+    ? props.fields.filter(f => f !== 'SUM_PLAN_ENERGY')
     : props.fields
 )
 
@@ -135,7 +135,7 @@ const chartOptions = computed(() => ({
       },
       formatter: value => {
         if (!value || value === 0) return ''
-        return Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })
+        return Math.trunc(Number(value)).toLocaleString()
       },
     },
     tooltip: {
@@ -143,7 +143,7 @@ const chartOptions = computed(() => ({
         label: (ctx) => {
           const value = ctx.parsed.y
           if (value == null) return `${ctx.dataset.label}: -`
-          return `${ctx.dataset.label}: ${value.toLocaleString(undefined, { maximumFractionDigits: 3 })} ${props.yAxisLabel}`
+          return `${ctx.dataset.label}: ${Math.trunc(value).toLocaleString()} ${props.yAxisLabel}`
         },
       },
     },

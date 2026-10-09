@@ -1,4 +1,14 @@
+@font-face {
+  font-family: 'Phetsarath';
+  src: url('/fonts/PHETSARATH.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 body {
   /* font-family: 'Noto Serif Lao', serif; */
    font-family: "Noto Sans Lao", sans-serif;
+   /* font-family: 'Phetsarath', sans-serif; */
 }

@@ -5,7 +5,10 @@
         <h3>ຈັດການແຜນການຜະລິດພະລັງງານ</h3>
       </v-col>
       <v-col cols="9" class="text-end">
-        <v-btn color="primary" rounded="lg" class="my-2" prepend-icon="mdi-plus" @click="openCreatePlan">
+        <v-btn color="success" rounded="lg" class="ma-2" prepend-icon="mdi-file-upload-outline" @click="goToUpload()">
+          ອັບໂຫຼດແຜນພະລັງງານ
+        </v-btn>
+         <v-btn color="primary" rounded="lg" class="ma-2" prepend-icon="mdi-plus" @click="openCreatePlan">
           ສ້າງແຜນພະລັງງານ
         </v-btn>
       </v-col>
@@ -45,7 +48,7 @@
             </v-col>
 
             <v-col cols="12">
-              <v-text-field v-model="form.energy" density="compact" label="ພະລັງງານ (MW)" type="number" color="primary"
+              <v-text-field v-model="form.energy" density="compact" label="ພະລັງງານ (kWh)" type="number" color="primary"
                 variant="outlined" />
             </v-col>
           </v-row>
@@ -130,8 +133,8 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" class="text-center ">
-                    <h1 class="text-primary">{{ item.energy }} </h1>
-                    MW
+                    <h1 class="text-primary">{{ formatNumber(item.energy) }} </h1>
+                    kWh
                     <p>ແຜນພະລັງງານ</p>
                   </v-col>
                 </v-row>
@@ -182,8 +185,8 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" class="text-center ">
-                    <h1 class="text-primary">{{ item.energy }} </h1>
-                    MW
+                    <h1 class="text-primary">{{ formatNumber(item.energy) }} </h1>
+                    kWh
                     <p>ແຜນພະລັງງານ</p>
                   </v-col>
                 </v-row>
@@ -236,8 +239,8 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" class="text-center ">
-                    <h1 class="text-primary">{{ item.energy }} </h1>
-                    MW
+                    <h1 class="text-primary">{{ formatNumber(item.energy) }} </h1>
+                    Kwh
                     <p>ແຜນພະລັງງານ</p>
                   </v-col>
                 </v-row>
@@ -288,8 +291,8 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" class="text-center ">
-                    <h1 class="text-primary">{{ item.energy }} </h1>
-                    MW
+                    <h1 class="text-primary">{{ formatNumber(item.energy) }} </h1>
+                    kWh
                     <p>ແຜນພະລັງງານ</p>
                   </v-col>
                 </v-row>
@@ -315,8 +318,16 @@ import { ref, watch } from 'vue'
 import AppDatePicker from '~~/components/common/AppDatePicker.vue'
 import moment from 'moment';
 import { useAuthUser } from '~~/composables/useAuth';
+import { formatNumber } from '~~/components/common/formatnumber.js'
 import axios from 'axios';
+definePageMeta({
+  middleware: "auth",
+  layout: "default",
+});
+
 const user = useAuthUser()
+const nuxtApp = useNuxtApp();
+// const dam = 'NEM'
 const dam = user.value.BR_CODE
 const role = user.value.ROLE_CODE
 const activeTab = ref('Y')
@@ -504,5 +515,12 @@ watch(dialog, (value) => {
     resetForm()
   }
 })
+
+const goToUpload = (item) => {
+  nuxtApp.$router.push({
+    path: "/staff/upload",
+    query: ""
+  });
+};
 
 </script>

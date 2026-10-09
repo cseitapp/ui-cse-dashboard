@@ -1,23 +1,44 @@
 <template>
+   <v-container>
+    <h3>ຈັດການຂໍ້ມູນພະລັງງານ</h3>
+
   <!-- Page Title -->
   <v-row class="ma-0" :align="'center'">
+
     <v-col>
-      <h3>ເພີ່ມຂໍ້ມູນ</h3>
+      <v-row :align="'center'">
+
+        <v-col cols="4">
+          <v-row :align="'center'">
+            <v-col>
+              <v-text-field v-model.number="code_name" label="ຈຳນວນການປ້ອນ" type="number" variant="outlined"
+                density="comfortable" hide-details />
+            </v-col>
+            <v-col>
+              <v-btn color="primary" @click="saveCodeName">
+                ບັນທຶກ
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
     </v-col>
+
     <v-col cols="12" md="4">
       <v-row :align="'center'">
-        <v-col cols="2" class="text-center"><v-chip color="primary" size="large">
+        <v-col cols="2" md="3" class="text-center"><v-chip color="primary" elevation="1" size="large">
             <v-btn icon="mdi-chevron-left" variant="text" density="comfortable" @click="prevDate" /></v-chip></v-col>
-        <v-col cols="8"> <v-menu v-model="menu" :close-on-content-click="false">
+        <v-col cols="8" md="6"> <v-menu v-model="menu" :close-on-content-click="false">
             <template v-slot:activator="{ props }">
               <v-text-field rounded="lg" variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar"
                 color="primary" label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
             </template>
 
-            <v-date-picker :model-value="selectedDate" hide-header elevation="1" color="primary" @update:model-value="onDateChange" />
+            <v-date-picker :model-value="selectedDate" hide-header elevation="1" color="primary"
+              @update:model-value="onDateChange" />
           </v-menu></v-col>
-        <v-col cols="2">
-          <v-chip color="primary" size="large">
+        <v-col cols="2" md="3">
+          <v-chip color="primary" size="large" elevation="1">
             <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextDate" /></v-chip>
 
         </v-col>
@@ -48,22 +69,21 @@
           @change="handleFileChange($event, index)" />
 
         <!-- Upload trigger button -->
-        <v-btn color="success" size="small" prepend-icon="mdi-microsoft-excel" :loading="isUploading[index]"
-          @click="triggerFileInput(index)">
-          ອັບໂຫຼດ
+        <v-btn v-if="!selectedFiles[index]" color="success" size="small" prepend-icon="mdi-microsoft-excel"
+          :loading="isUploading[index]" @click="triggerFileInput(index)">
         </v-btn>
-
+        <!-- Submit button (only shown for this row after file selected) -->
+        <v-btn v-if="selectedFiles[index]" color="primary" size="small" prepend-icon="mdi-upload"
+          :loading="isUploading[index]" @click="submitFile(index, item)">
+          ອັບໂຫລດ
+        </v-btn>
         <!-- Selected file chip (only for this row) -->
-        <v-chip v-if="selectedFiles[index]" class="mt-2 ml-1" color="success" variant="tonal" size="small"
+        <v-chip v-if="selectedFiles[index]" color="success" variant="elevated" size="small" class="ml-3"
           prepend-icon="mdi-file-excel" closable @click:close="clearFile(index)">
           {{ selectedFiles[index].name }}
         </v-chip>
 
-        <!-- Submit button (only shown for this row after file selected) -->
-        <v-btn v-if="selectedFiles[index]" class="mt-2 ml-1" color="primary" size="small" prepend-icon="mdi-upload"
-          :loading="isUploading[index]" @click="submitFile(index, item)">
-          ອັບໂຫລດ
-        </v-btn>
+
 
       </template>
 
@@ -93,6 +113,7 @@
       </template>
     </v-data-table>
   </v-card>
+     </v-container>
 </template>
 
 <script setup>
@@ -131,12 +152,30 @@ function nextDate() {
 }
 
 const code_name = ref(8)
+const savedValue = ref(null)
+const saved = ref(false)
 const fileRefs = ref([])   // native <input> ref per row
 const selectedFiles = ref([])  // selected File object per row
 const isUploading = ref([])  // upload loading state per row
 const user = useAuthUser()
 const emp = user.value.USER_NAME
 
+onMounted(() => {
+  const stored = localStorage.getItem('code_name')
+  if (stored !== null) {
+    code_name.value = Number(stored)
+    savedValue.value = Number(stored)
+    saved.value = true
+  }
+})
+
+function saveCodeName() {
+  localStorage.setItem('code_name', code_name.value)
+  savedValue.value = code_name.value
+  saved.value = true
+
+  fetchData()
+}
 
 const snackbar = ref({ show: false, message: '', color: 'success' })
 

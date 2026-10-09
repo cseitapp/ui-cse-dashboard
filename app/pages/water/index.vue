@@ -1,97 +1,111 @@
 <template>
-    <v-row class="ma-0" :align="'center'">
-      <v-col>
-        <h3>ເພີ່ມຂໍ້ມູນນ້ຳ</h3>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-row  :align="'center'">
-          <v-col cols="2" class="text-center"><v-chip color="primary" size="large">
-            <v-btn icon="mdi-chevron-left"
-                variant="text" density="comfortable" @click="prevDate" />
+  <v-container>
+     <h3>ເພີ່ມຂໍ້ມູນນ້ຳ</h3>
+  <v-row class="ma-0" :align="'center'">
+    <v-col>
+      <v-row :align="'center'">
+        <v-col cols="4">
+          <v-row :align="'center'">
+            <v-col>
+              <v-text-field v-model.number="code_name" label="ຈຳນວນການປ້ອນ" type="number" variant="outlined" hide-details 
+                density="comfortable" />
+            </v-col>
+            <v-col>
+              <v-btn color="primary" @click="saveCodeName">
+                ບັນທຶກ
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-col>
+    <v-col cols="12" md="4">
+      <v-row :align="'center'">
+        <v-col cols="2" md="3" class="text-center"><v-chip color="primary" elevation="1" size="large">
+            <v-btn icon="mdi-chevron-left" variant="text" density="comfortable" @click="prevDate" />
           </v-chip></v-col>
-          <v-col cols="8"> <v-menu v-model="menu" :close-on-content-click="false">
-              <template v-slot:activator="{ props }">
-                <v-text-field variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar" color="primary" rounded="lg"
-                  label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
-              </template>
+        <v-col cols="8" md="6"> <v-menu v-model="menu" :close-on-content-click="false">
+            <template v-slot:activator="{ props }">
+              <v-text-field variant="outlined" density="comfortable" prepend-inner-icon="mdi-calendar" color="primary"
+                rounded="lg" label="ເລືອກວັນ" :model-value="displayDate" readonly v-bind="props" class="mt-4" />
+            </template>
 
-              <v-date-picker :model-value="selectedDate" hide-header color="primary"
-                @update:model-value="onDateChange" />
-            </v-menu></v-col>
-          <v-col cols="2">
-            <v-chip color="primary" size="large">
-              <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextDate" />
-            </v-chip>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top right">
-      {{ snackbar.message }}
-    </v-snackbar>
-
-
-    <!-- Vuetify Card wrapping the table -->
-    <v-card class="rounded-lg" elevation="0" >
-      <v-data-table :headers="headers" :items="tableRows" density="default" hide-default-footer :items-per-page="-1"
-        :loading="loading">
-
-        <!-- Status column -->
-        <template #item.status="{ item }">
-          <v-chip :color="statusColor(item.status)" size="small" variant="tonal" class="font-semibold text-xs">
-            {{ statusLabel(item.status) }}
+            <v-date-picker :model-value="selectedDate" hide-header color="primary" @update:model-value="onDateChange" />
+          </v-menu></v-col>
+        <v-col cols="2" md="3">
+          <v-chip color="primary" elevation="1" size="large">
+            <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextDate" />
           </v-chip>
-        </template>
+        </v-col>
+      </v-row>
+    </v-col>
+  </v-row>
+
+  <!-- Snackbar -->
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top right">
+    {{ snackbar.message }}
+  </v-snackbar>
 
 
-        <!-- Manage column — open dialog -->
-        <template #item.manage="{ item, index }">
-          <div class="d-flex align-center justify-center ga-2">
-            <v-btn color="primary" size="small" variant="tonal" v-if="item.status !== 1 && item.status !== 2"
-              :disabled="!canSave(item)" :loading="isUploading[index]" @click="submitDialog(index, item)">
-              <v-icon color="primary" icon="mdi-content-save-all"></v-icon>
-            </v-btn>
+  <!-- Vuetify Card wrapping the table -->
+  <v-card class="rounded-lg" elevation="0">
+    <v-data-table :headers="headers" :items="tableRows" density="default" hide-default-footer :items-per-page="-1"
+      :loading="loading">
 
-            <v-btn class="ms-2" color="warning" variant="tonal" size="small" :loading="isUploading[index]"
-              v-if="item.status === 1 || item.status === 2" :disabled="!isChanged(item)"
-              @click="submitEdit(index, item)">
-              <v-icon color="warning" icon="mdi-pencil-outline"></v-icon>
-            </v-btn>
-          </div>
-        </template>
+      <!-- Status column -->
+      <template #item.status="{ item }">
+        <v-chip :color="statusColor(item.status)" size="small" variant="tonal" class="font-semibold text-xs">
+          {{ statusLabel(item.status) }}
+        </v-chip>
+      </template>
 
-        <template #item.inflow="{ item }">
-          <div class="d-flex align-center justify-center" style="height: 100%;">
-            <v-text-field :model-value="formatNumber(item.inflow)" @update:model-value="val => item.inflow = val"
-              variant="outlined" density="compact" rounded="lg" color="primary" hide-details style="max-width: 150px;"
-              type="number" />
-          </div>
-        </template>
+      <!-- Manage column — open dialog -->
+      <template #item.manage="{ item, index }">
+        <div class="d-flex align-center justify-center ga-2">
+          <v-btn color="primary" size="small" variant="tonal" v-if="item.status !== 1 && item.status !== 2"
+            :disabled="!canSave(item)" :loading="isUploading[index]" @click="submitDialog(index, item)">
+            <v-icon color="primary" icon="mdi-content-save-all"></v-icon>
+          </v-btn>
 
-        <template #item.outflow="{ item }">
-          <div class="d-flex align-center justify-center" style="height: 100%;">
-            <v-text-field :model-value="formatNumber(item.outflow)" @update:model-value="val => item.outflow = val"
-              variant="outlined" density="compact" rounded="lg" color="primary" hide-details style="max-width: 150px;"
-              type="number" />
-          </div>
-        </template>
-        <template #item.date="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">{{ item.date }}</div>
-        </template>
-        <template #item.section="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">{{ item.section }}</div>
-        </template>
-        <template #item.created_at="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">{{ formatDate(item.created_at) }}</div>
-        </template>
-        <template #item.modify_at="{ item }">
-          <div style="min-width:80px; white-space: nowrap;">{{ formatDate(item.modify_at) }}</div>
-        </template>
+          <v-btn class="ms-2" color="warning" variant="tonal" size="small" :loading="isUploading[index]"
+            v-if="item.status === 1 || item.status === 2" :disabled="!isChanged(item)" @click="submitEdit(index, item)">
+            <v-icon color="warning" icon="mdi-pencil-outline"></v-icon>
+          </v-btn>
+        </div>
+      </template>
 
-      </v-data-table>
-    </v-card>
+      <template #item.inflow="{ item }">
+        <div class="d-flex align-center justify-center" style="height: 100%;">
+          <v-text-field :model-value="formatNumber(item.inflow)" @update:model-value="val => item.inflow = val"
+            variant="outlined" density="compact" rounded="lg" color="primary" hide-details style="max-width: 150px;"
+            type="number" />
+        </div>
+      </template>
+
+      <template #item.outflow="{ item }">
+        <div class="d-flex align-center justify-center" style="height: 100%;">
+          <v-text-field :model-value="formatNumber(item.outflow)" @update:model-value="val => item.outflow = val"
+            variant="outlined" density="compact" rounded="lg" color="primary" hide-details style="max-width: 150px;"
+            type="number" />
+        </div>
+      </template>
+      <template #item.date="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">{{ item.date }}</div>
+      </template>
+      <template #item.section="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">{{ item.section }}</div>
+      </template>
+      <template #item.created_at="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">{{ formatDate(item.created_at) }}</div>
+      </template>
+      <template #item.modify_at="{ item }">
+        <div style="min-width:80px; white-space: nowrap;">{{ formatDate(item.modify_at) }}</div>
+      </template>
+
+    </v-data-table>
+  </v-card>
+  </v-container>
+
 </template>
 
 <script setup>
@@ -137,6 +151,26 @@ function nextDate() {
 
 // 24 rows: one per hour (00:00–23:00)
 const code_name = ref(24)
+const savedValue = ref(null)
+const saved = ref(false)
+
+
+onMounted(() => {
+  const stored = localStorage.getItem('code_name_water')
+  if (stored !== null) {
+    code_name.value = Number(stored)
+    savedValue.value = Number(stored)
+    saved.value = true
+  }
+})
+
+function saveCodeName() {
+  localStorage.setItem('code_name_water', code_name.value)
+  savedValue.value = code_name.value
+  saved.value = true
+
+  fetchData()
+}
 
 const isUploading = ref([])
 const user = useAuthUser()
@@ -243,20 +277,14 @@ const isChanged = (item) => {
 }
 
 // Returns Vuetify chip color per status label
-const statusColor = (status) => {
-  const map = {
-    'ອັບໂຫລດແລ້ວ': 'success',
-    'ບໍ່ມີການອັບໂຫລດ': 'red',
-    'ແກ້ໄຂ': 'warning'
-  }
-  return map[status] ?? 'default'
+const STATUS_MAP = {
+  1: { label: 'ເພີ່ມແລ້ວ', color: 'success' },
+  2: { label: 'ແກ້ໄຂ', color: 'warning' },
+  0: { label: 'ຫວ່າງ', color: 'red' }
 }
 
-const statusLabel = (apiStatus) => {
-  if (apiStatus === 1) return 'ເພີ່ມແລ້ວ'
-  else if (apiStatus === 2) return 'ແກ້ໄຂ'
-  else return 'ຫວ່າງ'
-}
+const statusColor = (status) => STATUS_MAP[status]?.color ?? 'grey'
+const statusLabel = (status) => STATUS_MAP[status]?.label ?? 'ຫວ່າງ'
 
 // index 0 → "00:00-01:00" … index 23 → "23:00-24:00"
 const sectionLabel = (index) => {

@@ -7,6 +7,9 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
+   imports: {
+    dirs: ["composables"],
+  },
   vite: {
     plugins: [
       vuetify({ autoImport: true }),
