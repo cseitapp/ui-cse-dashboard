@@ -1,13 +1,13 @@
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 export default defineNuxtConfig({
-   modules: [
+  modules: [
     "@nuxt/icon",
   ],
   //...
   build: {
     transpile: ['vuetify'],
   },
-   imports: {
+  imports: {
     dirs: ["composables"],
   },
   vite: {
@@ -20,6 +20,12 @@ export default defineNuxtConfig({
       },
     },
   },
+  icon: {
+    serverBundle: {
+      collections: ['mdi', 'lucide'],
+    },
+  },
+
   runtimeConfig: {
     // Backend API URL (can be HTTP)
     VITE_URL_PATH_TICKET: process.env.VITE_URL_PATH_TICKET,
@@ -32,7 +38,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~~/assets/css/main.css'],
   app: {
-    baseURL:'/',
+    baseURL: '/',
     head: {
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -44,5 +50,5 @@ export default defineNuxtConfig({
       ]
     }
   },
- 
+
 })
