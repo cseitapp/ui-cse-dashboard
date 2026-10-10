@@ -37,14 +37,14 @@ let ro = null;
 const toNum = (v) => (v === null || v === undefined || v === "" ? null : Number(v));
 
 const buildOption = () => ({
-    textStyle: { fontFamily: FONT },
+  textStyle: { fontFamily: FONT },
   title: { text: props.title, left: "center", textStyle: { fontSize: 16, fontFamily: FONT }, },
   tooltip: {
     trigger: "axis",
     axisPointer: { type: "shadow" },
     valueFormatter: (v) => (v == null ? "-" : `${v}${props.unit ? " " + props.unit : ""}`),
   },
-  legend: { top: 40 ,textStyle: { fontFamily: FONT }},
+  legend: { top: 40, textStyle: { fontFamily: FONT } },
   grid: { left: 16, right: 16, top: 70, bottom: 40, containLabel: true },
   xAxis: { type: "category", data: props.labels, axisTick: { alignWithLabel: true } },
   yAxis: { type: "value", name: props.unit },
@@ -57,6 +57,13 @@ const buildOption = () => ({
     data: (s.data || []).map(toNum),
     itemStyle: s.color ? { color: s.color } : undefined,
     emphasis: { focus: "series" },
+    label: {
+      show: true,
+      position: props.stack ? "inside" : "top",
+      fontFamily: FONT,
+      formatter: ({ value }) =>
+        value == null ? "" : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 }),
+    },
   })),
 });
 

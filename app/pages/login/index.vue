@@ -29,7 +29,7 @@ const handleLogin = async () => {
 <template>
   <v-layout>
     <v-container fluid class="d-flex align-center justify-center"
-      style="height: 100vh; background: url('/assets/images/bg_new.jpg') no-repeat center center; background-size: cover;">
+      style="height: 100vh; background: url('/assets/images/DAM.jpeg') no-repeat center center; background-size: cover;">
       <v-row align="center" justify="center">
         <v-col cols="10" sm="8" md="6" lg="3">
           <v-card class="rounded-xl" style="border-width: 2px; border-style: solid; border-color: white;" color="#474a4d96">
