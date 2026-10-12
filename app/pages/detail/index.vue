@@ -48,7 +48,7 @@
                                     <v-menu v-model="picker.menu.value" :close-on-content-click="false"
                                         transition="scale-transition" offset-y min-width="auto">
                                         <template #activator="{ props }">
-                                            <v-text-field color="primary" v-bind="props" hide-details
+                                            <v-text-field color="primary" v-bind="props" hide-details rounded="lg"
                                                 :model-value="formatPickerDisplay(picker.date.value, activeType)"
                                                 :label="picker.label" variant="outlined" density="compact"
                                                 prepend-inner-icon="mdi-calendar" readonly />
@@ -114,7 +114,7 @@
                                     </v-menu>
                                 </v-col>
                                 <v-col>
-                                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify"
+                                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" rounded="lg"
                                         @click="onSearch">ຄົ້ນຫາ</v-btn>
                                 </v-col>
                             </v-row>
@@ -146,7 +146,7 @@
                             <v-menu v-model="picker.menu.value" :close-on-content-click="false"
                                 transition="scale-transition" offset-y min-width="auto">
                                 <template #activator="{ props }">
-                                    <v-text-field color="primary" v-bind="props" hide-details
+                                    <v-text-field color="primary" v-bind="props" hide-details rounded="lg"
                                         :model-value="formatPickerDisplay(picker.date.value, activeType)"
                                         :label="picker.label" variant="outlined" density="compact"
                                         prepend-inner-icon="mdi-calendar" readonly />
@@ -207,7 +207,7 @@
                             </v-menu>
                         </v-col>
                         <v-col>
-                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify"
+                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify" rounded="lg"
                                 @click="onSearch">ຄົ້ນຫາ</v-btn>
                         </v-col>
                     </v-row>
@@ -245,6 +245,11 @@
                 </v-card>
             </v-col>
             <v-col v-bind="colProps">
+                <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
+                    <BarChart title="ລະດັບນ້ຳຝົນ (MM)" unit="MM" :labels="labelsRain" :series="rainfallSeries" />
+                </v-card>
+            </v-col>
+            <v-col cols="12">
                 <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
                     <Basiclinechart :data="allData" title="ປະລິມານນ້ຳເຂົ້າ ແລະ ປະລິມານນ້ຳອອກ (MCM)"
                         x-field="PERIOD_LABEL" :series="[
@@ -293,6 +298,7 @@ import BarChart from '~~/components/common/BarChart.vue'
 import Basiclinechart from '~~/components/common/Basiclinechart.vue'
 
 const labels = computed(() => allData.value.map((r) => r.PERIOD_LABEL));
+const labelsRain = computed(() => rainfall.value.map((r) => r.summary_date));
 
 const energySeries = computed(() => [
     { name: "ແຜນ", data: allData.value.map((r) => r.SUM_PLAN_ENERGY), color: "#90a4ae" },
@@ -307,6 +313,10 @@ const revenueSeries = computed(() => [
 const inflowSeries = computed(() => [
     { name: "ແຜນນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_PLAN), color: "#4dd0e6" },
     { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0c2" },
+]);
+
+const rainfallSeries = computed(() => [
+    { name: "ລະດັບນ້ຳຝົນ", data: rainfall.value.map((r) => r.avg_total_value), color: "#1976d2" }
 ]);
 // const inflowOutFlowSeries = computed(() => [
 //     { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0e6" },
@@ -490,6 +500,7 @@ const onSearch = () => {
 
     loadAlldata()
     loadWaterData()
+    loadRainfall()
 }
 const activeType = ref('D')
 const onTypeChange = (type) => {
@@ -533,6 +544,19 @@ const loadWaterData = async () => {
     // console.log("water", water_data.value)
 }
 
+const rainfall = ref([])
+const loadRainfall = async () => {
+    const res = await axios.get("/api/data/rainfall", {
+        params: withTypeParams({
+            start: startPicker.date.value,
+            end: endPicker.date.value,
+            code: code
+        }),
+    });
+    rainfall.value = res.data.DATA;
+}
+
+
 const setDateRange = (date, type) => {
     switch (type) {
         case 'Y':
@@ -574,5 +598,6 @@ onMounted(() => {
     onTypeChange(activeType.value)
     loadAlldata()
     loadWaterData()
+    loadRainfall()
 })
 </script>

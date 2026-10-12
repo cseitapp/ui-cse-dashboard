@@ -21,26 +21,26 @@
                 </v-tabs>
               </v-col>
               <!-- Year (always shown) -->
-              <v-row class="d-flex justify-center mb-2" :align="'center'">
+              <v-row class="d-flex justify-center mb-2 pa-4" :align="'center'">
                 <v-col cols="12" sm="3">
-                  <v-select v-model="selectedYear" :items="yearItems" label="ປີ" variant="outlined"
+                  <v-select v-model="selectedYear" :items="yearItems" label="ປີ" variant="outlined" rounded="lg"
                     density="comfortable" hide-details />
                 </v-col>
 
                 <!-- Quarter -->
                 <v-col v-if="periodType === 'quarter'" cols="12" sm="3">
-                  <v-select v-model="selectedQuarter" :items="quarterItems" item-title="title" item-value="value"
+                  <v-select v-model="selectedQuarter" :items="quarterItems" item-title="title" item-value="value" rounded="lg"
                     label="ໄຕມາດ" variant="outlined" density="comfortable" hide-details />
                 </v-col>
 
                 <!-- Month -->
                 <v-col v-if="periodType === 'month'" cols="12" sm="3">
-                  <v-select v-model="selectedMonth" :items="monthItems" item-title="title" item-value="value"
+                  <v-select v-model="selectedMonth" :items="monthItems" item-title="title" item-value="value" rounded="lg"
                     label="ເດືອນ" variant="outlined" density="comfortable" hide-details />
                 </v-col>
                 <!-- Search button -->
                 <v-col cols="12" class="text-end" sm="auto">
-                  <v-btn color="primary" prepend-icon="mdi-magnify" variant="outlined" :loading="loading"
+                  <v-btn color="primary" prepend-icon="mdi-magnify" variant="outlined" :loading="loading" rounded="lg"
                     :disabled="loading" @click="search">
                     ຄົ້ນຫາ
                   </v-btn>
