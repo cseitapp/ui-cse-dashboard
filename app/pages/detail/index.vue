@@ -579,7 +579,8 @@ const setDateRange = (date, type) => {
             // Default "D" now represents the current month range
             return {
                 start_date: moment(date).startOf('month').format('YYYY-MM-DD'),
-                end_date: moment(date).endOf('month').format('YYYY-MM-DD'),
+                // end_date: moment(date).endOf('month').format('YYYY-MM-DD'),
+                end_date: moment(date).format('YYYY-MM-DD'),
             }
         case 'H':
             return {
