@@ -1,7 +1,5 @@
 <template>
   <v-container fluid>
-    <!-- <v-card rounded="lg" elevation="0" border :loading="loading" > -->
-
     <v-card-text>
       <div class="d-flex justify-center">
         <v-img src="/assets/images/logo_cse.png" min-width="100px" height="100px" />
@@ -12,10 +10,10 @@
           ລາຍລະອຽດເຂື່ອນ
         </v-btn></div>
       <v-row class="d-flex justify-center">
-        <v-col cols="8">
-          <v-card class="d-flex justify-center pa-3">
+        <v-col cols="12" lg="8" md="12">
+          <v-card class="d-flex justify-center pa-3 rounded-lg">
             <v-row :align="'center'">
-              <v-col>
+              <v-col class="d-flex justify-center" cols="12">
                 <v-tabs v-model="periodType" color="primary">
                   <v-tab value="year">ປີ</v-tab>
                   <v-tab value="quarter">ໄຕມາດ</v-tab>
@@ -23,29 +21,31 @@
                 </v-tabs>
               </v-col>
               <!-- Year (always shown) -->
-              <v-col cols="12" sm="2">
-                <v-select v-model="selectedYear" :items="yearItems" label="ປີ" variant="outlined" density="comfortable"
-                  hide-details />
-              </v-col>
+              <v-row class="d-flex justify-center mb-2" :align="'center'">
+                <v-col cols="12" sm="3">
+                  <v-select v-model="selectedYear" :items="yearItems" label="ປີ" variant="outlined"
+                    density="comfortable" hide-details />
+                </v-col>
 
-              <!-- Quarter -->
-              <v-col v-if="periodType === 'quarter'" cols="12" sm="2">
-                <v-select v-model="selectedQuarter" :items="quarterItems" item-title="title" item-value="value"
-                  label="ໄຕມາດ" variant="outlined" density="comfortable" hide-details />
-              </v-col>
+                <!-- Quarter -->
+                <v-col v-if="periodType === 'quarter'" cols="12" sm="3">
+                  <v-select v-model="selectedQuarter" :items="quarterItems" item-title="title" item-value="value"
+                    label="ໄຕມາດ" variant="outlined" density="comfortable" hide-details />
+                </v-col>
 
-              <!-- Month -->
-              <v-col v-if="periodType === 'month'" cols="12" sm="2">
-                <v-select v-model="selectedMonth" :items="monthItems" item-title="title" item-value="value"
-                  label="ເດືອນ" variant="outlined" density="comfortable" hide-details />
-              </v-col>
-              <!-- Search button -->
-              <v-col cols="12" class="text-end" sm="auto">
-                <v-btn color="primary" prepend-icon="mdi-magnify" variant="outlined" :loading="loading"
-                  :disabled="loading" @click="search">
-                  ຄົ້ນຫາ
-                </v-btn>
-              </v-col>
+                <!-- Month -->
+                <v-col v-if="periodType === 'month'" cols="12" sm="3">
+                  <v-select v-model="selectedMonth" :items="monthItems" item-title="title" item-value="value"
+                    label="ເດືອນ" variant="outlined" density="comfortable" hide-details />
+                </v-col>
+                <!-- Search button -->
+                <v-col cols="12" class="text-end" sm="auto">
+                  <v-btn color="primary" prepend-icon="mdi-magnify" variant="outlined" :loading="loading"
+                    :disabled="loading" @click="search">
+                    ຄົ້ນຫາ
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-row>
 
           </v-card>
@@ -63,30 +63,35 @@
             <v-card rounded="lg" elevation="0" :hover="!isAll(item)" class="text-center border-sm rounded-lg"
               :class="{ 'cursor-pointer': !isAll(item) }" @click="!isAll(item) && gotoDetail(item)">
               <v-card-text class="text-center">
-                <div class="d-flex align-center">
-                  <Icon :name="isAll(item) ? 'mdi:sigma' : 'game-icons:waterfall'" size="3rem" class="text-grey mx-4" />
+                <v-row :align="'center'" dense>
+                  <!-- Icon + title -->
+                  <v-col cols="12" sm="8" md="9">
+                    <div class="d-flex align-center">
+                      <Icon :name="isAll(item) ? 'mdi:sigma' : 'game-icons:waterfall'" size="3rem"
+                        class="text-grey mx-2 mx-sm-4 flex-shrink-0" />
+                      <div class="text-left">
+                        <h3><b>{{ isAll(item) ? 'ລວມທຸກເຂື່ອນ' : item.branch?.BR_NAME }}</b></h3>
+                        <h4 class="text-grey"><b>{{ isAll(item) ? 'ລາຍງານພະລັງງານ ແລະ ລາຍຮັບ' : item.branch?.BR_NAME_EN
+                        }} {{ formatDate(item.PERIOD_START) }} - {{ formatDate(item.PERIOD_END) }}</b></h4>
+                      </div>
+                    </div>
+                  </v-col>
 
-                  <div class="text-left">
-                    <h3><b>{{ isAll(item) ? 'ລວມທຸກເຂື່ອນ' : item.branch?.BR_NAME }}</b></h3>
-                    <h4 class="text-grey"><b>{{ isAll(item) ? 'ລາຍງານພະລັງງານ ແລະ ລາຍຮັບ' : item.branch?.BR_NAME_EN
-                    }} {{ formatDate(item.PERIOD_START) }} - {{ formatDate(item.PERIOD_END) }}</b></h4>
-                  </div>
-                  <div class="text-right ml-auto">
-                    <h3>
-                      <v-chip :color="getStatus(getPercent(item)).color" variant="tonal" class="ml-2">
-                        {{ getStatus(getPercent(item)).text }}
-                        <template v-if="getPercent(item) !== null">
-                          ({{ getPercent(item) }}%)
-                        </template>
-                      </v-chip>
-                    </h3>
-                  </div>
-                </div>
+                  <!-- Status chip -->
+                  <v-col cols="12" sm="4" md="3" class="text-center text-sm-right">
+                    <v-chip :color="getStatus(getPercent(item)).color" variant="tonal">
+                      {{ getStatus(getPercent(item)).text }}
+                      <template v-if="getPercent(item) !== null">
+                        ({{ getPercent(item) }}%)
+                      </template>
+                    </v-chip>
+                  </v-col>
+                </v-row>
               </v-card-text>
               <div class="ma-3">
                 <v-row>
                   <!-- Total Energy -->
-                  <v-col cols="6" class="d-flex justify-center">
+                  <v-col cols="12" sm="6" md="6" class="d-flex justify-center">
                     <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
                       <v-card-text>
                         <v-row>
@@ -112,38 +117,17 @@
                               <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
                                 formatNumber(item.YEAR_ACTUAL_REVENUE)
                                 || '-'
-                              }}
-                                  MUSD</v-chip></v-col>
-                            </v-row></v-col>
-                          <!-- <v-divider></v-divider>
-                          <v-col cols="12">
-                            <v-row class="text-primary d-flex align-center">
-                              <v-col cols="6">
-                                <p>ພະລັງງານເດືອນ: {{ item.MONTH_NO }}</p>
-                              </v-col>
-                              <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
-                                formatNumber(item.MONTH_ACTUAL_ENERGY)
-                                  }}
-                                  GWh</v-chip></v-col>
-                            </v-row></v-col>
-                          <v-col cols="12">
-                            <v-row class="text-primary d-flex align-center">
-                              <v-col cols="6">
-                                <p>ລາຍຮັບເດືອນ: {{ item.MONTH_NO }}</p>
-                              </v-col>
-                              <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
-                                formatNumber(item.MONTH_ACTUAL_REVENUE)
-                                || '-'
                                   }}
                                   MUSD</v-chip></v-col>
-                            </v-row></v-col> -->
+                            </v-row></v-col>
+
                         </v-row>
                       </v-card-text>
                     </v-card>
                   </v-col>
 
                   <!-- Energy Plan -->
-                  <v-col cols="6" class="d-flex justify-center">
+                  <v-col cols="12" sm="6" md="6" class="d-flex justify-center">
                     <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
                       <v-card-text>
                         <v-row>
@@ -170,31 +154,10 @@
                               <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
                                 formatNumber(item.YEAR_PLAN_REVENUE) ||
                                 '-'
-                              }}
-                                  MUSD</v-chip></v-col>
-                            </v-row></v-col>
-                          <!-- <v-divider></v-divider>
-                          <v-col cols="12">
-                            <v-row class="text-success d-flex align-center">
-                              <v-col cols="6">
-                                <p>ແຜນພະລັງງານເດືອນ: {{ item.MONTH_NO }}</p>
-                              </v-col>
-                              <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
-                                formatNumber(item.MONTH_PLAN_ENERGY)
-                                  }}
-                                  GWh</v-chip></v-col>
-                            </v-row></v-col>
-                          <v-col cols="12">
-                            <v-row class="text-success d-flex align-center">
-                              <v-col cols="6">
-                                <p>ແຜນລາຍຮັບເດືອນ: {{ item.MONTH_NO }}</p>
-                              </v-col>
-                              <v-col cols="6" class="text-left"><v-chip :variant="isAll(item) ? 'tonal' : 'outlined'">{{
-                                formatNumber(item.MONTH_PLAN_REVENUE)
-                                || '-'
                                   }}
                                   MUSD</v-chip></v-col>
-                            </v-row></v-col> -->
+                            </v-row></v-col>
+
                         </v-row>
                       </v-card-text>
                     </v-card>
@@ -222,7 +185,6 @@
         ບໍ່ມີຂໍ້ມູນ
       </div>
     </v-card-text>
-    <!-- </v-card> -->
   </v-container>
 </template>
 
@@ -363,6 +325,17 @@ const energySeries = computed(() => [
     data: sortedDataDam.value.map((r) => r.YEAR_ACTUAL_ENERGY),
     color: "#1976D2",
   },
+  {
+    name: "ແຜນ",
+    data: sortedDataDam.value.map((r) => r.YEAR_PLAN_ENERGY),
+    color: "#ADADAD",
+  },
+  //  {
+  //   name: "ປະລິມານນ້ຳຝົນ",
+  //   data: sortedDataDam.value.map((r) => r.MONTH_RAINFALL),
+  //   color: "#1996D2",
+  // },
+
 ]);
 
 

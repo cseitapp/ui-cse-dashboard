@@ -25,30 +25,35 @@
             <v-card rounded="lg" elevation="0" :hover="!isAll(item)" class="text-center border-sm rounded-lg"
               :class="{ 'cursor-pointer': !isAll(item) }" @click="!isAll(item) && gotoDetail(item)">
               <v-card-text class="text-center">
-                <div class="d-flex align-center">
-                  <Icon :name="isAll(item) ? 'mdi:sigma' : 'game-icons:waterfall'" size="3rem" class="text-grey mx-4" />
+                <v-row :align="'center'" dense>
+                  <!-- Icon + title -->
+                  <v-col cols="12" sm="8" md="9">
+                    <div class="d-flex align-center">
+                      <Icon :name="isAll(item) ? 'mdi:sigma' : 'game-icons:waterfall'" size="3rem"
+                        class="text-grey mx-2 mx-sm-4 flex-shrink-0" />
+                      <div class="text-left">
+                        <h3><b>{{ isAll(item) ? 'ລວມທຸກເຂື່ອນ' : item.branch?.BR_NAME }}</b></h3>
+                        <h4 class="text-grey"><b>{{ isAll(item) ? 'ລາຍງານພະລັງງານ ແລະ ລາຍຮັບ' : item.branch?.BR_NAME_EN
+                        }} {{ formatDate(item.PERIOD_START) }} - {{ formatDate(item.PERIOD_END) }}</b></h4>
+                      </div>
+                    </div>
+                  </v-col>
 
-                  <div class="text-left">
-                    <h3><b>{{ isAll(item) ? 'ລວມທຸກເຂື່ອນ' : item.branch?.BR_NAME }}</b></h3>
-                    <h4 class="text-grey"><b>{{ isAll(item) ? 'ລາຍງານພະລັງງານ ແລະ ລາຍຮັບ' : item.branch?.BR_NAME_EN
-                        }}</b></h4>
-                  </div>
-                  <div class="text-right ml-auto">
-                    <h3>
-                      <v-chip :color="getStatus(getPercent(item)).color" variant="tonal" class="ml-2">
-                        {{ getStatus(getPercent(item)).text }}
-                        <template v-if="getPercent(item) !== null">
-                          ({{ getPercent(item) }}%)
-                        </template>
-                      </v-chip>
-                    </h3>
-                  </div>
-                </div>
+                  <!-- Status chip -->
+                  <v-col cols="12" sm="4" md="3" class="text-center text-sm-right">
+                    <v-chip :color="getStatus(getPercent(item)).color" variant="tonal">
+                      {{ getStatus(getPercent(item)).text }}
+                      <template v-if="getPercent(item) !== null">
+                        ({{ getPercent(item) }}%)
+                      </template>
+                    </v-chip>
+                  </v-col>
+                </v-row>
               </v-card-text>
               <div class="ma-3">
                 <v-row>
                   <!-- Total Energy -->
-                  <v-col cols="6" class="d-flex justify-center">
+                  <v-col cols="12" sm="12" md="6" class="d-flex justify-center">
                     <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
                       <v-card-text>
                         <v-row>
@@ -105,7 +110,7 @@
                   </v-col>
 
                   <!-- Energy Plan -->
-                  <v-col cols="6" class="d-flex justify-center">
+                  <v-col cols="12" sm="12" md="6" class="d-flex justify-center">
                     <v-card elevation="0" rounded="lg" color="grey-lighten-4" class="w-100">
                       <v-card-text>
                         <v-row>

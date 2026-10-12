@@ -246,30 +246,35 @@
             </v-col>
             <v-col v-bind="colProps">
                 <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
-                    <EChart :data="allData" title="ປະລິມານນ້ຳເຂົ້າ ແລະ ປະລິມານນ້ຳອອກ (MCM)" x-field="PERIOD_LABEL" :series="[
-                        { field: 'SUM_INFLOW_ACTUAL', label: 'ປະລິມານນ້ຳເຂົ້າ' },
-                        { field: 'SUM_OUTFLOW', label: 'ປະລິມານນ້ຳອອກ' }
-                    ]" />
+                    <Basiclinechart :data="allData" title="ປະລິມານນ້ຳເຂົ້າ ແລະ ປະລິມານນ້ຳອອກ (MCM)"
+                        x-field="PERIOD_LABEL" :series="[
+                            { field: 'SUM_INFLOW_ACTUAL', label: 'ປະລິມານນ້ຳເຂົ້າ' },
+                            { field: 'SUM_OUTFLOW', label: 'ປະລິມານນ້ຳອອກ' }
+                        ]" />
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="12" lg="12">
                 <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
 
-                    <EChart :data="water_data" title="ລະດັບນ້ຳຂອງເຂື່ອນ (MASL)" x-field="D_DATE" :series="[
-                        { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ' },
-                        { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ' },
-                        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383' }
-                    ]" />
+                    <v-tabs v-model="activeTab" color="primary" align-tabs="end">
+                        <v-tab value="all">ທັງໝົດ</v-tab>
+                        <v-tab value="main">ເຂື່ອນຫຼັກ</v-tab>
+                        <v-tab value="diversion">ເຂື່ອນອ່ວຍນ້ຳ</v-tab>
+                    </v-tabs>
+
+                    <Basiclinechart :data="water_data" title="ລະດັບນ້ຳຂອງເຂື່ອນ (MASL)" x-field="D_DATE"
+                        :series="chartSeries" />
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="12" lg="12">
                 <v-card rounded="lg" elevation="0" class="border-sm pa-4" style="height: 450px">
-                    <EChart :data="water_data" title="ບໍລິມາດນ້ຳຂອງເຂື່ອນ (MCM)" x-field="D_DATE" :series="[
-                        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ' },
-                        { field: 'D_DIVERSION_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ' },
-                        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດການນຳໃຊ້ນ້ຳເຂື່ອນຫຼັກ', color: '#1914B3' },
-                        { field: 'D_DIVERSION_USE_VOLUME', label: 'ບໍລິມາດການນຳໃຊ້ນ້ຳເຂື່ອນອ່ວາຍນ້ຳ', color: '#38C25D' }
-                    ]" />
+                    <v-tabs v-model="volumeTab" color="primary" align-tabs="end">
+                        <v-tab value="all">ທັງໝົດ</v-tab>
+                        <v-tab value="main">ເຂື່ອນຫຼັກ</v-tab>
+                        <v-tab value="diversion">ເຂື່ອນອ່ວຍນ້ຳ</v-tab>
+                    </v-tabs>
+                    <Basiclinechart :data="water_data" title="ບໍລິມາດນ້ຳທັງໝົດຂອງເຂື່ອນ (MCM)" x-field="D_DATE"
+                        :series="volumeSeries" />
                 </v-card>
             </v-col>
         </v-row>
@@ -281,11 +286,11 @@
 <script setup>
 import axios from 'axios'
 import moment from 'moment'
-import EnergyLineChart from '~~/components/common/EnergyLineChart.vue'
 import InfoDialog from '~~/components/common/InfoDialog.vue'
 import { useDisplay } from 'vuetify'
 import EChart from '~~/components/common/EChart.vue'
 import BarChart from '~~/components/common/BarChart.vue'
+import Basiclinechart from '~~/components/common/Basiclinechart.vue'
 
 const labels = computed(() => allData.value.map((r) => r.PERIOD_LABEL));
 
@@ -303,10 +308,10 @@ const inflowSeries = computed(() => [
     { name: "ແຜນນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_PLAN), color: "#4dd0e6" },
     { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0c2" },
 ]);
-const inflowOutFlowSeries = computed(() => [
-    { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0e6" },
-    { name: "ຕົວຈິງນ້ຳອອກ", data: allData.value.map((r) => r.SUM_OUTFLOW), color: "#a5d6a7" },
-]);
+// const inflowOutFlowSeries = computed(() => [
+//     { name: "ຕົວຈິງນ້ຳເຂົ້າ", data: allData.value.map((r) => r.SUM_INFLOW_ACTUAL), color: "#4dd0e6" },
+//     { name: "ຕົວຈິງນ້ຳອອກ", data: allData.value.map((r) => r.SUM_OUTFLOW), color: "#a5d6a7" },
+// ]);
 // ─── Route ───────────────────────────────────────────────
 const route = useRoute()
 const dialog = ref(false)
@@ -326,10 +331,59 @@ definePageMeta({
 
 const colProps = computed(() => {
     if (['Y', 'M'].includes(activeType.value)) {
-        return { cols: 6, sm: 6, md: 6, lg: 6 } // Y/M layout
+        return { cols: 12, sm: 12, md: 12, lg: 6 } // Y/M layout
     }
     return { cols: 12, sm: 12, md: 12, lg: 6 } // W/D/H layout (same pattern for all three)
 })
+
+const activeTab = ref('all')
+
+const seriesByTab = {
+    all: [
+        { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ', markPoint: true },
+        { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ', markPoint: true },
+        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
+        { field: 'HIGH_WATER_LEVEL', label: 'ສູງສຸດ (ເຂື່ອນຫຼັກ)', color: '#ee6666' },
+        { field: 'LOW_WATER_LEVEL', label: 'ຕ່ຳສຸດ (ເຂື່ອນຫຼັກ)', color: '#fac858' },
+        { field: 'HIGH_WATER_LEVEL_DIVERSION', label: 'ສູງສຸດ (ອ່ວຍນ້ຳ)', color: '#ee6666' },
+        { field: 'LOW_WATER_LEVEL_DIVERSION', label: 'ຕ່ຳສຸດ (ອ່ວຍນ້ຳ)', color: '#fac858' }
+    ],
+    main: [
+        { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ', markPoint: true },
+        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
+        { field: 'HIGH_WATER_LEVEL', label: 'ສູງສຸດ (ເຂື່ອນຫຼັກ)', color: '#ee6666' },
+        { field: 'LOW_WATER_LEVEL', label: 'ຕ່ຳສຸດ (ເຂື່ອນຫຼັກ)', color: '#fac858' }
+    ],
+    diversion: [
+        { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ', markPoint: true },
+        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
+        { field: 'HIGH_WATER_LEVEL_DIVERSION', label: 'ສູງສຸດ (ອ່ວຍນ້ຳ)', color: '#ee6666' },
+        { field: 'LOW_WATER_LEVEL_DIVERSION', label: 'ຕ່ຳສຸດ (ອ່ວຍນ້ຳ)', color: '#fac858' }
+    ]
+}
+
+const chartSeries = computed(() => seriesByTab[activeTab.value])
+
+const volumeTab = ref('all')
+
+const volumeSeriesByTab = {
+    all: [
+        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທັງໝົດ', color: '#1E40AF', markPoint: true },
+        { field: 'D_MAIN_USE_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທີ່ນຳໃຊ້ໄດ້', color: '#60A5FA', markPoint: true },
+        { field: 'D_DIVERSION_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ', color: '#166534', markPoint: true },
+        { field: 'D_DIVERSION_USE_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທີ່ນຳໃຊ້ໄດ້', color: '#4ADE80', markPoint: true }
+    ],
+    main: [
+        { field: 'D_MAIN_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທັງໝົດ', color: '#1E40AF', markPoint: true },
+        { field: 'D_MAIN_USE_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທີ່ນຳໃຊ້ໄດ້', color: '#60A5FA', markPoint: true }
+    ],
+    diversion: [
+        { field: 'D_DIVERSION_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ', color: '#166534', markPoint: true },
+        { field: 'D_DIVERSION_USE_VOLUME', label: 'ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທີ່ນຳໃຊ້ໄດ້', color: '#4ADE80', markPoint: true }
+    ]
+}
+
+const volumeSeries = computed(() => volumeSeriesByTab[volumeTab.value])
 
 // ─── Date Pickers ─────────────────────────────────────────
 const createDatePicker = (label, initial) => ({
@@ -466,6 +520,7 @@ const loadAlldata = async () => {
 }
 
 const water_data = ref([])
+
 const loadWaterData = async () => {
     const res = await axios.get("/api/data/dam", {
         params: withTypeParams({
