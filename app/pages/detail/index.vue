@@ -265,6 +265,7 @@
                         <v-tab value="all">ທັງໝົດ</v-tab>
                         <v-tab value="main">ເຂື່ອນຫຼັກ</v-tab>
                         <v-tab value="diversion">ເຂື່ອນອ່ວຍນ້ຳ</v-tab>
+                        <v-tab value="plan">ອ່າງເກັບນ້ຳ</v-tab>
                     </v-tabs>
 
                     <Basiclinechart :data="water_data" title="ລະດັບນ້ຳຂອງເຂື່ອນ (MASL)" x-field="D_DATE"
@@ -352,7 +353,6 @@ const seriesByTab = {
     all: [
         { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ', markPoint: true },
         { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ', markPoint: true },
-        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
         { field: 'HIGH_WATER_LEVEL', label: 'ສູງສຸດ (ເຂື່ອນຫຼັກ)', color: '#ee6666' },
         { field: 'LOW_WATER_LEVEL', label: 'ຕ່ຳສຸດ (ເຂື່ອນຫຼັກ)', color: '#fac858' },
         { field: 'HIGH_WATER_LEVEL_DIVERSION', label: 'ສູງສຸດ (ອ່ວຍນ້ຳ)', color: '#ee6666' },
@@ -360,15 +360,16 @@ const seriesByTab = {
     ],
     main: [
         { field: 'D_MAIN', label: 'ເຂື່ອນຫຼັກ', markPoint: true },
-        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
         { field: 'HIGH_WATER_LEVEL', label: 'ສູງສຸດ (ເຂື່ອນຫຼັກ)', color: '#ee6666' },
         { field: 'LOW_WATER_LEVEL', label: 'ຕ່ຳສຸດ (ເຂື່ອນຫຼັກ)', color: '#fac858' }
     ],
     diversion: [
         { field: 'D_DIVERSION', label: 'ເຂື່ອນອ່ວຍນ້ຳ', markPoint: true },
-        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true },
         { field: 'HIGH_WATER_LEVEL_DIVERSION', label: 'ສູງສຸດ (ອ່ວຍນ້ຳ)', color: '#ee6666' },
         { field: 'LOW_WATER_LEVEL_DIVERSION', label: 'ຕ່ຳສຸດ (ອ່ວຍນ້ຳ)', color: '#fac858' }
+    ],
+    plan: [
+        { field: 'D_PLAN_WL', label: 'ອ່າງເກັບນ້ຳ', color: '#82B383', markPoint: true }
     ]
 }
 
