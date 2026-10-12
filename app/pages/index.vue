@@ -288,7 +288,6 @@ const loadData = async () => {
       },
     });
     data.value = res.data.data
-    console.log(data.value)
   } catch (err) {
     console.error(err);
     data.value = [];
