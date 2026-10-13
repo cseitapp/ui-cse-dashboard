@@ -8,6 +8,7 @@ COPY ./package.json /app/
 
 # Copy the rest of the application files to the working directory
 COPY . /app
+COPY .env.production .env
 
 ## Install dependencies
 
