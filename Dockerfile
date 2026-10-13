@@ -8,7 +8,6 @@ COPY ./package.json /app/
 
 # Copy the rest of the application files to the working directory
 COPY . /app
-COPY .env.production .env
 
 ## Install dependencies
 
@@ -17,9 +16,11 @@ RUN npm install
 # Build the application
 RUN npm run build
 
-# Define environment variables
-ENV HOST=0.0.0.0 NODE_ENV=production
-ENV NODE_ENV=production
+# Runtime defaults. Docker Compose can override these from .env.local.
+ENV HOST=0.0.0.0 \
+    NITRO_HOST=0.0.0.0 \
+    PORT=4455 \
+    NODE_ENV=production
 
 # Expose the port the application will run on
 EXPOSE 4455
