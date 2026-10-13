@@ -15,7 +15,7 @@
       <!-- 📅 DATE RANGE -->
       <v-row class="ma-3 d-flex align-center">
         <v-col v-if="role === 'ADMIN' || role === 'DIRECTOR'">
-          <v-select v-model="selected" :items="dams" item-title="BR_CODE" item-value="BR_CODE" variant="outlined"
+          <v-select v-model="selected" :items="dams" item-title="BR_SHORT_NAME" item-value="BR_CODE" variant="outlined"
             hide-details density="compact" color="primary" placeholder="ກະລຸນາເລືອກເຂື່ອນ" />
         </v-col>
 
@@ -55,6 +55,7 @@
       <template #item.total_power="{ item }">
         <strong>{{ formatNumber(item.total_power) }}</strong>
       </template>
+      <template #item.D_DAM="{ item }">{{ getPlantShortName(item.D_DAM) }}</template>
     </v-data-table>
   </v-container>
 </template>
@@ -63,6 +64,7 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 import { useAuthUser } from '~~/composables/useAuth'
+import { getPlantShortName } from '~~/app/utils/plantNames'
 
 const user = useAuthUser();
 const nuxtApp = useNuxtApp();
@@ -174,7 +176,10 @@ const getBranch = async () => {
   loading.value = true
   try {
     const res = await axios.get("/api/branch",);
-    dams.value = res.data.DATA;
+    dams.value = (res.data.DATA || []).map(item => ({
+      ...item,
+      BR_SHORT_NAME: getPlantShortName(item.BR_CODE, item.BR_NAME_EN),
+    }));
   } catch (err) {
     console.error(err);
   } finally {
@@ -193,8 +198,6 @@ onMounted(() => {
   loadData();
   getBranch()
 })
-
-loadData();
 
 
 </script>

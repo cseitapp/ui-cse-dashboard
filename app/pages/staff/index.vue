@@ -124,7 +124,7 @@
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
                     class="cursor-pointer" /></v-chip>
-                <h3>{{ item.branch.BR_NAME }} ({{ item.dam_code }})</h3>
+                <h3>{{ getPlantShortName(item.dam_code, item.branch?.BR_NAME_EN) }}</h3>
                 <v-card-subtitle>ແຜນປະຈຳປີ</v-card-subtitle>
                 <v-chip color="primary" size="large"> {{ formatPlanPeriod(item) }}</v-chip>
 
@@ -176,7 +176,7 @@
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
                     class="cursor-pointer" /></v-chip>
-                <h3>{{ item.branch.BR_NAME }} ({{ item.dam_code }})</h3>
+                <h3>{{ getPlantShortName(item.dam_code, item.branch?.BR_NAME_EN) }}</h3>
                 <v-card-subtitle>ແຜນປະຈຳປີ</v-card-subtitle>
                 <v-chip color="primary" size="large"> {{ formatPlanPeriod(item) }}</v-chip>
 
@@ -230,7 +230,7 @@
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
                     class="cursor-pointer" /></v-chip>
-                <h3>{{ item.branch.BR_NAME }} ({{ item.dam_code }})</h3>
+                <h3>{{ getPlantShortName(item.dam_code, item.branch?.BR_NAME_EN) }}</h3>
                 <v-card-subtitle>ແຜນປະຈຳປີ</v-card-subtitle>
                 <v-chip color="primary" size="large"> {{ formatPlanPeriod(item) }}</v-chip>
 
@@ -282,7 +282,7 @@
                 <v-chip class="my-3 px-6" color="primary" variant="outlined" @click="openEdit(item)"><v-icon size="28"
                     v-if="role === 'ADMIN' || (role === 'STAFF' && dam === item.dam_code)" icon="mdi-pencil-outline"
                     class="cursor-pointer" /></v-chip>
-                <h3>{{ item.branch.BR_NAME }} ({{ item.dam_code }})</h3>
+                <h3>{{ getPlantShortName(item.dam_code, item.branch?.BR_NAME_EN) }}</h3>
                 <v-card-subtitle>ແຜນປະຈຳປີ</v-card-subtitle>
                 <v-chip color="primary" size="large"> {{ formatPlanPeriod(item) }}</v-chip>
 
@@ -320,6 +320,7 @@ import moment from 'moment';
 import { useAuthUser } from '~~/composables/useAuth';
 import { formatNumber } from "~~/components/common/formatNumber";
 import axios from 'axios';
+import { getPlantShortName } from '~~/app/utils/plantNames';
 definePageMeta({
   middleware: "auth",
   layout: "default",
