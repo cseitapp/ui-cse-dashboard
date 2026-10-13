@@ -856,6 +856,11 @@ const outflowPlanFields = [
   "D_PLAN_OUTFLOW",
   "PLAN_OUTFLOW",
   "OUTFLOW_PLAN",
+  "D_PLAN_TURBINE",
+  "PLAN_TURBINE",
+  "SUM_PLAN_TURBINE",
+  "SUM_TURBINE_PLAN",
+  "TURBINE_PLAN",
 ];
 
 function planOutflowValue(row) {
@@ -865,7 +870,14 @@ function planOutflowValue(row) {
 
 const monthlyOutflowPlanByPeriod = computed(() => {
   const totals = new Map();
-  const dailyPlanFields = ["D_PLAN_OUTFLOW", "PLAN_OUTFLOW", "OUTFLOW_PLAN"];
+  const dailyPlanFields = [
+    "D_PLAN_OUTFLOW",
+    "PLAN_OUTFLOW",
+    "OUTFLOW_PLAN",
+    "D_PLAN_TURBINE",
+    "PLAN_TURBINE",
+    "TURBINE_PLAN",
+  ];
 
   waterData.value.forEach((row) => {
     const dateValue = row.D_DATE ?? row.DATE ?? row.DATA_DATE;

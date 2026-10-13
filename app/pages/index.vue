@@ -1168,7 +1168,19 @@ const yesterdayFields = {
   actualInflow: ["D_ACTUAL_INFLOW", "SUM_INFLOW_ACTUAL", "ACTUAL_INFLOW", "INFLOW_ACTUAL"],
   planInflow: ["D_INFLOW_PLAN", "SUM_INFLOW_PLAN", "INFLOW_PLAN"],
   actualOutflow: ["D_TOTAL_OUTFLOW", "SUM_OUTFLOW", "TOTAL_OUTFLOW"],
-  planOutflow: ["D_PLAN_OUTFLOW", "SUM_PLAN_OUTFLOW", "SUM_OUTFLOW_PLAN", "PLAN_OUTFLOW", "OUTFLOW_PLAN"],
+  planOutflow: [
+    "D_PLAN_OUTFLOW",
+    "SUM_PLAN_OUTFLOW",
+    "SUM_OUTFLOW_PLAN",
+    "PLAN_OUTFLOW",
+    "OUTFLOW_PLAN",
+    "D_PLAN_TURBINE",
+    "PLAN_TURBINE",
+    "SUM_PLAN_TURBINE",
+    "SUM_TURBINE_PLAN",
+    "D_TURBINE_PLAN",
+    "TURBINE_PLAN",
+  ],
   mainVolume: ["D_MAIN_VOLUME", "MAIN_VOLUME"],
   diversionVolume: ["D_DIVERSION_VOLUME", "DIVERSION_VOLUME"],
   totalVolume: ["D_TOTAL_VOLUME", "TOTAL_VOLUME"],
@@ -1181,6 +1193,12 @@ const yesterdayPlanOutflowSummaryFields = [
   "SUM_OUTFLOW_PLAN",
   "PLAN_OUTFLOW",
   "OUTFLOW_PLAN",
+  "DAY_PLAN_TURBINE",
+  "DAY_TURBINE_PLAN",
+  "D_PLAN_TURBINE",
+  "PLAN_TURBINE",
+  "SUM_PLAN_TURBINE",
+  "SUM_TURBINE_PLAN",
 ];
 
 function dataRowCode(row) {
@@ -1309,13 +1327,28 @@ const totalInflow = computed(() => sumPeriodMetric("SUM_INFLOW_ACTUAL", "D_ACTUA
 const totalPlanInflow = computed(() => sumPeriodMetric("SUM_INFLOW_PLAN", "D_INFLOW_PLAN", "INFLOW_PLAN"));
 const totalOutflow = computed(() => sumPeriodMetric("SUM_OUTFLOW", "D_TOTAL_OUTFLOW", "TOTAL_OUTFLOW"));
 const totalPlanOutflow = computed(() => {
-  const sum = sumPeriodMetric("SUM_PLAN_OUTFLOW", "SUM_OUTFLOW_PLAN", "D_PLAN_OUTFLOW", "PLAN_OUTFLOW", "OUTFLOW_PLAN");
+  const sum = sumPeriodMetric(
+    "SUM_PLAN_OUTFLOW",
+    "SUM_OUTFLOW_PLAN",
+    "D_PLAN_OUTFLOW",
+    "PLAN_OUTFLOW",
+    "OUTFLOW_PLAN",
+    "SUM_PLAN_TURBINE",
+    "SUM_TURBINE_PLAN",
+    "D_PLAN_TURBINE",
+    "PLAN_TURBINE",
+  );
   if (sum > 0) return sum;
   const prefix = waterPeriodPrefix.value;
   if (prefix && summaryData.value.length) {
     const damSum = summaryData.value.reduce((acc, row) => {
       if (row.D_DAM === "ALL" || row.IS_TOTAL === 1 || String(row.D_DAM || '').toUpperCase() === "ALL") return acc;
-      return acc + toNumber(row[`${prefix}_PLAN_OUTFLOW`] ?? row[`${prefix}_OUTFLOW_PLAN`]);
+      return acc + toNumber(
+        row[`${prefix}_PLAN_OUTFLOW`]
+        ?? row[`${prefix}_OUTFLOW_PLAN`]
+        ?? row[`${prefix}_PLAN_TURBINE`]
+        ?? row[`${prefix}_TURBINE_PLAN`]
+      );
     }, 0);
     if (damSum > 0) return damSum;
   }
@@ -1439,7 +1472,16 @@ const waterPlantList = computed(() => {
     current.inflow += toNumber(row.SUM_INFLOW_ACTUAL ?? row.D_ACTUAL_INFLOW ?? row.ACTUAL_INFLOW);
     current.planInflow += toNumber(row.SUM_INFLOW_PLAN ?? row.D_INFLOW_PLAN ?? row.INFLOW_PLAN);
     current.outflow += toNumber(row.SUM_OUTFLOW ?? row.D_TOTAL_OUTFLOW ?? row.TOTAL_OUTFLOW);
-    current.planOutflow += toNumber(row.SUM_PLAN_OUTFLOW ?? row.SUM_OUTFLOW_PLAN ?? row.D_PLAN_OUTFLOW ?? row.PLAN_OUTFLOW);
+    current.planOutflow += toNumber(
+      row.SUM_PLAN_OUTFLOW
+      ?? row.SUM_OUTFLOW_PLAN
+      ?? row.D_PLAN_OUTFLOW
+      ?? row.PLAN_OUTFLOW
+      ?? row.D_PLAN_TURBINE
+      ?? row.PLAN_TURBINE
+      ?? row.SUM_PLAN_TURBINE
+      ?? row.SUM_TURBINE_PLAN
+    );
     totals.set(code, current);
   });
 
@@ -1448,7 +1490,12 @@ const waterPlantList = computed(() => {
     if (!current.planOutflow && prefix) {
       const summaryRow = summaryData.value.find(item => item.D_DAM === code);
       if (summaryRow) {
-        current.planOutflow = toNumber(summaryRow[`${prefix}_PLAN_OUTFLOW`] ?? summaryRow[`${prefix}_OUTFLOW_PLAN`]);
+        current.planOutflow = toNumber(
+          summaryRow[`${prefix}_PLAN_OUTFLOW`]
+          ?? summaryRow[`${prefix}_OUTFLOW_PLAN`]
+          ?? summaryRow[`${prefix}_PLAN_TURBINE`]
+          ?? summaryRow[`${prefix}_TURBINE_PLAN`]
+        );
       }
     }
   });
@@ -1464,7 +1511,12 @@ const waterPlantList = computed(() => {
         inflow: toNumber(row[`${prefix}_ACTUAL_INFLOW`]),
         planInflow: toNumber(row[`${prefix}_INFLOW_PLAN`]),
         outflow: toNumber(row[`${prefix}_TOTAL_OUTFLOW`]),
-        planOutflow: toNumber(row[`${prefix}_PLAN_OUTFLOW`] ?? row[`${prefix}_OUTFLOW_PLAN`]),
+        planOutflow: toNumber(
+          row[`${prefix}_PLAN_OUTFLOW`]
+          ?? row[`${prefix}_OUTFLOW_PLAN`]
+          ?? row[`${prefix}_PLAN_TURBINE`]
+          ?? row[`${prefix}_TURBINE_PLAN`]
+        ),
       });
     });
   }
