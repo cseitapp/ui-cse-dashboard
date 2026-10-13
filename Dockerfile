@@ -21,7 +21,7 @@ RUN npm run build
 #ENV HOST=0.0.0.0 \
 #    NITRO_HOST=0.0.0.0 \
 #   PORT=4455 \
-#  NODE_ENV=production
+ENV NODE_ENV=production
 
 # Expose the port the application will run on
 EXPOSE 4455
