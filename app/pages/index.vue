@@ -6522,4 +6522,25 @@ onBeforeUnmount(() => activeRequestController?.abort());
     gap: 5px;
   }
 }
+
+/* Keep every plant figure readable when a card is narrow. On phones and
+   tablets, Actual and Plan use separate rows instead of truncating values. */
+@media (max-width: 900px) {
+  .combined-metric-values {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .combined-metric-values > span + span {
+    padding-top: 5px;
+    padding-left: 0;
+    border-top: 1px solid rgba(133, 174, 189, 0.14);
+    border-left: 0;
+  }
+
+  .combined-metric-values strong {
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
 </style>
