@@ -331,10 +331,9 @@ const dialog = ref(false)
 const { mobile } = useDisplay()
 const showFilter = ref(false)
 
-const item = JSON.parse(route.query.item);
-const code = item.D_DAM
-const loading = ref(false)
-const branchName = item.branch.BR_NAME
+const code = route.query.code;
+const branchName = route.query.branch;
+const loading = ref(false);
 definePageMeta({
     middleware: "auth",
     layout: "default",
@@ -542,7 +541,7 @@ const loadWaterData = async () => {
         }),
     });
     water_data.value = res.data.data;
-    // console.log("water", water_data.value)
+    console.log("water", water_data.value)
 }
 
 const rainfall = ref([])

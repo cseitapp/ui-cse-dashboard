@@ -61,7 +61,7 @@
         <v-row>
           <v-col v-for="item in sortedData" :key="item.D_DAM" cols="12" sm="12" md="12" :lg="isAll(item) ? 12 : 6">
             <v-card rounded="lg" elevation="0" :hover="!isAll(item)" class="text-center border-sm rounded-lg"
-              :class="{ 'cursor-pointer': !isAll(item) }" @click="!isAll(item) && gotoDetail(item)">
+              :class="{ 'cursor-pointer': !isAll(item) }" @click="!isAll(item)">
               <v-card-text class="text-center">
                 <v-row :align="'center'" dense>
                   <!-- Icon + title -->
@@ -337,13 +337,8 @@ const energySeries = computed(() => [
 
 ]);
 
-
-
-const gotoDetail = (item) => {
-  router.push({ path: `/detail`, query: { item: JSON.stringify(item) } });
-};
 const showDam = (item) => {
-  router.push({ path: `/showdam`, query: { item: JSON.stringify(item) } });
+  router.push({ path: `/showdam` });
 };
 onMounted(() => {
   loadData()

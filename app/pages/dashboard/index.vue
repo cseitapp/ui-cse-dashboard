@@ -118,19 +118,33 @@ const quickRanges = [
 const headers = [
   { title: "ວັນ ແລະ ເວລາ", key: "D_DATE" },
   { title: "ເຂື່ອນ", key: "D_DAM" },
+
+  // Main dam
+  { title: "ແຜນລະດັບນ້ຳເຂື່ອນຫຼັກ", key: "D_PLAN_WL" },
   { title: "ເຂື່ອນຫຼັກ", key: "D_MAIN" },
-  { title: "ເຂື່ອນຫຼັກນຳໃຊ້", key: "D_MAIN_USE_VOLUME" },
+  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນຫຼັກສູງສຸດ", key: "D_PLAN_MAIN_VOLUME" },
   { title: "ເຂື່ອນຫຼັກນຳໃຊ້ສູງສຸດ", key: "D_MAIN_VOLUME" },
+  { title: "ແຜນເຂື່ອນຫຼັກນຳໃຊ້", key: "D_PLAN_MAIN_USABLE_VOLUME" },
+  { title: "ເຂື່ອນຫຼັກນຳໃຊ້", key: "D_MAIN_USE_VOLUME" },
+
+  // Diversion dam
+  { title: "ແຜນລະດັບນ້ຳເຂື່ອນນ້ຳອ່ວາຍ", key: "D_PLAN_DIVERSION" },
   { title: "ເຂື່ອນນ້ຳອ່ວາຍ", key: "D_DIVERSION" },
-  { title: "ເຂື່ອນນຳໃຊ້", key: "D_DIVERSION_USE_VOLUME" },
+  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_PLAN_DIVERSION_VOLUME" },
   { title: "ເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_DIVERSION_VOLUME" },
+  { title: "ແຜນເຂື່ອນນຳໃຊ້", key: "D_PLAN_DIVERSION_USABLE_VOLUME" },
+  { title: "ເຂື່ອນນຳໃຊ້", key: "D_DIVERSION_USE_VOLUME" },
+
+  // Energy & revenue
   { title: "ພະລັງງານຜະລິດໄດ້", key: "D_ACTUAL_ENERGY" },
   { title: "ແຜນພະລັງງານ", key: "D_PLAN_ENERGY" },
   { title: "ລາຍຮັບ", key: "D_ACTUAL_REVENUE" },
   { title: "ແຜນລາຍຮັບ", key: "D_PLAN_REVENUE" },
-  { title: "ແອ່າງເກັບນ້ຳ", key: "D_PLAN_WL" },
+
+  // Flow
   { title: "ອັດຕານ້ຳເຂົ້າ", key: "D_ACTUAL_INFLOW" },
   { title: "ແຜນອັດຕານ້ຳເຂົ້າ", key: "D_INFLOW_PLAN" },
+  { title: "ແຜນນ້ຳໄຫຼຜ່ານຈັກ", key: "D_PLAN_TURBINE" },
   { title: "ນ້ຳອອກຈາກປະຕູ", key: "D_SPAILWAY" },
   { title: "ນ້ຳໄຫຼຜ່ານຈັກ", key: "D_TAILRACE" },
   { title: "ອັດຕານ້ຳອອກທັງໝົດ", key: "D_TOTAL_OUTFLOW" },
