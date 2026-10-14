@@ -865,8 +865,30 @@ const inflowSeries = computed(() => {
 const outflowPlanFields = [
   "SUM_PLAN_OUTFLOW",
   "SUM_OUTFLOW_PLAN",
+  "DAY_PLAN_OUTFLOW",
+  "DAY_OUTFLOW_PLAN",
+  "DAY_PLAN_TURBINE",
+  "DAY_TURBINE_PLAN",
+  "WEEK_PLAN_OUTFLOW",
+  "WEEK_OUTFLOW_PLAN",
+  "WEEK_PLAN_TURBINE",
+  "WEEK_TURBINE_PLAN",
+  "QUARTER_PLAN_OUTFLOW",
+  "QUARTER_OUTFLOW_PLAN",
+  "QUARTER_PLAN_TURBINE",
+  "QUARTER_TURBINE_PLAN",
+  "Q_PLAN_OUTFLOW",
+  "Q_OUTFLOW_PLAN",
+  "Q_PLAN_TURBINE",
+  "Q_TURBINE_PLAN",
+  "YEAR_PLAN_OUTFLOW",
+  "YEAR_OUTFLOW_PLAN",
+  "YEAR_PLAN_TURBINE",
+  "YEAR_TURBINE_PLAN",
   "MONTH_PLAN_OUTFLOW",
   "MONTH_OUTFLOW_PLAN",
+  "MONTH_PLAN_TURBINE",
+  "MONTH_TURBINE_PLAN",
   "D_PLAN_OUTFLOW",
   "PLAN_OUTFLOW",
   "OUTFLOW_PLAN",
@@ -882,12 +904,37 @@ function planOutflowValue(row) {
   return field ? toNumber(row[field]) : 0;
 }
 
+const annualOutflowPlanFields = [
+  "YEAR_PLAN_OUTFLOW",
+  "YEAR_OUTFLOW_PLAN",
+  "YEAR_PLAN_TURBINE",
+  "YEAR_TURBINE_PLAN",
+  "SUM_PLAN_OUTFLOW",
+  "SUM_OUTFLOW_PLAN",
+];
+
+function annualOutflowPlanValue() {
+  const summaryPlan = firstNumericFieldValue(plantSummaryRow(summaryData.value), annualOutflowPlanFields);
+  if (summaryPlan !== null && summaryPlan > 0) return summaryPlan;
+
+  const periodPlans = allData.value
+    .map(row => firstNumericFieldValue(row, annualOutflowPlanFields))
+    .filter(value => value !== null && value > 0);
+
+  // Annual plan fields can be repeated in period rows, so use one value.
+  return periodPlans.length ? Math.max(...periodPlans) : 0;
+}
+
 const monthlyOutflowPlanByPeriod = computed(() => {
   const totals = new Map();
   const dailyPlanFields = [
+    "DAY_PLAN_OUTFLOW",
+    "DAY_OUTFLOW_PLAN",
     "D_PLAN_OUTFLOW",
     "PLAN_OUTFLOW",
     "OUTFLOW_PLAN",
+    "DAY_PLAN_TURBINE",
+    "DAY_TURBINE_PLAN",
     "D_PLAN_TURBINE",
     "PLAN_TURBINE",
     "TURBINE_PLAN",
@@ -902,15 +949,44 @@ const monthlyOutflowPlanByPeriod = computed(() => {
     const field = dailyPlanFields.find(name => row[name] !== undefined && row[name] !== null && row[name] !== "");
     if (!field) return;
 
-    const key = date.format("YYYY-MM");
+    const key = activeType.value === "D"
+      ? date.format("YYYY-MM-DD")
+      : activeType.value === "W"
+        ? date.format("GGGG-[W]WW")
+        : activeType.value === "Y"
+          ? date.format("YYYY")
+          : date.format("YYYY-MM");
     totals.set(key, (totals.get(key) || 0) + toNumber(row[field]));
   });
 
   return totals;
 });
 
-function outflowPlanMonthKey(row, index) {
+function outflowPlanPeriodKey(row, index) {
   const period = String(row.PERIOD_LABEL ?? "").trim();
+  const rangeStart = moment(startDate.value, "YYYY-MM-DD", true);
+
+  if (activeType.value === "D") {
+    const fullDate = period.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (fullDate) return `${fullDate[1]}-${fullDate[2].padStart(2, "0")}-${fullDate[3].padStart(2, "0")}`;
+    const compactDate = period.match(/^(\d{4})(\d{2})(\d{2})$/);
+    if (compactDate) return `${compactDate[1]}-${compactDate[2]}-${compactDate[3]}`;
+    if (rangeStart.isValid() && /^\d{1,2}$/.test(period)) {
+      return rangeStart.clone().date(Number(period)).format("YYYY-MM-DD");
+    }
+    return rangeStart.isValid() ? rangeStart.clone().add(index, "day").format("YYYY-MM-DD") : "";
+  }
+
+  if (activeType.value === "W") {
+    const yearWeek = period.match(/^(\d{4})[-_/ ]?W?(\d{1,2})$/i);
+    if (yearWeek) return `${yearWeek[1]}-W${yearWeek[2].padStart(2, "0")}`;
+    const weekOnly = period.match(/^W(?:EEK)?[-_ ]?(\d{1,2})$/i);
+    if (weekOnly && rangeStart.isValid()) return `${rangeStart.isoWeekYear()}-W${weekOnly[1].padStart(2, "0")}`;
+    return rangeStart.isValid()
+      ? rangeStart.clone().startOf("isoWeek").add(index, "week").format("GGGG-[W]WW")
+      : "";
+  }
+
   const yearMonth = period.match(/^(\d{4})[-/](\d{1,2})/);
   if (yearMonth) return `${yearMonth[1]}-${yearMonth[2].padStart(2, "0")}`;
 
@@ -920,7 +996,6 @@ function outflowPlanMonthKey(row, index) {
   const compactYearMonth = period.match(/^(\d{4})(\d{2})/);
   if (compactYearMonth) return `${compactYearMonth[1]}-${compactYearMonth[2]}`;
 
-  const rangeStart = moment(startDate.value, "YYYY-MM-DD", true);
   const month = /^\d{1,2}$/.test(period) ? Number(period) : index + 1;
   return rangeStart.isValid() && month >= 1 && month <= 12
     ? `${rangeStart.year()}-${String(month).padStart(2, "0")}`
@@ -929,14 +1004,14 @@ function outflowPlanMonthKey(row, index) {
 
 const outflowPlanSeriesData = computed(() => allData.value.map((row, index) => {
   const periodPlan = planOutflowValue(row);
-  if (periodPlan > 0 || activeType.value !== "M") return periodPlan;
-
-  const monthKey = outflowPlanMonthKey(row, index);
-  if (!monthKey) return 0;
-  if (Object.prototype.hasOwnProperty.call(monthlyOutflowPlans.value, monthKey)) {
-    return toNumber(monthlyOutflowPlans.value[monthKey]);
+  if (periodPlan > 0) return periodPlan;
+  if (activeType.value === "Y") return annualOutflowPlanValue();
+  const periodKey = outflowPlanPeriodKey(row, index);
+  if (!periodKey) return 0;
+  if (Object.prototype.hasOwnProperty.call(monthlyOutflowPlans.value, periodKey)) {
+    return toNumber(monthlyOutflowPlans.value[periodKey]);
   }
-  return toNumber(monthlyOutflowPlanByPeriod.value.get(monthKey));
+  return toNumber(monthlyOutflowPlanByPeriod.value.get(periodKey));
 }));
 
 const outflowSeries = computed(() => [
@@ -1157,24 +1232,8 @@ const totalPlanOutflow = computed(() => {
     && end.isSame(end.clone().endOf("year"), "day");
 
   if ((activeType.value === "M" && isWholeYear) || activeType.value === "Y") {
-    const normalizedCode = String(code || "").trim().toUpperCase();
-    const summaryRow = summaryData.value.find(row => (
-      String(row.D_DAM || row.DAM_CODE || row.BR_CODE || "").trim().toUpperCase() === normalizedCode
-    )) || summaryData.value.find(row => (
-      row.IS_TOTAL === 1 || row.IS_TOTAL === "1" || String(row.D_DAM || "").toUpperCase() === "ALL"
-    )) || summaryData.value[0];
-    const summaryAnnualPlan = toNumber(summaryRow?.YEAR_PLAN_OUTFLOW ?? summaryRow?.YEAR_OUTFLOW_PLAN);
-    if (summaryAnnualPlan > 0) return summaryAnnualPlan;
-
-    const annualPlans = allData.value
-      .map(row => row.YEAR_PLAN_OUTFLOW ?? row.YEAR_OUTFLOW_PLAN)
-      .filter(value => value !== undefined && value !== null && value !== "")
-      .map(toNumber)
-      .filter(value => value > 0);
-
-    // YEAR_PLAN_OUTFLOW can be repeated on every monthly row. Read it once
-    // instead of multiplying the annual plan by the number of months.
-    if (annualPlans.length) return Math.max(...annualPlans);
+    const annualPlan = annualOutflowPlanValue();
+    if (annualPlan > 0) return annualPlan;
   }
 
   return outflowPlanSeriesData.value.reduce((sum, value) => sum + toNumber(value), 0);
@@ -1311,7 +1370,8 @@ async function loadDashboardData() {
 
   loading.value = true;
   errorMessage.value = "";
-  const monthlyPeriods = activeType.value === "M" ? monthSummaryPeriods() : [];
+  // Quarter bars are monthly too, so use the same per-month plan source.
+  const monthlyPeriods = ["M", "Q"].includes(activeType.value) ? monthSummaryPeriods() : [];
   const monthlyPlanRequest = Promise.allSettled(monthlyPeriods.map(period => axios.get("/api/data/sum", {
     params: { dateselect: period.date, dam: code },
   })));
