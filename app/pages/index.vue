@@ -25,21 +25,6 @@
             </span>
           </button>
 
-          <button
-            v-if="!showPlantDetails"
-            class="metric-console-toggle"
-            :class="{ active: metricDisplayMode === 'console' }"
-            type="button"
-            :aria-pressed="metricDisplayMode === 'console'"
-            title="ປ່ຽນເປັນຮູບແບບຄອນໂຊນພະລັງງານ"
-            @click="toggleConsoleDisplayMode"
-          >
-            <span class="metric-console-toggle-icon"><Icon name="lucide:activity" size="18" /></span>
-            <span class="metric-console-toggle-copy">
-              <small>POWER</small>
-              <strong>ຄອນໂຊນ</strong>
-            </span>
-          </button>
 
           <button class="date-badge" type="button" @click="filterOpen = !filterOpen">
             <Icon name="lucide:calendar-days" size="18" class="date-icon" />
@@ -105,7 +90,6 @@
         class="kpi-grid"
         :class="{
           'plant-list-mode': plantListView,
-          'console-view': metricDisplayMode === 'console',
           'dual-view': metricDisplayMode === 'dual',
         }"
         aria-label="ຕົວເລກສະຫຼຸບ"
@@ -134,15 +118,6 @@
             :yesterday-plan="yesterdayPlanEnergy"
             :has-yesterday-actual="hasYesterdayActualEnergy"
             :has-yesterday-plan="hasYesterdayPlanEnergy"
-          />
-          <MetricPowerConsole
-            v-else-if="metricDisplayMode === 'console'"
-            :actual="totalEnergy"
-            :plan="totalPlanEnergy"
-            unit="GWh"
-            accent="#4dded9"
-            icon="mdi:lightning-bolt"
-            :performance="energyPerformance"
           />
           <div v-else class="kpi-summary-panel energy-summary">
             <strong class="summary-center-percentage kpi-percentage">
@@ -290,15 +265,6 @@
             :yesterday-plan="yesterdayPlanRevenue"
             :has-yesterday-actual="hasYesterdayActualRevenue"
             :has-yesterday-plan="hasYesterdayPlanRevenue"
-          />
-          <MetricPowerConsole
-            v-else-if="metricDisplayMode === 'console'"
-            :actual="totalRevenue"
-            :plan="totalPlanRevenue"
-            unit="MUSD"
-            accent="#ffd34f"
-            icon="lucide:dollar-sign"
-            :performance="revenuePerformance"
           />
           <div v-else class="kpi-summary-panel revenue-summary">
             <strong class="summary-center-percentage kpi-percentage">
@@ -591,15 +557,6 @@
                 :has-yesterday-actual="hasYesterdayActualInflow"
                 :has-yesterday-plan="hasYesterdayPlanInflow"
               />
-              <MetricPowerConsole
-                v-else-if="metricDisplayMode === 'console'"
-                :actual="apiTotalInflow"
-                :plan="apiPlanInflow"
-                unit="MCM"
-                accent="#6ee6b4"
-                icon="lucide:waves-arrow-down"
-                :performance="inflowPerformance"
-              />
               <div v-else class="water-summary-panel inflow-panel">
                 <strong class="water-summary-center-percentage water-performance">
                   <TrendIndicator :tone="inflowPerformance.tone" :size="13" />
@@ -651,15 +608,6 @@
                 :yesterday-plan="yesterdayPlanOutflow"
                 :has-yesterday-actual="hasYesterdayActualOutflow"
                 :has-yesterday-plan="hasYesterdayPlanOutflow"
-              />
-              <MetricPowerConsole
-                v-else-if="metricDisplayMode === 'console'"
-                :actual="apiTotalOutflow"
-                :plan="apiPlanOutflow"
-                unit="MCM"
-                accent="#75d9ff"
-                icon="mdi:waves-arrow-right"
-                :performance="outflowPerformance"
               />
               <div v-else class="water-summary-panel outflow-panel">
                 <strong class="water-summary-center-percentage water-performance">
@@ -846,20 +794,6 @@
                   <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong></span>
                 </div>
               </MetricDualArc>
-              <MetricPowerConsole
-                v-else-if="metricDisplayMode === 'console'"
-                :actual="totalWaterVolume"
-                :plan="yearTotalPlanVolume"
-                unit="MCM"
-                accent="#68e4d8"
-                icon="lucide:archive"
-                :performance="totalVolumePerformance"
-              >
-                <div class="metric-volume-components console-volume-components">
-                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainWaterVolume) }} <i>MCM</i></strong></span>
-                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong></span>
-                </div>
-              </MetricPowerConsole>
               <div v-else class="water-summary-panel total-volume-panel">
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
@@ -903,20 +837,6 @@
                   <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionUsableWaterVolume) }} <i>MCM</i></strong></span>
                 </div>
               </MetricDualArc>
-              <MetricPowerConsole
-                v-else-if="metricDisplayMode === 'console'"
-                :actual="totalUsableWaterVolume"
-                :plan="yearTotalPlanUsableVolume"
-                unit="MCM"
-                accent="#76ed9a"
-                icon="lucide:droplets"
-                :performance="usableVolumePerformance"
-              >
-                <div class="metric-volume-components console-volume-components">
-                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainUsableWaterVolume) }} <i>MCM</i></strong></span>
-                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionUsableWaterVolume) }} <i>MCM</i></strong></span>
-                </div>
-              </MetricPowerConsole>
               <div v-else class="water-summary-panel usable-volume-panel">
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
@@ -1215,7 +1135,6 @@
 import axios from "axios";
 import { getPlantBrand, getPlantShortName } from "~~/app/utils/plantNames";
 import MetricDualArc from "~~/components/common/MetricDualArc.vue";
-import MetricPowerConsole from "~~/components/common/MetricPowerConsole.vue";
 import TrendIndicator from "~~/components/common/TrendIndicator.vue";
 
 const BarChart = defineAsyncComponent(() => import("~~/components/common/BarChart.vue"));
@@ -1242,7 +1161,7 @@ const comparisonChartOpen = ref(false);
 const comparisonChartReady = ref(false);
 const comparisonChartMetric = ref("energy");
 const plantListView = ref(false);
-const metricDisplayMode = ref("classic");
+const metricDisplayMode = ref("dual"); /* DUAL ປຽບທຽບ is the default style */
 const plantsExpanded = ref(false);
 const waterPlantsExpanded = ref(false);
 const waterVolumePlantsExpanded = ref(false);
@@ -2580,11 +2499,6 @@ function togglePlantDetails() {
   router.push({ path: "/", query });
 }
 
-function toggleConsoleDisplayMode() {
-  metricDisplayMode.value = metricDisplayMode.value === "console" ? "classic" : "console";
-  saveMetricDisplayMode();
-}
-
 function toggleDualDisplayMode() {
   metricDisplayMode.value = metricDisplayMode.value === "dual" ? "classic" : "dual";
   saveMetricDisplayMode();
@@ -2604,10 +2518,14 @@ function openSite(code) {
 
 onMounted(() => {
   const savedMode = localStorage.getItem("dashboardMetricDisplayMode");
-  if (["console", "dual", "classic"].includes(savedMode)) {
+  if (["dual", "classic"].includes(savedMode)) {
     metricDisplayMode.value = savedMode;
+  } else if (savedMode === "console") {
+    /* POWER ຄອນໂຊນ mode was removed – fall back to DUAL ປຽບທຽບ */
+    metricDisplayMode.value = "dual";
+    localStorage.setItem("dashboardMetricDisplayMode", "dual");
   } else if (savedMode === "gauge") {
-    localStorage.setItem("dashboardMetricDisplayMode", "classic");
+    localStorage.setItem("dashboardMetricDisplayMode", "dual");
   }
   loadDashboard();
 });

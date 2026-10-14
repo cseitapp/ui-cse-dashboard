@@ -1356,14 +1356,15 @@ async function loadDashboardData() {
   filterOpen.value = false;
 }
 
-/* Follow the display mode chosen on the main dashboard (DUAL ປຽບທຽບ / POWER ຄອນໂຊນ share one theme) */
-const dualView = ref(false);
+/* Follow the display mode chosen on the main dashboard (DUAL ປຽບທຽບ) */
+const dualView = ref(true);
 
 onMounted(() => {
   try {
-    dualView.value = ["dual", "console"].includes(localStorage.getItem("dashboardMetricDisplayMode"));
+    /* DUAL is the default; only an explicit "classic" choice turns it off */
+    dualView.value = localStorage.getItem("dashboardMetricDisplayMode") !== "classic";
   } catch {
-    dualView.value = false;
+    dualView.value = true;
   }
   loadDashboardData();
 });
