@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { use } from 'echarts/core'
 import VChart from 'vue-echarts'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -29,6 +29,18 @@ use([
 ])
 
 const FONT = "'Noto Sans Lao', sans-serif"
+const isCompact = ref(false)
+
+function syncChartLayout() {
+    isCompact.value = window.innerWidth <= 560
+}
+
+onMounted(() => {
+    syncChartLayout()
+    window.addEventListener('resize', syncChartLayout, { passive: true })
+})
+
+onBeforeUnmount(() => window.removeEventListener('resize', syncChartLayout))
 
 const props = defineProps({
     title: String,
@@ -118,12 +130,19 @@ const option = computed(() => ({
     },
     tooltip: {
         trigger: 'axis',
+        confine: true,
+        padding: isCompact.value ? [7, 9] : undefined,
         backgroundColor: props.dark ? '#252930' : undefined,
         borderColor: props.dark ? '#3b404a' : undefined,
-        textStyle: { color: props.dark ? '#f7f8fa' : undefined, fontFamily: FONT, fontSize: 13 }
+        textStyle: { color: props.dark ? '#f7f8fa' : undefined, fontFamily: FONT, fontSize: isCompact.value ? 10 : 13 },
+        extraCssText: `max-width:calc(100% - ${isCompact.value ? 12 : 16}px);white-space:normal;overflow-wrap:anywhere;`
     },
     toolbox: {
         show: true,
+        top: isCompact.value ? 28 : 30,
+        right: 4,
+        itemSize: isCompact.value ? 13 : 15,
+        itemGap: isCompact.value ? 6 : 10,
         iconStyle: { borderColor: props.dark ? '#7f8792' : '#666' },
         emphasis: { iconStyle: { borderColor: props.dark ? '#ff8a1f' : '#1976d2' } },
         feature: {
@@ -135,17 +154,39 @@ const option = computed(() => ({
         }
     },
     legend: {
-        top: 4,
-        textStyle: { color: props.dark ? '#8f96a1' : '#333', fontFamily: FONT, fontSize: 13 },
+        type: 'scroll',
+        orient: 'horizontal',
+        top: 0,
+        left: 'center',
+        right: 'auto',
+        width: isCompact.value ? '96%' : '90%',
+        itemWidth: isCompact.value ? 13 : 25,
+        itemHeight: isCompact.value ? 8 : 14,
+        itemGap: isCompact.value ? 7 : 10,
+        pageIconSize: isCompact.value ? 10 : 15,
+        pageButtonGap: isCompact.value ? 4 : 5,
+        textStyle: {
+            color: props.dark ? '#8f96a1' : '#333',
+            fontFamily: FONT,
+            fontSize: isCompact.value ? 11 : 14,
+            fontWeight: 600,
+            lineHeight: isCompact.value ? 17 : 20
+        },
         data: seriesList.value.filter(s => !s.hideInLegend).map(s => s.label)
     },
-    grid: { left: 50, right: 20, top: 48, bottom: 70 },
+    grid: {
+        left: isCompact.value ? 42 : 50,
+        right: isCompact.value ? 12 : 20,
+        top: isCompact.value ? 64 : 66,
+        bottom: isCompact.value ? 58 : 70
+    },
     xAxis: {
         type: 'category',
         axisLabel: {
             color: props.dark ? '#8f96a1' : '#666',
             fontFamily: FONT,
-            fontSize: 13,
+            fontSize: isCompact.value ? 10 : 13,
+            hideOverlap: true,
             formatter: formatXAxisLabel
         },
         axisLine: { lineStyle: { color: props.dark ? 'rgba(255,255,255,.1)' : '#ccc' } },
@@ -155,15 +196,18 @@ const option = computed(() => ({
     yAxis: {
         type: 'value',
         scale: true,
-        axisLabel: { color: props.dark ? '#8f96a1' : '#666', fontFamily: FONT, fontSize: 13 },
+        axisLabel: { color: props.dark ? '#8f96a1' : '#666', fontFamily: FONT, fontSize: isCompact.value ? 10 : 13, hideOverlap: true },
         splitLine: { lineStyle: { color: props.dark ? 'rgba(255,255,255,.08)' : '#e5e5e5', type: props.dark ? 'dashed' : 'solid' } }
     },
     dataZoom: [{ type: 'inside' }, {
         type: 'slider',
+        bottom: isCompact.value ? 4 : undefined,
+        height: isCompact.value ? 16 : undefined,
+        handleSize: isCompact.value ? 12 : undefined,
         borderColor: props.dark ? '#343842' : '#ddd',
         backgroundColor: props.dark ? '#17191e' : '#fff',
         fillerColor: props.dark ? 'rgba(255,122,0,.12)' : 'rgba(25,118,210,.12)',
-        textStyle: { color: props.dark ? '#8f96a1' : '#666' },
+        textStyle: { color: props.dark ? '#8f96a1' : '#666', fontSize: isCompact.value ? 9 : 12 },
         labelFormatter: formatXAxisLabel
     }],
 
@@ -185,8 +229,16 @@ const option = computed(() => ({
         ...(s.color && {
             itemStyle: { color: s.color },
         }),
+        labelLayout: isCompact.value ? { hideOverlap: true, moveOverlap: 'shiftY' } : undefined,
         data: valuesForSeries(s),
-        markPoint: s.referenceLine || s.markPoint === false ? undefined : markPointOption,
+        markPoint: s.referenceLine || s.markPoint === false ? undefined : {
+            ...markPointOption,
+            symbolSize: isCompact.value ? 32 : markPointOption.symbolSize,
+            label: {
+                ...markPointOption.label,
+                fontSize: isCompact.value ? 7.5 : markPointOption.label.fontSize
+            }
+        },
         markLine: index === 0 && props.currentMarker?.value ? {
             silent: true,
             symbol: ['none', 'none'],
@@ -201,13 +253,17 @@ const option = computed(() => ({
             label: {
                 show: true,
                 position: 'insideEndTop',
+                rotate: 0,
+                align: 'left',
+                verticalAlign: 'middle',
+                offset: [10, 0],
                 formatter: props.currentMarker.label || 'Latest update',
                 color: '#fff',
                 backgroundColor: props.currentMarker.color || '#e85564',
                 borderRadius: 6,
-                padding: [5, 8],
+                padding: isCompact.value ? [3, 5] : [5, 8],
                 fontFamily: FONT,
-                fontSize: 11,
+                fontSize: isCompact.value ? 9 : 11,
                 fontWeight: 700
             },
             data: [{ xAxis: props.currentMarker.value }]

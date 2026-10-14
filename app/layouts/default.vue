@@ -9,7 +9,7 @@
       >
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-toolbar-title class="brand-title">
+        <div class="brand-title">
           <NuxtLink
             to="/"
             class="header-logo-home"
@@ -17,10 +17,10 @@
             title="ກັບໄປໜ້າຫຼັກ"
           >
             <div class="header-logo-shell">
-              <v-img src="/assets/images/logo_cse.png" class="header-logo" />
+              <img src="/assets/images/logo_cse.png" class="header-logo" alt="CS Energy Co., Ltd">
             </div>
           </NuxtLink>
-        </v-toolbar-title>
+        </div>
 
         <v-avatar class="d-none d-lg-block">
           <v-img alt="John" :src="`/api/image/${PROFILE}/${user.PICTURE}`" />
@@ -200,7 +200,13 @@ watch(mobile, (isMobile) => {
   box-shadow: 0 9px 30px rgba(46,105,154,.11) !important;
   backdrop-filter: blur(16px);
 }
-.brand-title { overflow: visible; }
+.brand-title {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  overflow: visible;
+}
 .header-logo-home {
   display: inline-flex;
   max-width: 100%;
@@ -248,11 +254,14 @@ watch(mobile, (isMobile) => {
   pointer-events: none;
 }
 .header-logo {
+  display: block;
   width: 100%;
   height: 100%;
   padding: 4px 9px;
   border-radius: 10px;
   background: linear-gradient(115deg, #fff 0%, #f8fafb 70%, #fff4ec 100%);
+  object-fit: contain;
+  object-position: center;
 }
 .app-drawer {
   border-right: 1px solid rgba(66, 139, 202, .15) !important;
@@ -541,6 +550,7 @@ watch(mobile, (isMobile) => {
     flex:none !important;
     transform:translate(-50%,-50%);
   }
+  .header-logo-home { width:100%; }
   .header-logo-shell { width:100%; margin:0 auto; }
   .app-main { background:linear-gradient(165deg,#087b90,#07516f 35%,#093657 64%,#0b1d42) !important; }
 }

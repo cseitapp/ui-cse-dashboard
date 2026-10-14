@@ -5500,8 +5500,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 .volume-plant-total .volume-plant-yesterday b { color: #82dbe9; font-size: .47rem; }
 .combined-metric-values.single { grid-template-columns: minmax(0,1fr); }
-.water-volume-plant-card:not(.has-diversion) .combined-card-metrics {
-  grid-template-columns: minmax(0, 1fr);
+.water-volume-plant-card .plant-volume-comparison-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .combined-metric.water-main-volume { border-color: rgba(67, 206, 216, .16); }
 .combined-metric.water-diversion-volume { border-color: rgba(82, 154, 230, .18); }
@@ -5524,6 +5524,30 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .plant-volume-summary.water-usable-volume .combined-progress i {
   background: linear-gradient(90deg, #2fbd88, #70e3b1);
   box-shadow: 0 0 5px rgba(69, 207, 158, .23);
+}
+.water-volume-plant-card .combined-metric-values {
+  position: relative;
+}
+.water-volume-plant-card .combined-metric-values::after {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--plant-metric-divider) 18%,
+    var(--plant-metric-divider) 82%,
+    transparent
+  );
+  box-shadow: 0 0 5px var(--plant-metric-divider-glow);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-.5px);
+}
+.water-volume-plant-card .combined-metric-values > span + span::before {
+  display: none;
 }
 .plant-volume-components {
   display: grid;
@@ -5587,7 +5611,12 @@ onBeforeUnmount(() => activeRequestController?.abort());
 
 @media (max-width: 600px) {
   .water-plants-grid { grid-template-columns: 1fr; gap: 8px; }
-  .plant-volume-comparison-grid { grid-template-columns: 1fr; }
+  .plant-volume-comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plant-volume-summary .combined-metric-heading > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @media (max-width: 600px) {

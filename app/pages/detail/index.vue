@@ -6,22 +6,22 @@
           <button type="button" class="icon-button back-button" aria-label="ກັບຄືນ" @click="router.back()">
             <Icon name="lucide:arrow-left" size="21" />
           </button>
+          <div
+            class="plant-header-brand"
+            :style="{ '--plant-accent': plantBrand.accent }"
+            :aria-label="`${branchName} logo`"
+            role="img"
+          >
+            <span class="detail-plant-logo" :class="{ 'has-logo': plantBrand.logo }">
+              <img v-if="plantBrand.logo" :src="plantBrand.logo" :alt="`${branchName} logo`">
+              <span v-else>{{ plantBrand.mark }}</span>
+            </span>
+          </div>
           <div class="plant-title-block">
             <div class="plant-title-row">
               <h1>{{ branchName }}</h1>
             </div>
           </div>
-        </div>
-
-        <div
-          class="plant-header-brand"
-          :style="{ '--plant-accent': plantBrand.accent }"
-          :aria-label="`${branchName} logo`"
-        >
-          <span class="detail-plant-logo" :class="{ 'has-logo': plantBrand.logo }">
-            <img v-if="plantBrand.logo" :src="plantBrand.logo" :alt="`${branchName} logo`">
-            <span v-else>{{ plantBrand.mark }}</span>
-          </span>
         </div>
 
         <div class="header-actions">
@@ -301,6 +301,7 @@
               :labels="labels"
               :series="inflowSeries"
               :dark="true"
+              :show-all-x-axis-labels="activeType !== 'D'"
             />
           </article>
 
@@ -356,19 +357,28 @@
               <div><strong>ລະດັບນ້ຳຂອງເຂື່ອນ</strong><small>MASL</small></div>
             </div>
             <div v-if="waterLevelLimits.length" class="water-level-limits" aria-label="ຂອບເຂດລະດັບນ້ຳ">
-              <div
+              <button
                 v-for="limit in waterLevelLimits"
                 :key="limit.field"
+                type="button"
                 class="water-level-limit"
+                :class="{ 'is-hidden': !isWaterLevelLimitVisible(limit.field) }"
                 :style="{ '--limit-color': limit.color }"
-                :title="limit.field"
+                :aria-pressed="isWaterLevelLimitVisible(limit.field)"
+                :title="`${isWaterLevelLimitVisible(limit.field) ? 'Hide' : 'Show'} ${limit.label}`"
+                @click="toggleWaterLevelLimit(limit.field)"
               >
                 <span>
                   <Icon :name="limit.kind === 'high' ? 'lucide:arrow-up-to-line' : 'lucide:arrow-down-to-line'" size="15" />
-                  {{ limit.label }}
+                  <span>{{ limit.label }}</span>
+                  <Icon
+                    class="water-level-limit-toggle"
+                    :name="isWaterLevelLimitVisible(limit.field) ? 'lucide:eye' : 'lucide:eye-off'"
+                    size="13"
+                  />
                 </span>
                 <strong>{{ formatMetric(limit.value) }} <small>MASL</small></strong>
-              </div>
+              </button>
             </div>
             <div v-if="loading" class="chart-state"><span class="loader" /><span>ກຳລັງໂຫຼດ...</span></div>
             <div v-else-if="!waterData.length" class="chart-state"><Icon name="lucide:gauge" size="32" /><span>ບໍ່ມີຂໍ້ມູນ</span></div>
@@ -400,7 +410,7 @@
             <div v-else-if="!waterData.length" class="chart-state"><Icon name="lucide:database" size="32" /><span>ບໍ່ມີຂໍ້ມູນ</span></div>
             <EChart
               v-else
-              :data="waterData"
+              :data="waterVolumeChartData"
               title=""
               x-field="D_DATE"
               :dark="true"
@@ -579,6 +589,7 @@ const waterData = ref([]);
 const yesterdayData = ref([]);
 const summaryData = ref([]);
 const monthlyOutflowPlans = ref({});
+const hiddenWaterLevelLimitFields = ref([]);
 const yesterdayDate = moment().subtract(1, "day").format("YYYY-MM-DD");
 
 const periodOptions = [
@@ -956,6 +967,16 @@ const waterLevelLimitDefinitions = [
   { field: "LOW_WATER_LEVEL_DIVERSION", label: "ຕ່ຳສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "low", color: "#a795ff" },
 ];
 
+function isWaterLevelLimitVisible(field) {
+  return !hiddenWaterLevelLimitFields.value.includes(field);
+}
+
+function toggleWaterLevelLimit(field) {
+  hiddenWaterLevelLimitFields.value = isWaterLevelLimitVisible(field)
+    ? [...hiddenWaterLevelLimitFields.value, field]
+    : hiddenWaterLevelLimitFields.value.filter(item => item !== field);
+}
+
 function waterLevelLimitValue(field) {
   const row = [...waterData.value, ...summaryData.value].find(item => (
     item[field] !== undefined
@@ -970,10 +991,94 @@ const waterLevelLimits = computed(() => waterLevelLimitDefinitions
   .map(limit => ({ ...limit, value: waterLevelLimitValue(limit.field) }))
   .filter(limit => limit.value !== null));
 
+const mainWaterLevelPlanFields = [
+  "D_PLAN_WL",
+  "D_PLAN_MAIN_WL",
+  "D_MAIN_PLAN_WL",
+  "D_PLAN_WL_MAIN",
+];
+const diversionWaterLevelPlanFields = [
+  "D_PLAN_DIVERSION_WL",
+  "D_DIVERSION_PLAN_WL",
+  "D_PLAN_WL_DIVERSION",
+  "D_DIVERSION_WL_PLAN",
+];
+
+function firstNumericFieldValue(row, fields) {
+  const field = fields.find((name) => {
+    const value = row?.[name];
+    return value !== undefined
+      && value !== null
+      && value !== ""
+      && Number.isFinite(Number(String(value).replace(/,/g, "")));
+  });
+  return field ? toNumber(row[field]) : null;
+}
+
 const waterLevelChartData = computed(() => {
   const limitValues = Object.fromEntries(waterLevelLimits.value.map(limit => [limit.field, limit.value]));
-  return waterData.value.map(row => ({ ...row, ...limitValues }));
+  return waterData.value.map(row => ({
+    ...row,
+    ...limitValues,
+    __MAIN_PLAN_WL: firstNumericFieldValue(row, mainWaterLevelPlanFields),
+    __DIVERSION_PLAN_WL: firstNumericFieldValue(row, diversionWaterLevelPlanFields),
+  }));
 });
+
+const mainPlanVolumeFields = [
+  "D_PLAN_MAIN_VOLUME",
+  "D_MAIN_PLAN_VOLUME",
+  "DAY_PLAN_MAIN_VOLUME",
+  "DAY_MAIN_PLAN_VOLUME",
+  "WEEK_PLAN_MAIN_VOLUME",
+  "WEEK_MAIN_PLAN_VOLUME",
+  "MONTH_PLAN_MAIN_VOLUME",
+  "MONTH_MAIN_PLAN_VOLUME",
+  "YEAR_PLAN_MAIN_VOLUME",
+  "YEAR_MAIN_PLAN_VOLUME",
+];
+const diversionPlanVolumeFields = [
+  "D_PLAN_DIVERSION_VOLUME",
+  "D_DIVERSION_PLAN_VOLUME",
+  "DAY_PLAN_DIVERSION_VOLUME",
+  "DAY_DIVERSION_PLAN_VOLUME",
+  "WEEK_PLAN_DIVERSION_VOLUME",
+  "WEEK_DIVERSION_PLAN_VOLUME",
+  "MONTH_PLAN_DIVERSION_VOLUME",
+  "MONTH_DIVERSION_PLAN_VOLUME",
+  "YEAR_PLAN_DIVERSION_VOLUME",
+  "YEAR_DIVERSION_PLAN_VOLUME",
+];
+const mainPlanUsableVolumeFields = [
+  "D_PLAN_MAIN_USE_VOLUME",
+  "D_MAIN_PLAN_USE_VOLUME",
+  "D_PLAN_MAIN_USABLE_VOLUME",
+  "D_MAIN_PLAN_USABLE_VOLUME",
+  "DAY_PLAN_MAIN_USABLE_VOLUME",
+  "WEEK_PLAN_MAIN_USABLE_VOLUME",
+  "MONTH_PLAN_MAIN_USABLE_VOLUME",
+  "YEAR_PLAN_MAIN_USABLE_VOLUME",
+  "YEAR_MAIN_PLAN_USABLE_VOLUME",
+];
+const diversionPlanUsableVolumeFields = [
+  "D_PLAN_DIVERSION_USE_VOLUME",
+  "D_DIVERSION_PLAN_USE_VOLUME",
+  "D_PLAN_DIVERSION_USABLE_VOLUME",
+  "D_DIVERSION_PLAN_USABLE_VOLUME",
+  "DAY_PLAN_DIVERSION_USABLE_VOLUME",
+  "WEEK_PLAN_DIVERSION_USABLE_VOLUME",
+  "MONTH_PLAN_DIVERSION_USABLE_VOLUME",
+  "YEAR_PLAN_DIVERSION_USABLE_VOLUME",
+  "YEAR_DIVERSION_PLAN_USABLE_VOLUME",
+];
+
+const waterVolumeChartData = computed(() => waterData.value.map(row => ({
+  ...row,
+  __MAIN_PLAN_VOLUME: firstNumericFieldValue(row, mainPlanVolumeFields),
+  __DIVERSION_PLAN_VOLUME: firstNumericFieldValue(row, diversionPlanVolumeFields),
+  __MAIN_PLAN_USABLE_VOLUME: firstNumericFieldValue(row, mainPlanUsableVolumeFields),
+  __DIVERSION_PLAN_USABLE_VOLUME: firstNumericFieldValue(row, diversionPlanUsableVolumeFields),
+})));
 
 function latestWaterMarker(fields) {
   const latestRow = waterData.value
@@ -1001,22 +1106,29 @@ const latestWaterVolumeMarker = computed(() => latestWaterMarker([
 ]));
 
 const waterLevelSeries = computed(() => [
-  { field: "D_MAIN", label: "ເຂື່ອນຫຼັກ", color: "#2f8dea" },
-  { field: "D_DIVERSION", label: "ເຂື່ອນອ່ວາຍນ້ຳ", color: "#38b9d6" },
-  { field: "D_PLAN_WL", label: "ແຜນລະດັບນ້ຳ", color: "#74cda8", area: false },
-  ...waterLevelLimitDefinitions.map(limit => ({
+  { field: "D_MAIN", label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນຫຼັກ)", color: "#2f8dea" },
+  { field: "D_DIVERSION", label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#38b9d6" },
+  { field: "__MAIN_PLAN_WL", label: "ແຜນລະດັບນ້ຳ (ເຂື່ອນຫຼັກ)", color: "#74cda8", area: false },
+  { field: "__DIVERSION_PLAN_WL", label: "ແຜນລະດັບນ້ຳ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#f6c85f", area: false },
+  ...waterLevelLimitDefinitions
+    .filter(limit => isWaterLevelLimitVisible(limit.field))
+    .map(limit => ({
     ...limit,
     area: false,
     hideInLegend: true,
     markPoint: false,
     referenceLine: true,
-  })),
+    })),
 ]);
 const waterVolumeSeries = [
   { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທັງໝົດ", color: "#2f8dea" },
   { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#38b9d6" },
   { field: "D_MAIN_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນຫຼັກທັງໝົດ", color: "#74cda8", area: false },
   { field: "D_DIVERSION_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#9bc9f5", area: false },
+  { field: "__MAIN_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ (ເຂື່ອນຫຼັກ)", color: "#f6c85f", area: false, lineType: "dashed" },
+  { field: "__DIVERSION_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#f0a957", area: false, lineType: "dashed" },
+  { field: "__MAIN_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ (ເຂື່ອນຫຼັກ)", color: "#d5e86a", area: false, lineType: "dashed" },
+  { field: "__DIVERSION_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#c9a7ff", area: false, lineType: "dashed" },
 ];
 
 function toNumber(value) {
@@ -1371,6 +1483,27 @@ onMounted(loadDashboardData);
   border-radius:9px;
   background:rgba(4,39,70,.34);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  color:inherit;
+  cursor:pointer;
+  font:inherit;
+  text-align:left;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,opacity .18s ease,transform .18s ease;
+}
+.water-level-limit:hover {
+  border-color:color-mix(in srgb,var(--limit-color) 54%,transparent);
+  background:rgba(8,57,87,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 5px 14px rgba(0,22,46,.16);
+  transform:translateY(-1px);
+}
+.water-level-limit:focus-visible {
+  outline:2px solid color-mix(in srgb,var(--limit-color) 72%,white);
+  outline-offset:2px;
+}
+.water-level-limit.is-hidden {
+  border-left-color:rgba(123,157,170,.42);
+  background:rgba(4,31,55,.24);
+  box-shadow:none;
+  opacity:.56;
 }
 .water-level-limit > span {
   display:flex;
@@ -1381,6 +1514,19 @@ onMounted(loadDashboardData);
   font-size:.68rem;
   line-height:1.25;
 }
+.water-level-limit > span > span {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.water-level-limit-toggle {
+  flex:0 0 auto;
+  margin-left:auto;
+  color:var(--limit-color);
+  opacity:.9;
+}
+.water-level-limit.is-hidden .water-level-limit-toggle { color:#7896a3; }
 .water-level-limit > span svg { flex:0 0 auto;color:var(--limit-color); }
 .water-level-limit strong {
   display:block;
@@ -1404,31 +1550,34 @@ onMounted(loadDashboardData);
 @media (max-width: 420px) {
   .water-level-limits {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    margin-top: 10px;
+    gap: 5px 6px;
+    margin: 7px 0 2px;
   }
   .water-level-limit {
-    min-height: 62px;
-    padding: 7px 8px;
+    min-height: 48px;
+    padding: 5px 7px;
     border-left-width: 2px;
-    border-radius: 8px;
+    border-radius: 7px;
   }
   .water-level-limit > span {
-    align-items: flex-start;
-    gap: 4px;
-    font-size: .6rem;
-    line-height: 1.2;
+    align-items: center;
+    gap: 3px;
+    overflow: hidden;
+    font-size: .56rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .water-level-limit > span svg {
-    width: 13px;
-    height: 13px;
-    margin-top: 1px;
+    width: 12px;
+    height: 12px;
   }
   .water-level-limit strong {
-    margin-top: 5px;
-    font-size: .82rem;
+    margin-top: 3px;
+    font-size: .78rem;
+    line-height: 1;
   }
-  .water-level-limit strong small { font-size: .5rem; }
+  .water-level-limit strong small { font-size: .48rem; }
 }
 
 @media (max-width: 600px) {
@@ -2297,6 +2446,11 @@ onMounted(loadDashboardData);
   margin-bottom:6px;
 }
 .chart-card-header .chart-title { min-width:0; margin-bottom:0; }
+.water-section .chart-title strong {
+  font-size:clamp(.96rem,1vw,1.06rem);
+  font-weight:700;
+  line-height:1.2;
+}
 .chart-total-summary {
   display:grid;
   min-width:190px;
@@ -3081,31 +3235,36 @@ onMounted(loadDashboardData);
   .chart-data-table tfoot td::before { max-width:65%; }
 }
 
-/* Give the selected plant logo a dedicated, centered brand position. */
+/* Compact plant identity: Back, logo, and plant name remain on one line. */
 .plant-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(190px, 24vw, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: clamp(12px, 2vw, 26px);
+  gap: clamp(10px, 1.5vw, 18px);
 }
-.plant-identity { justify-self: start; }
+.plant-identity {
+  min-width: 0;
+  justify-self: start;
+  gap: clamp(8px, 1vw, 12px);
+}
 .header-actions { justify-self: end; }
 .plant-header-brand {
   position: relative;
   z-index: 1;
   display: grid;
-  width: 100%;
-  height: clamp(68px, 6.4vw, 82px);
-  padding: 6px 18px;
+  width: clamp(56px, 5.5vw, 68px);
+  height: clamp(50px, 5vw, 60px);
+  flex: 0 0 auto;
+  padding: 3px;
   place-items: center;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--plant-accent, #38bdf8) 44%, rgba(255,255,255,.42));
-  border-radius: 15px;
+  border-radius: 12px;
   background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,250,252,.95));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.92),
-    0 10px 26px rgba(0,28,61,.20),
-    0 0 18px color-mix(in srgb, var(--plant-accent, #38bdf8) 16%, transparent);
+    0 7px 18px rgba(0,28,61,.18),
+    0 0 12px color-mix(in srgb, var(--plant-accent, #38bdf8) 14%, transparent);
 }
 .plant-header-brand::after {
   position: absolute;
@@ -3134,37 +3293,41 @@ onMounted(loadDashboardData);
   box-shadow: none;
 }
 .plant-header-brand .detail-plant-logo img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 0;
   object-fit: contain;
   object-position: center;
 }
 
 @media (max-width: 760px) {
-  .plant-header {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "identity actions"
-      "brand brand";
-    gap: 8px 10px;
-  }
-  .plant-identity { grid-area: identity; }
-  .header-actions { grid-area: actions; }
+  .plant-header { gap: 8px; }
+  .plant-identity { gap: 7px; }
   .plant-header-brand {
-    grid-area: brand;
-    width: min(100%, 230px);
-    height: 62px;
-    justify-self: center;
-    padding: 5px 13px;
-    border-radius: 13px;
+    width: 48px;
+    height: 44px;
+    padding: 2px;
+    border-radius: 10px;
   }
 }
 
 @media (max-width: 420px) {
   .plant-header-brand {
-    width: min(100%, 205px);
-    height: 57px;
+    width: 44px;
+    height: 40px;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 340px) {
+  .plant-identity { gap: 5px; }
+  .plant-header-brand {
+    width: 40px;
+    height: 37px;
+    padding: 2px;
   }
 }
 </style>
