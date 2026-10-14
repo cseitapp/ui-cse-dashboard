@@ -472,16 +472,19 @@
               </div>
             </div>
             <div class="water-header-actions">
-              <span
+              <button
+                type="button"
                 class="flow-comparison-badge"
                 :class="flowComparison.tone"
-                :title="`ປະລິມານນ້ຳເຂົ້າ ທຽບກັບ ປະລິມານນ້ຳອອກ: ${flowComparison.percentage}`"
-                :aria-label="`ປະລິມານນ້ຳເຂົ້າ ທຽບກັບ ປະລິມານນ້ຳອອກ ${flowComparison.percentage}`"
+                :title="flowComparisonTitle"
+                :aria-label="flowComparisonTitle"
+                :aria-pressed="flowComparisonReversed"
+                @click="flowComparisonReversed = !flowComparisonReversed"
               >
                 <Icon name="lucide:arrow-right-left" size="12" />
-                <span>ເຂົ້າ/ອອກ</span>
-                <strong>{{ flowComparison.percentage }}</strong>
-              </span>
+                <span>{{ flowComparisonLabel }}</span>
+                <strong aria-live="polite">{{ flowComparison.percentage }}</strong>
+              </button>
               <span class="water-period-badge">{{ selectedPeriodLabel }}</span>
             </div>
           </div>
@@ -676,7 +679,14 @@
         <article class="water-volume-executive-card">
           <div class="water-executive-header">
             <div class="water-executive-title">
-              <span class="water-title-icon volume"><Icon name="mdi:waves-arrow-up" size="19" /></span>
+              <span class="water-title-icon volume reservoir-volume-symbol" role="img" aria-label="ບໍລິມາດນ້ຳ">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
+                  <path class="water-fill" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72L18.6 18H5.4L5 12.5Z" />
+                  <path class="volume-surface" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72" />
+                  <path class="capacity-mark" d="M7 9h3" />
+                </svg>
+              </span>
               <div>
                 <h2>ບໍລິມາດນ້ຳລວມ</h2>
               </div>
@@ -687,7 +697,14 @@
           <div class="water-executive-grid volume-comparison-grid">
             <section class="water-metric-block total-volume-metric">
               <div class="water-metric-heading">
-                <span class="metric-icon total-volume-icon"><Icon name="lucide:waves" size="19" /></span>
+                <span class="metric-icon total-volume-icon reservoir-volume-symbol" role="img" aria-label="ບໍລິມາດນ້ຳທັງໝົດ">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
+                    <path class="water-fill" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72L18.6 18H5.4L5 12.5Z" />
+                    <path class="volume-surface" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72" />
+                    <path class="capacity-mark" d="M7 9h3" />
+                  </svg>
+                </span>
                 <span>ບໍລິມາດນ້ຳທັງໝົດ</span>
               </div>
               <div class="water-summary-panel total-volume-panel">
@@ -786,7 +803,17 @@
                   <span class="combined-card-metrics plant-volume-comparison-grid">
                     <span class="combined-metric plant-volume-summary water-main-volume">
                       <span class="combined-metric-heading">
-                        <span><Icon name="lucide:waves" size="13" /> ບໍລິມາດນ້ຳທັງໝົດ</span>
+                        <span>
+                          <span class="reservoir-volume-symbol plant-volume-heading-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                              <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
+                              <path class="water-fill" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72L18.6 18H5.4L5 12.5Z" />
+                              <path class="volume-surface" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72" />
+                              <path class="capacity-mark" d="M7 9h3" />
+                            </svg>
+                          </span>
+                          ບໍລິມາດນ້ຳທັງໝົດ
+                        </span>
                         <span class="combined-performance" :class="plant.totalVolumePerf.tone">
                           <TrendIndicator :direction="plant.totalVolumePerf.tone === 'positive' ? 'up' : plant.totalVolumePerf.tone === 'warning' ? 'down' : 'flat'" :size="11" />
                           {{ plant.totalVolumePerf.percentage }}
@@ -1032,6 +1059,7 @@ const plantListView = ref(false);
 const plantsExpanded = ref(false);
 const waterPlantsExpanded = ref(false);
 const waterVolumePlantsExpanded = ref(false);
+const flowComparisonReversed = ref(false);
 const selectedPeriod = ref("Y");
 const selectedDate = ref(today);
 const selectedMonth = ref(today.slice(0, 7));
@@ -1869,7 +1897,19 @@ function performance(actual, plan) {
 const energyPerformance = computed(() => performance(totalEnergy.value, totalPlanEnergy.value));
 const revenuePerformance = computed(() => performance(totalRevenue.value, totalPlanRevenue.value));
 const inflowPerformance = computed(() => performance(apiTotalInflow.value, apiPlanInflow.value));
-const flowComparison = computed(() => performance(apiTotalInflow.value, apiTotalOutflow.value));
+const flowComparison = computed(() => (
+  flowComparisonReversed.value
+    ? performance(apiTotalOutflow.value, apiTotalInflow.value)
+    : performance(apiTotalInflow.value, apiTotalOutflow.value)
+));
+const flowComparisonLabel = computed(() => (
+  flowComparisonReversed.value ? "ອອກ/ເຂົ້າ" : "ເຂົ້າ/ອອກ"
+));
+const flowComparisonTitle = computed(() => (
+  flowComparisonReversed.value
+    ? `ປະລິມານນ້ຳອອກ ທຽບກັບ ປະລິມານນ້ຳເຂົ້າ: ${flowComparison.value.percentage}. ກົດເພື່ອສະຫຼັບເປັນ ນ້ຳເຂົ້າ/ນ້ຳອອກ`
+    : `ປະລິມານນ້ຳເຂົ້າ ທຽບກັບ ປະລິມານນ້ຳອອກ: ${flowComparison.value.percentage}. ກົດເພື່ອສະຫຼັບເປັນ ນ້ຳອອກ/ນ້ຳເຂົ້າ`
+));
 const totalVolumePerformance = computed(() => performance(totalWaterVolume.value, yearTotalPlanVolume.value));
 const usableVolumePerformance = computed(() => performance(totalUsableWaterVolume.value, yearTotalPlanUsableVolume.value));
 const outflowPerformance = computed(() => {
@@ -4884,6 +4924,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
   margin-left: auto;
 }
 .flow-comparison-badge {
+  appearance: none;
   display: inline-flex;
   min-height: 25px;
   align-items: center;
@@ -4894,11 +4935,24 @@ onBeforeUnmount(() => activeRequestController?.abort());
   border-radius: 999px;
   background: rgba(6, 51, 83, .46);
   color: #8fc7d0;
+  font: inherit;
   font-size: .6rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
 }
+.flow-comparison-badge:hover {
+  border-color: rgba(111, 231, 235, .48);
+  box-shadow: 0 0 0 3px rgba(71, 203, 211, .08);
+  transform: translateY(-1px);
+}
+.flow-comparison-badge:focus-visible {
+  outline: 2px solid rgba(111, 231, 235, .76);
+  outline-offset: 2px;
+}
+.flow-comparison-badge:active { transform: translateY(0); }
 .flow-comparison-badge > svg { color: #69dbe1; }
 .flow-comparison-badge strong {
   color: #a9e8ea;
@@ -5006,6 +5060,37 @@ onBeforeUnmount(() => activeRequestController?.abort());
   border-color: rgba(91, 221, 180, .26);
   background: linear-gradient(145deg, rgba(45, 179, 139, .23), rgba(28, 113, 112, .20));
   color: #72e2b9;
+}
+.reservoir-volume-symbol { overflow: hidden; }
+.reservoir-volume-symbol > svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+  filter: drop-shadow(0 0 3px rgba(103, 234, 219, .22));
+}
+.reservoir-volume-symbol .reservoir-basin { stroke-width: 1.8; }
+.reservoir-volume-symbol .water-fill {
+  fill: currentColor;
+  stroke: none;
+  opacity: .18;
+}
+.reservoir-volume-symbol .volume-surface { stroke-width: 1.85; }
+.reservoir-volume-symbol .capacity-mark { opacity: .68; }
+.plant-volume-heading-icon {
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  place-items: center;
+}
+.plant-volume-heading-icon > svg {
+  width: 14px;
+  height: 14px;
+  filter: none;
 }
 .total-volume-panel {
   border-color: rgba(80, 205, 220, .21);
@@ -7141,31 +7226,40 @@ onBeforeUnmount(() => activeRequestController?.abort());
   }
 }
 
-/* Keep every plant figure readable when a card is narrow. On phones and
-   tablets, Actual and Plan use separate rows instead of truncating values. */
+/* Keep Actual and Plan on one compact line in every plant metric box. */
 @media (max-width: 900px) {
   .combined-metric-values {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .combined-metric-values > span + span {
-    padding-top: 5px;
-    padding-left: 0;
+    padding-top: 0;
+    padding-left: 8px;
     border-top: 0;
     border-left: 0;
   }
 
   .combined-metric-values > span + span::before {
-    inset: 0 6% auto;
-    width: 88%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
+    inset: 1px auto 1px 0;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(180deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
   }
 
   .combined-metric-values strong {
-    overflow: visible;
-    text-overflow: clip;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 430px) {
+  .combined-metric-values small { font-size: .56rem; }
+  .combined-metric-values strong { font-size: clamp(.78rem, 4vw, .92rem); }
+  .combined-metric-values i { font-size: .48rem; }
+
+  .combined-metric-values > span + span {
+    padding-left: 7px;
   }
 }
 

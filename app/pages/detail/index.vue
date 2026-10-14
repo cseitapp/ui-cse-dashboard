@@ -1013,10 +1013,10 @@ const waterLevelSeries = computed(() => [
   })),
 ]);
 const waterVolumeSeries = [
-  { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ", color: "#2f8dea" },
-  { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ", color: "#38b9d6" },
-  { field: "D_MAIN_USE_VOLUME", label: "ການນຳໃຊ້ນ້ຳເຂື່ອນຫຼັກ", color: "#74cda8", area: false },
-  { field: "D_DIVERSION_USE_VOLUME", label: "ການນຳໃຊ້ນ້ຳເຂື່ອນອ່າງນ້ຳ", color: "#9bc9f5", area: false },
+  { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທັງໝົດ", color: "#2f8dea" },
+  { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#38b9d6" },
+  { field: "D_MAIN_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນຫຼັກທັງໝົດ", color: "#74cda8", area: false },
+  { field: "D_DIVERSION_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#9bc9f5", area: false },
 ];
 
 function toNumber(value) {
