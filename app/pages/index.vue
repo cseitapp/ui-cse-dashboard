@@ -8,12 +8,46 @@
           </div>
         </div>
 
-        <button class="date-badge" type="button" @click="filterOpen = !filterOpen">
-          <Icon name="lucide:calendar-days" size="18" class="date-icon" />
-          <span class="date-range-text">{{ rangeLabel }}</span>
-          <span class="date-mobile-text">ວັນທີ</span>
-          <Icon :name="filterOpen ? 'lucide:chevron-up' : 'lucide:chevron-down'" size="16" class="date-chevron" />
-        </button>
+        <div class="dashboard-header-controls">
+          <button
+            v-if="!showPlantDetails"
+            class="metric-dual-toggle"
+            :class="{ active: metricDisplayMode === 'dual' }"
+            type="button"
+            :aria-pressed="metricDisplayMode === 'dual'"
+            title="ປ່ຽນເປັນຮູບແບບປຽບທຽບຄູ່"
+            @click="toggleDualDisplayMode"
+          >
+            <span class="metric-dual-toggle-icon"><Icon name="lucide:git-compare-arrows" size="18" /></span>
+            <span class="metric-dual-toggle-copy">
+              <small>DUAL</small>
+              <strong>ປຽບທຽບ</strong>
+            </span>
+          </button>
+
+          <button
+            v-if="!showPlantDetails"
+            class="metric-console-toggle"
+            :class="{ active: metricDisplayMode === 'console' }"
+            type="button"
+            :aria-pressed="metricDisplayMode === 'console'"
+            title="ປ່ຽນເປັນຮູບແບບຄອນໂຊນພະລັງງານ"
+            @click="toggleConsoleDisplayMode"
+          >
+            <span class="metric-console-toggle-icon"><Icon name="lucide:activity" size="18" /></span>
+            <span class="metric-console-toggle-copy">
+              <small>POWER</small>
+              <strong>ຄອນໂຊນ</strong>
+            </span>
+          </button>
+
+          <button class="date-badge" type="button" @click="filterOpen = !filterOpen">
+            <Icon name="lucide:calendar-days" size="18" class="date-icon" />
+            <span class="date-range-text">{{ rangeLabel }}</span>
+            <span class="date-mobile-text">ວັນທີ</span>
+            <Icon :name="filterOpen ? 'lucide:chevron-up' : 'lucide:chevron-down'" size="16" class="date-chevron" />
+          </button>
+        </div>
       </header>
 
       <div class="dashboard-toolbar">
@@ -69,7 +103,11 @@
       <section
         v-if="!showPlantDetails"
         class="kpi-grid"
-        :class="{ 'plant-list-mode': plantListView }"
+        :class="{
+          'plant-list-mode': plantListView,
+          'console-view': metricDisplayMode === 'console',
+          'dual-view': metricDisplayMode === 'dual',
+        }"
         aria-label="ຕົວເລກສະຫຼຸບ"
       >
         <article class="executive-overview-card" aria-label="ພາບລວມພະລັງງານ ແລະ ລາຍຮັບ">
@@ -85,7 +123,28 @@
               <span>{{ energyPerformance.percentage }}</span>
             </strong>
           </div>
-          <div class="kpi-summary-panel energy-summary">
+          <MetricDualArc
+            v-if="metricDisplayMode === 'dual'"
+            :actual="totalEnergy"
+            :plan="totalPlanEnergy"
+            unit="GWh"
+            icon="mdi:lightning-bolt"
+            :performance="energyPerformance"
+            :yesterday-actual="yesterdayActualEnergy"
+            :yesterday-plan="yesterdayPlanEnergy"
+            :has-yesterday-actual="hasYesterdayActualEnergy"
+            :has-yesterday-plan="hasYesterdayPlanEnergy"
+          />
+          <MetricPowerConsole
+            v-else-if="metricDisplayMode === 'console'"
+            :actual="totalEnergy"
+            :plan="totalPlanEnergy"
+            unit="GWh"
+            accent="#4dded9"
+            icon="mdi:lightning-bolt"
+            :performance="energyPerformance"
+          />
+          <div v-else class="kpi-summary-panel energy-summary">
             <strong class="summary-center-percentage kpi-percentage">
               <TrendIndicator :tone="energyPerformance.tone" :size="13" />
               <span>{{ energyPerformance.percentage }}</span>
@@ -220,7 +279,28 @@
               <span>{{ revenuePerformance.percentage }}</span>
             </strong>
           </div>
-          <div class="kpi-summary-panel revenue-summary">
+          <MetricDualArc
+            v-if="metricDisplayMode === 'dual'"
+            :actual="totalRevenue"
+            :plan="totalPlanRevenue"
+            unit="MUSD"
+            icon="lucide:dollar-sign"
+            :performance="revenuePerformance"
+            :yesterday-actual="yesterdayActualRevenue"
+            :yesterday-plan="yesterdayPlanRevenue"
+            :has-yesterday-actual="hasYesterdayActualRevenue"
+            :has-yesterday-plan="hasYesterdayPlanRevenue"
+          />
+          <MetricPowerConsole
+            v-else-if="metricDisplayMode === 'console'"
+            :actual="totalRevenue"
+            :plan="totalPlanRevenue"
+            unit="MUSD"
+            accent="#ffd34f"
+            icon="lucide:dollar-sign"
+            :performance="revenuePerformance"
+          />
+          <div v-else class="kpi-summary-panel revenue-summary">
             <strong class="summary-center-percentage kpi-percentage">
               <TrendIndicator :tone="revenuePerformance.tone" :size="13" />
               <span>{{ revenuePerformance.percentage }}</span>
@@ -499,7 +579,28 @@
                   {{ inflowPerformance.percentage }}
                 </strong>
               </div>
-              <div class="water-summary-panel inflow-panel">
+              <MetricDualArc
+                v-if="metricDisplayMode === 'dual'"
+                :actual="apiTotalInflow"
+                :plan="apiPlanInflow"
+                unit="MCM"
+                icon="lucide:waves-arrow-down"
+                :performance="inflowPerformance"
+                :yesterday-actual="yesterdayActualInflow"
+                :yesterday-plan="yesterdayPlanInflow"
+                :has-yesterday-actual="hasYesterdayActualInflow"
+                :has-yesterday-plan="hasYesterdayPlanInflow"
+              />
+              <MetricPowerConsole
+                v-else-if="metricDisplayMode === 'console'"
+                :actual="apiTotalInflow"
+                :plan="apiPlanInflow"
+                unit="MCM"
+                accent="#6ee6b4"
+                icon="lucide:waves-arrow-down"
+                :performance="inflowPerformance"
+              />
+              <div v-else class="water-summary-panel inflow-panel">
                 <strong class="water-summary-center-percentage water-performance">
                   <TrendIndicator :tone="inflowPerformance.tone" :size="13" />
                   <span>{{ inflowPerformance.percentage }}</span>
@@ -539,7 +640,28 @@
                   {{ outflowPerformance.percentage }}
                 </strong>
               </div>
-              <div class="water-summary-panel outflow-panel">
+              <MetricDualArc
+                v-if="metricDisplayMode === 'dual'"
+                :actual="apiTotalOutflow"
+                :plan="apiPlanOutflow"
+                unit="MCM"
+                icon="mdi:waves-arrow-right"
+                :performance="outflowPerformance"
+                :yesterday-actual="yesterdayActualOutflow"
+                :yesterday-plan="yesterdayPlanOutflow"
+                :has-yesterday-actual="hasYesterdayActualOutflow"
+                :has-yesterday-plan="hasYesterdayPlanOutflow"
+              />
+              <MetricPowerConsole
+                v-else-if="metricDisplayMode === 'console'"
+                :actual="apiTotalOutflow"
+                :plan="apiPlanOutflow"
+                unit="MCM"
+                accent="#75d9ff"
+                icon="mdi:waves-arrow-right"
+                :performance="outflowPerformance"
+              />
+              <div v-else class="water-summary-panel outflow-panel">
                 <strong class="water-summary-center-percentage water-performance">
                   <TrendIndicator :tone="outflowPerformance.tone" :size="13" />
                   <span>{{ outflowPerformance.percentage }}</span>
@@ -707,7 +829,38 @@
                 </span>
                 <span>ບໍລິມາດນ້ຳທັງໝົດ</span>
               </div>
-              <div class="water-summary-panel total-volume-panel">
+              <MetricDualArc
+                v-if="metricDisplayMode === 'dual'"
+                :actual="totalWaterVolume"
+                :plan="yearTotalPlanVolume"
+                unit="MCM"
+                icon="lucide:archive"
+                :performance="totalVolumePerformance"
+                :yesterday-actual="yesterdayTotalWaterVolume"
+                :yesterday-plan="yesterdayPlanWaterVolume"
+                :has-yesterday-actual="hasYesterdayTotalVolume"
+                :has-yesterday-plan="hasYesterdayPlanVolume"
+              >
+                <div class="metric-volume-components dual-volume-components">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </MetricDualArc>
+              <MetricPowerConsole
+                v-else-if="metricDisplayMode === 'console'"
+                :actual="totalWaterVolume"
+                :plan="yearTotalPlanVolume"
+                unit="MCM"
+                accent="#68e4d8"
+                icon="lucide:archive"
+                :performance="totalVolumePerformance"
+              >
+                <div class="metric-volume-components console-volume-components">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </MetricPowerConsole>
+              <div v-else class="water-summary-panel total-volume-panel">
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -733,7 +886,38 @@
                 <span class="metric-icon usable-volume-icon"><Icon name="lucide:droplets" size="19" /></span>
                 <span>ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
               </div>
-              <div class="water-summary-panel usable-volume-panel">
+              <MetricDualArc
+                v-if="metricDisplayMode === 'dual'"
+                :actual="totalUsableWaterVolume"
+                :plan="yearTotalPlanUsableVolume"
+                unit="MCM"
+                icon="lucide:droplets"
+                :performance="usableVolumePerformance"
+                :yesterday-actual="yesterdayUsableWaterVolume"
+                :yesterday-plan="yesterdayPlanUsableWaterVolume"
+                :has-yesterday-actual="hasYesterdayUsableVolume"
+                :has-yesterday-plan="hasYesterdayPlanUsableVolume"
+              >
+                <div class="metric-volume-components dual-volume-components">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainUsableWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionUsableWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </MetricDualArc>
+              <MetricPowerConsole
+                v-else-if="metricDisplayMode === 'console'"
+                :actual="totalUsableWaterVolume"
+                :plan="yearTotalPlanUsableVolume"
+                unit="MCM"
+                accent="#76ed9a"
+                icon="lucide:droplets"
+                :performance="usableVolumePerformance"
+              >
+                <div class="metric-volume-components console-volume-components">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainUsableWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionUsableWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </MetricPowerConsole>
+              <div v-else class="water-summary-panel usable-volume-panel">
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -1030,6 +1214,8 @@
 <script setup>
 import axios from "axios";
 import { getPlantBrand, getPlantShortName } from "~~/app/utils/plantNames";
+import MetricDualArc from "~~/components/common/MetricDualArc.vue";
+import MetricPowerConsole from "~~/components/common/MetricPowerConsole.vue";
 import TrendIndicator from "~~/components/common/TrendIndicator.vue";
 
 const BarChart = defineAsyncComponent(() => import("~~/components/common/BarChart.vue"));
@@ -1056,6 +1242,7 @@ const comparisonChartOpen = ref(false);
 const comparisonChartReady = ref(false);
 const comparisonChartMetric = ref("energy");
 const plantListView = ref(false);
+const metricDisplayMode = ref("classic");
 const plantsExpanded = ref(false);
 const waterPlantsExpanded = ref(false);
 const waterVolumePlantsExpanded = ref(false);
@@ -1218,6 +1405,22 @@ const yesterdayFields = {
   mainVolume: ["D_MAIN_VOLUME", "MAIN_VOLUME"],
   diversionVolume: ["D_DIVERSION_VOLUME", "DIVERSION_VOLUME"],
   totalVolume: ["D_TOTAL_VOLUME", "TOTAL_VOLUME"],
+  totalUsableVolume: [
+    "D_TOTAL_USE_VOLUME",
+    "TOTAL_USE_VOLUME",
+    "D_TOTAL_USABLE_VOLUME",
+    "TOTAL_USABLE_VOLUME",
+    "D_TOTAL_VOLUMN_USABLE",
+    "TOTAL_VOLUMN_USABLE",
+  ],
+  mainUsableVolume: ["D_MAIN_USE_VOLUME", "MAIN_USE_VOLUME", "D_MAIN_USABLE_VOLUME", "MAIN_USABLE_VOLUME"],
+  diversionUsableVolume: ["D_DIVERSION_USE_VOLUME", "DIVERSION_USE_VOLUME", "D_DIVERSION_USABLE_VOLUME", "DIVERSION_USABLE_VOLUME"],
+  totalPlanVolume: ["D_PLAN_TOTAL_VOLUME", "D_TOTAL_PLAN_VOLUME", "DAY_PLAN_TOTAL_VOLUME", "DAY_TOTAL_PLAN_VOLUME"],
+  mainPlanVolume: ["D_PLAN_MAIN_VOLUME", "D_MAIN_PLAN_VOLUME", "DAY_PLAN_MAIN_VOLUME", "DAY_MAIN_PLAN_VOLUME"],
+  diversionPlanVolume: ["D_PLAN_DIVERSION_VOLUME", "D_DIVERSION_PLAN_VOLUME", "DAY_PLAN_DIVERSION_VOLUME", "DAY_DIVERSION_PLAN_VOLUME"],
+  totalPlanUsableVolume: ["D_PLAN_TOTAL_USE_VOLUME", "D_TOTAL_PLAN_USE_VOLUME", "D_PLAN_TOTAL_USABLE_VOLUME", "D_TOTAL_PLAN_USABLE_VOLUME", "DAY_PLAN_TOTAL_USABLE_VOLUME"],
+  mainPlanUsableVolume: ["D_PLAN_MAIN_USE_VOLUME", "D_MAIN_PLAN_USE_VOLUME", "D_PLAN_MAIN_USABLE_VOLUME", "D_MAIN_PLAN_USABLE_VOLUME", "DAY_PLAN_MAIN_USABLE_VOLUME"],
+  diversionPlanUsableVolume: ["D_PLAN_DIVERSION_USE_VOLUME", "D_DIVERSION_PLAN_USE_VOLUME", "D_PLAN_DIVERSION_USABLE_VOLUME", "D_DIVERSION_PLAN_USABLE_VOLUME", "DAY_PLAN_DIVERSION_USABLE_VOLUME"],
 };
 const yesterdayPlanOutflowSummaryFields = [
   "DAY_PLAN_OUTFLOW",
@@ -1309,6 +1512,10 @@ const hasYesterdayData = computed(() => hasYesterdayMetric(null,
   ...yesterdayFields.actualRevenue,
   ...yesterdayFields.planRevenue,
 ));
+const hasYesterdayActualEnergy = computed(() => hasYesterdayMetric(null, ...yesterdayFields.actualEnergy));
+const hasYesterdayPlanEnergy = computed(() => hasYesterdayMetric(null, ...yesterdayFields.planEnergy));
+const hasYesterdayActualRevenue = computed(() => hasYesterdayMetric(null, ...yesterdayFields.actualRevenue));
+const hasYesterdayPlanRevenue = computed(() => hasYesterdayMetric(null, ...yesterdayFields.planRevenue));
 const yesterdayActualEnergy = computed(() => yesterdayMetric(...yesterdayFields.actualEnergy));
 const yesterdayPlanEnergy = computed(() => yesterdayMetric(...yesterdayFields.planEnergy));
 const yesterdayActualRevenue = computed(() => yesterdayMetric(...yesterdayFields.actualRevenue));
@@ -1338,6 +1545,30 @@ const yesterdayDiversionWaterVolume = computed(() => yesterdayMetric(...yesterda
 const yesterdayTotalWaterVolume = computed(() => {
   const total = yesterdayMetric(...yesterdayFields.totalVolume);
   return total || yesterdayMainWaterVolume.value + yesterdayDiversionWaterVolume.value;
+});
+const hasYesterdayPlanVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalPlanVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.mainPlanVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanVolume));
+const yesterdayPlanWaterVolume = computed(() => {
+  const total = yesterdayMetric(...yesterdayFields.totalPlanVolume);
+  return total || yesterdayMetric(...yesterdayFields.mainPlanVolume)
+    + yesterdayMetric(...yesterdayFields.diversionPlanVolume);
+});
+const hasYesterdayUsableVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalUsableVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.mainUsableVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.diversionUsableVolume));
+const yesterdayUsableWaterVolume = computed(() => {
+  const total = yesterdayMetric(...yesterdayFields.totalUsableVolume);
+  return total || yesterdayMetric(...yesterdayFields.mainUsableVolume)
+    + yesterdayMetric(...yesterdayFields.diversionUsableVolume);
+});
+const hasYesterdayPlanUsableVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalPlanUsableVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.mainPlanUsableVolume)
+  || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanUsableVolume));
+const yesterdayPlanUsableWaterVolume = computed(() => {
+  const total = yesterdayMetric(...yesterdayFields.totalPlanUsableVolume);
+  return total || yesterdayMetric(...yesterdayFields.mainPlanUsableVolume)
+    + yesterdayMetric(...yesterdayFields.diversionPlanUsableVolume);
 });
 
 function sumPeriodMetric(...fields) {
@@ -2349,13 +2580,37 @@ function togglePlantDetails() {
   router.push({ path: "/", query });
 }
 
+function toggleConsoleDisplayMode() {
+  metricDisplayMode.value = metricDisplayMode.value === "console" ? "classic" : "console";
+  saveMetricDisplayMode();
+}
+
+function toggleDualDisplayMode() {
+  metricDisplayMode.value = metricDisplayMode.value === "dual" ? "classic" : "dual";
+  saveMetricDisplayMode();
+}
+
+function saveMetricDisplayMode() {
+  if (import.meta.client) {
+    localStorage.setItem("dashboardMetricDisplayMode", metricDisplayMode.value);
+  }
+}
+
 function openSite(code) {
   const item = summaryData.value.find(row => row.D_DAM === code);
   if (item) router.push({ path: "/detail", query: { item: JSON.stringify(item), code } });
   else router.push({ path: "/detail", query: { code } });
 }
 
-onMounted(loadDashboard);
+onMounted(() => {
+  const savedMode = localStorage.getItem("dashboardMetricDisplayMode");
+  if (["console", "dual", "classic"].includes(savedMode)) {
+    metricDisplayMode.value = savedMode;
+  } else if (savedMode === "gauge") {
+    localStorage.setItem("dashboardMetricDisplayMode", "classic");
+  }
+  loadDashboard();
+});
 onBeforeUnmount(() => activeRequestController?.abort());
 </script>
 
@@ -7643,6 +7898,977 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .water-volume-overview .water-volume-yesterday i {
     grid-area: unit;
     font-size: clamp(0.43rem, 1.75vw, 0.5rem);
+  }
+}
+
+/* Dashboard presentation controls. */
+.dashboard-header-controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.metric-console-toggle {
+  position: relative;
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 13px 5px 6px;
+  overflow: hidden;
+  border: 1px solid rgba(166, 236, 100, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(5, 16, 17, 0.96), rgba(11, 29, 24, 0.94));
+  color: #efffe2;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 22px rgba(0, 17, 24, 0.24);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.metric-console-toggle::after {
+  position: absolute;
+  right: -14px;
+  bottom: -18px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(153, 234, 88, 0.13);
+  content: "";
+  filter: blur(8px);
+}
+
+.metric-console-toggle:hover {
+  border-color: rgba(177, 245, 106, 0.72);
+  box-shadow: 0 0 0 3px rgba(160, 233, 92, 0.08), 0 10px 26px rgba(0, 17, 24, 0.3);
+  transform: translateY(-1px);
+}
+
+.metric-console-toggle:focus-visible {
+  outline: 3px solid rgba(166, 240, 96, 0.28);
+  outline-offset: 3px;
+}
+
+.metric-console-toggle.active {
+  border-color: rgba(184, 255, 111, 0.7);
+  background: linear-gradient(145deg, rgba(11, 34, 22, 0.98), rgba(4, 16, 18, 0.98));
+  box-shadow: 0 0 0 3px rgba(164, 239, 94, 0.08), 0 0 22px rgba(164, 239, 94, 0.16);
+}
+
+.metric-console-toggle-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(218, 255, 181, 0.48);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d6ff9e, #8ed34e 47%, #39752e 100%);
+  color: #0a2718;
+  box-shadow: 0 0 14px rgba(164, 236, 91, 0.34), inset 0 1px 1px rgba(255, 255, 255, 0.62);
+}
+
+.metric-console-toggle-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.metric-console-toggle-copy small {
+  color: #86a878;
+  font-size: 0.49rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.metric-console-toggle-copy strong {
+  margin-top: 3px;
+  color: #f2ffe7;
+  font-size: 0.69rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.metric-dual-toggle {
+  position: relative;
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  overflow: hidden;
+  border: 1px solid rgba(89, 210, 218, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(5, 40, 62, 0.96), rgba(5, 26, 49, 0.96));
+  color: #e7f8fa;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 22px rgba(0, 21, 45, 0.22);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.metric-dual-toggle::after {
+  position: absolute;
+  right: -10px;
+  bottom: -19px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, rgba(255, 187, 70, 0.14), rgba(76, 223, 218, 0.18));
+  content: "";
+  filter: blur(9px);
+}
+
+.metric-dual-toggle:hover {
+  border-color: rgba(91, 231, 226, 0.72);
+  box-shadow: 0 0 0 3px rgba(75, 220, 217, 0.08), 0 10px 26px rgba(0, 21, 45, 0.28);
+  transform: translateY(-1px);
+}
+
+.metric-dual-toggle:focus-visible {
+  outline: 3px solid rgba(80, 224, 220, 0.28);
+  outline-offset: 3px;
+}
+
+.metric-dual-toggle.active {
+  border-color: rgba(91, 235, 228, 0.74);
+  background: linear-gradient(145deg, rgba(7, 55, 72, 0.98), rgba(5, 28, 51, 0.98));
+  box-shadow: 0 0 0 3px rgba(78, 224, 220, 0.08), 0 0 22px rgba(78, 224, 220, 0.15);
+}
+
+.metric-dual-toggle-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(192, 246, 244, 0.44);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffc45a 0 46%, #58e0dc 54% 100%);
+  color: #082c3d;
+  box-shadow: 0 0 14px rgba(72, 220, 218, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.58);
+}
+
+.metric-dual-toggle-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.metric-dual-toggle-copy small {
+  color: #75a8b3;
+  font-size: 0.49rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.metric-dual-toggle-copy strong {
+  margin-top: 3px;
+  color: #effcfd;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.console-view .executive-metric-block > .kpi-heading > .kpi-percentage,
+.console-view .water-metric-heading > .water-performance,
+.dual-view .executive-metric-block > .kpi-heading > .kpi-percentage,
+.dual-view .water-metric-heading > .water-performance {
+  display: none;
+}
+
+.console-view .executive-overview-card,
+.console-view .water-executive-card,
+.console-view .water-volume-executive-card {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(73, 216, 216, 0.06), transparent 36%),
+    linear-gradient(145deg, rgba(8, 50, 72, 0.96), rgba(6, 30, 54, 0.97));
+}
+
+.console-view .executive-metric-block,
+.console-view .water-metric-block {
+  min-width: 0;
+}
+
+.dual-view .executive-metric-block,
+.dual-view .water-metric-block {
+  min-width: 0;
+}
+
+/* Dual view: one calm surface language shared by every section card */
+.dual-view .executive-overview-card,
+.console-view .executive-overview-card,
+.dual-view .water-executive-card,
+.console-view .water-executive-card,
+.dual-view .water-volume-executive-card,
+.console-view .water-volume-executive-card {
+  padding: 18px 20px 20px;
+  /* same teal glass as the dashboard header and period tabs */
+  border: 1px solid rgba(112, 227, 230, 0.24);
+  border-radius: 22px;
+  background:
+    radial-gradient(70% 45% at 50% 0%, rgba(80, 220, 225, 0.08), transparent 70%),
+    linear-gradient(145deg, rgba(8, 79, 105, 0.48), rgba(7, 27, 63, 0.42));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 20px 48px rgba(1, 13, 38, 0.24);
+  backdrop-filter: blur(28px) saturate(125%);
+}
+
+.dual-view .executive-overview-card::before,
+.console-view .executive-overview-card::before {
+  display: none;
+}
+
+.dual-view .executive-overview-grid,
+.console-view .executive-overview-grid,
+.dual-view .water-executive-grid,
+.console-view .water-executive-grid {
+  gap: 20px;
+}
+
+.dual-view .executive-metric-block,
+.console-view .executive-metric-block,
+.dual-view .executive-metric-block.revenue-metric,
+.console-view .executive-metric-block.revenue-metric,
+.dual-view .water-metric-block,
+.console-view .water-metric-block {
+  padding: 0;
+  border: 0;
+}
+
+.dual-view .executive-metric-block.revenue-metric::before,
+.console-view .executive-metric-block.revenue-metric::before,
+.dual-view .water-metric-block + .water-metric-block::before,
+.console-view .water-metric-block + .water-metric-block::before {
+  display: none;
+}
+
+.dual-view .executive-metric-block > .kpi-heading,
+.console-view .executive-metric-block > .kpi-heading,
+.dual-view .water-metric-heading,
+.console-view .water-metric-heading {
+  margin-bottom: 10px;
+}
+
+.dual-view .water-executive-header,
+.console-view .water-executive-header {
+  border-bottom-color: rgba(120, 200, 220, 0.1);
+}
+
+/* Section icons: glossy gradient badges in the same family as the
+   DUAL / POWER header toggles (bright fill, dark glyph, soft glow). */
+.dual-view .metric-icon.energy,
+.console-view .metric-icon.energy,
+.dual-view .metric-icon.revenue,
+.console-view .metric-icon.revenue,
+.dual-view .metric-icon.inflow,
+.console-view .metric-icon.inflow,
+.dual-view .metric-icon.outflow,
+.console-view .metric-icon.outflow,
+.dual-view .metric-icon.usable-volume-icon,
+.console-view .metric-icon.usable-volume-icon,
+.dual-view .metric-icon.total-volume-icon,
+.console-view .metric-icon.total-volume-icon,
+.dual-view .water-title-icon,
+.console-view .water-title-icon {
+  --badge-color: #4fe0dc;
+
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--badge-color) 55%, white);
+  border-radius: 11px;
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(150deg, color-mix(in srgb, var(--badge-color) 85%, white), var(--badge-color) 45%, color-mix(in srgb, var(--badge-color) 62%, #0a3550));
+  color: #072a3c;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 4px color-mix(in srgb, var(--badge-color) 40%, #032033),
+    0 0 0 3px color-mix(in srgb, var(--badge-color) 14%, transparent),
+    0 6px 16px -4px color-mix(in srgb, var(--badge-color) 55%, transparent);
+}
+
+.dual-view .metric-icon.energy > svg,
+.console-view .metric-icon.energy > svg,
+.dual-view .metric-icon.revenue > svg,
+.console-view .metric-icon.revenue > svg,
+.dual-view .metric-icon.inflow > svg,
+.console-view .metric-icon.inflow > svg,
+.dual-view .metric-icon.outflow > svg,
+.console-view .metric-icon.outflow > svg,
+.dual-view .metric-icon.usable-volume-icon > svg,
+.console-view .metric-icon.usable-volume-icon > svg,
+.dual-view .metric-icon.total-volume-icon > svg,
+.console-view .metric-icon.total-volume-icon > svg,
+.dual-view .water-title-icon > svg,
+.console-view .water-title-icon > svg {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+}
+
+.dual-view .metric-icon.energy,
+.console-view .metric-icon.energy { --badge-color: #4fe0dc; }
+.dual-view .metric-icon.revenue,
+.console-view .metric-icon.revenue { --badge-color: #ffbd49; }
+.dual-view .metric-icon.inflow,
+.console-view .metric-icon.inflow { --badge-color: #6ee6b4; }
+.dual-view .metric-icon.outflow,
+.console-view .metric-icon.outflow { --badge-color: #75d9ff; }
+.dual-view .metric-icon.usable-volume-icon,
+.console-view .metric-icon.usable-volume-icon { --badge-color: #7cc4ff; }
+.dual-view .water-title-icon,
+.console-view .water-title-icon { --badge-color: #5fd6e8; }
+.dual-view .metric-icon.total-volume-icon,
+.console-view .metric-icon.total-volume-icon { --badge-color: #5cc8f0; }
+.dual-view .water-title-icon.volume,
+.console-view .water-title-icon.volume { --badge-color: #6cc9f5; }
+
+/* reservoir glyph: heavier strokes + visible water fill on the bright badge */
+.dual-view .metric-icon.reservoir-volume-symbol > svg,
+.console-view .metric-icon.reservoir-volume-symbol > svg,
+.dual-view .water-title-icon.reservoir-volume-symbol > svg,
+.console-view .water-title-icon.reservoir-volume-symbol > svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.9;
+}
+.dual-view .metric-icon.reservoir-volume-symbol .water-fill,
+.console-view .metric-icon.reservoir-volume-symbol .water-fill,
+.dual-view .water-title-icon.reservoir-volume-symbol .water-fill,
+.console-view .water-title-icon.reservoir-volume-symbol .water-fill { opacity: 0.38; }
+.dual-view .metric-icon.reservoir-volume-symbol .capacity-mark,
+.console-view .metric-icon.reservoir-volume-symbol .capacity-mark,
+.dual-view .water-title-icon.reservoir-volume-symbol .capacity-mark,
+.console-view .water-title-icon.reservoir-volume-symbol .capacity-mark { opacity: 0.8; }
+
+.dual-view .kpi-heading .kpi-title,
+.console-view .kpi-heading .kpi-title,
+.dual-view .water-metric-heading,
+.console-view .water-metric-heading {
+  gap: 10px;
+  color: #f0fbfd;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 600px) {
+  .dual-view .executive-overview-card,
+  .console-view .executive-overview-card,
+  .dual-view .water-executive-card,
+  .console-view .water-executive-card,
+  .dual-view .water-volume-executive-card,
+  .console-view .water-volume-executive-card {
+    padding: 12px 12px 14px;
+    border-radius: 18px;
+  }
+
+  .dual-view .executive-overview-grid,
+  .console-view .executive-overview-grid,
+  .dual-view .water-executive-grid,
+  .console-view .water-executive-grid {
+    gap: 16px;
+  }
+
+  .dual-view .executive-metric-block.revenue-metric,
+  .console-view .executive-metric-block.revenue-metric {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* Dual view: dam breakdown as ONE raised glass bar. Left half mirrors the
+   plan tile (left aligned, dot first); right half mirrors the actual tile
+   (right aligned, dot last). Doubled class beats the base rule below. */
+.metric-volume-components.dual-volume-components {
+  position: relative;
+  margin-top: 12px;
+  border: 1px solid rgba(112, 227, 230, 0.16);
+  border-radius: 12px;
+  background:
+    radial-gradient(45% 100% at 0% 0%, rgba(79, 224, 220, 0.07), transparent 60%),
+    radial-gradient(45% 100% at 100% 0%, rgba(117, 217, 255, 0.07), transparent 60%),
+    rgba(10, 60, 92, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px -8px rgba(1, 13, 38, 0.55);
+}
+
+/* thin top edge: teal from the left, sky blue from the right */
+.metric-volume-components.dual-volume-components::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4fe0dc, transparent 30%, transparent 70%, #75d9ff);
+  content: "";
+  opacity: 0.55;
+}
+
+.metric-volume-components.dual-volume-components > span {
+  --dam-color: #4fe0dc;
+
+  padding: 10px 14px 9px;
+}
+
+.metric-volume-components.dual-volume-components > span + span {
+  --dam-color: #75d9ff;
+
+  border-left: 1px dashed rgba(150, 220, 235, 0.22);
+  text-align: right;
+}
+
+.metric-volume-components.dual-volume-components small {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  /* base rule clips overflow, which cut off the dot's ring and glow */
+  overflow: visible;
+  padding-inline: 2px;
+}
+
+.metric-volume-components.dual-volume-components > span + span small {
+  flex-direction: row-reverse;
+}
+
+/* colour dot, like the plan / actual tiles */
+.metric-volume-components.dual-volume-components small::before {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--dam-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--dam-color) 20%, transparent), 0 0 8px var(--dam-color);
+  content: "";
+}
+
+.metric-volume-components.dual-volume-components strong {
+  margin-top: 5px;
+  color: color-mix(in srgb, var(--dam-color) 55%, #f0fbfd);
+  font-size: 0.86rem;
+  text-shadow: 0 1px 0 rgba(1, 13, 38, 0.6);
+}
+
+@media (max-width: 600px) {
+  .metric-volume-components.dual-volume-components {
+    margin-top: 10px;
+    border-radius: 11px;
+  }
+
+  .metric-volume-components.dual-volume-components > span {
+    padding: 8px 10px;
+  }
+
+  .metric-volume-components.dual-volume-components strong {
+    font-size: 0.78rem;
+  }
+}
+
+/* ==========================================================================
+   Dual view: per-plant cards share the main dashboard language
+   (teal glass, plan = amber on the left, actual = teal on the right,
+   tone chip, glowing progress, "ມື້ວານ" footer). CSS only – the same
+   markup serves energy/revenue, water flow and water volume cards.
+   ========================================================================== */
+.dual-view .combined-plant-card,
+.console-view .combined-plant-card {
+  --dual-plan: #ffbd49;
+  --dual-actual: #4fe0dc;
+
+  padding: 14px;
+  border: 1px solid rgba(112, 227, 230, 0.2);
+  border-radius: 18px;
+  background:
+    radial-gradient(80% 60% at 0% 0%, color-mix(in srgb, var(--plant-accent, #4fe0dc) 12%, transparent), transparent 65%),
+    linear-gradient(160deg, rgba(22, 118, 142, 0.34), rgba(10, 62, 96, 0.26) 55%, rgba(8, 40, 78, 0.3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 12px 30px -14px rgba(1, 13, 38, 0.5);
+}
+
+/* glowing top edge in the plant brand colour (replaces the left rail) */
+.dual-view .combined-plant-card::before,
+.console-view .combined-plant-card::before {
+  inset: 0 0 auto 0;
+  width: auto;
+  height: 2px;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--plant-accent, #4fe0dc), color-mix(in srgb, var(--plant-accent, #4fe0dc) 30%, transparent) 55%, transparent);
+  box-shadow: 0 0 10px var(--plant-accent, #4fe0dc);
+  opacity: 0.85;
+}
+
+.dual-view .combined-plant-card:hover,
+.console-view .combined-plant-card:hover,
+.dual-view .combined-plant-card:focus-visible,
+.console-view .combined-plant-card:focus-visible {
+  border-color: rgba(130, 232, 236, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 36px -14px rgba(1, 13, 38, 0.65);
+}
+
+.dual-view .combined-plant-logo,
+.console-view .combined-plant-logo {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border-radius: 11px;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 0 0 3px color-mix(in srgb, var(--plant-accent, #4fe0dc) 16%, transparent),
+    0 6px 14px -4px rgba(1, 13, 38, 0.6);
+}
+
+.dual-view .combined-plant-name strong,
+.console-view .combined-plant-name strong {
+  color: #f0fbfd;
+  letter-spacing: 0.01em;
+}
+
+.dual-view .combined-card-chevron,
+.console-view .combined-card-chevron {
+  top: 24px;
+  right: 14px;
+}
+
+.dual-view .combined-card-metrics,
+.console-view .combined-card-metrics {
+  gap: 12px;
+  margin-top: 14px;
+}
+
+/* ---- metric panel = mini gauge card ---- */
+.dual-view .combined-metric,
+.console-view .combined-metric {
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(112, 227, 230, 0.16);
+  border-radius: 14px;
+  background:
+    radial-gradient(70% 60% at 50% 0%, rgba(110, 235, 235, 0.08), transparent 70%),
+    linear-gradient(180deg, rgba(16, 92, 120, 0.42), rgba(9, 52, 86, 0.4));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 16px -10px rgba(1, 13, 38, 0.6);
+}
+
+.dual-view .combined-metric-heading,
+.console-view .combined-metric-heading {
+  align-items: center;
+}
+
+.dual-view .combined-metric-heading > span:first-child,
+.console-view .combined-metric-heading > span:first-child {
+  gap: 6px;
+}
+
+/* performance % as a tone chip, like "ທຽບກັບແຜນ" */
+.dual-view .combined-performance,
+.console-view .combined-performance {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, rgba(8, 48, 78, 0.55));
+}
+
+/* values: plan left (amber), actual right (teal) – markup order is actual, plan */
+.dual-view .combined-metric-values,
+.console-view .combined-metric-values,
+.dual-view .combined-yesterday-values,
+.console-view .combined-yesterday-values {
+  gap: 10px;
+}
+
+.dual-view .combined-metric-values > span,
+.console-view .combined-metric-values > span,
+.dual-view .combined-yesterday-values > span,
+.console-view .combined-yesterday-values > span {
+  --side-color: var(--dual-actual);
+}
+
+.dual-view .combined-metric-values > span:first-child,
+.console-view .combined-metric-values > span:first-child,
+.dual-view .combined-yesterday-values > span:first-child,
+.console-view .combined-yesterday-values > span:first-child {
+  order: 2;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.dual-view .combined-metric-values > span + span,
+.console-view .combined-metric-values > span + span,
+.dual-view .combined-yesterday-values > span + span,
+.console-view .combined-yesterday-values > span + span {
+  --side-color: var(--dual-plan);
+
+  order: 1;
+  padding-left: 0;
+}
+
+.dual-view .combined-metric-values > span + span::before,
+.console-view .combined-metric-values > span + span::before,
+.dual-view .combined-yesterday-values > span + span::before,
+.console-view .combined-yesterday-values > span + span::before,
+.dual-view .water-volume-plant-card .combined-metric-values::after,
+.console-view .water-volume-plant-card .combined-metric-values::after {
+  display: none;
+}
+
+.dual-view .combined-metric-values small,
+.console-view .combined-metric-values small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #a3c7d3;
+}
+
+.dual-view .combined-metric-values > span:first-child small,
+.console-view .combined-metric-values > span:first-child small {
+  flex-direction: row-reverse;
+}
+
+.dual-view .combined-metric-values small::before,
+.console-view .combined-metric-values small::before {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--side-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--side-color) 20%, transparent), 0 0 8px var(--side-color);
+  content: "";
+}
+
+.dual-view .combined-metric-values strong,
+.console-view .combined-metric-values strong,
+.dual-view .combined-metric-values > span + span strong,
+.console-view .combined-metric-values > span + span strong {
+  color: var(--side-color);
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(1, 13, 38, 0.6);
+}
+
+/* progress: amber plan track, glowing teal actual fill with a knob */
+.dual-view .combined-progress,
+.console-view .combined-progress {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  margin-inline: 0;
+  overflow: visible;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--dual-plan) 30%, rgba(150, 210, 225, 0.1)), rgba(150, 210, 225, 0.1));
+  box-shadow: inset 0 1px 1px rgba(1, 13, 38, 0.35);
+}
+
+.dual-view .combined-progress i,
+.console-view .combined-progress i,
+.dual-view .combined-progress i.positive,
+.console-view .combined-progress i.positive,
+.dual-view .combined-progress i.neutral,
+.console-view .combined-progress i.neutral,
+.dual-view .combined-metric.revenue .combined-progress i,
+.console-view .combined-metric.revenue .combined-progress i,
+.dual-view .combined-metric.water-outflow .combined-progress i,
+.console-view .combined-metric.water-outflow .combined-progress i,
+.dual-view .plant-volume-summary .combined-progress i,
+.console-view .plant-volume-summary .combined-progress i {
+  position: relative;
+  max-width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--dual-actual) 35%, transparent), var(--dual-actual));
+  box-shadow: 0 0 4px color-mix(in srgb, var(--dual-actual) 40%, transparent);
+}
+
+.dual-view .combined-progress i::after,
+.console-view .combined-progress i::after {
+  position: absolute;
+  top: 50%;
+  right: -2.5px;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #f1fcff;
+  border-radius: 50%;
+  background: var(--dual-actual);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--dual-actual) 70%, transparent);
+  content: "";
+  transform: translateY(-50%);
+}
+
+/* yesterday footer, like the tile foot */
+.dual-view .combined-yesterday-values,
+.console-view .combined-yesterday-values {
+  padding-top: 8px;
+  border-top: 1px dashed rgba(150, 220, 235, 0.22);
+}
+
+.dual-view .combined-yesterday-values small,
+.console-view .combined-yesterday-values small {
+  color: #7fa6b5;
+}
+
+.dual-view .combined-yesterday-values strong,
+.console-view .combined-yesterday-values strong,
+.dual-view .combined-yesterday-values > span + span strong,
+.console-view .combined-yesterday-values > span + span strong,
+.dual-view .combined-metric.revenue .combined-yesterday-values > span:first-child strong,
+.console-view .combined-metric.revenue .combined-yesterday-values > span:first-child strong {
+  color: #d6ebf2;
+  font-weight: 800;
+}
+
+/* volume cards: dam split bar mirrors the main dashboard dam bar */
+.dual-view .plant-volume-components,
+.console-view .plant-volume-components {
+  padding: 8px 10px;
+  border: 1px solid rgba(112, 227, 230, 0.18);
+  border-radius: 10px;
+  background:
+    radial-gradient(60% 120% at 0% 0%, rgba(79, 224, 220, 0.12), transparent 65%),
+    radial-gradient(60% 120% at 100% 0%, rgba(117, 217, 255, 0.12), transparent 65%),
+    rgba(6, 40, 66, 0.4);
+  box-shadow: inset 0 1px 0 rgba(160, 235, 240, 0.12);
+}
+
+.dual-view .plant-volume-components > span,
+.console-view .plant-volume-components > span {
+  --dam-color: #4fe0dc;
+
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.dual-view .plant-volume-components > span + span,
+.console-view .plant-volume-components > span + span {
+  --dam-color: #75d9ff;
+
+  align-items: flex-end;
+  padding-left: 8px;
+  text-align: right;
+}
+
+.dual-view .plant-volume-components > span + span::before,
+.console-view .plant-volume-components > span + span::before {
+  background: none;
+  border-left: 1px dashed rgba(150, 220, 235, 0.22);
+}
+
+.dual-view .plant-volume-components small,
+.console-view .plant-volume-components small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: visible;
+  padding-inline: 2px;
+  color: #a3c7d3;
+}
+
+.dual-view .plant-volume-components > span + span small,
+.console-view .plant-volume-components > span + span small {
+  flex-direction: row-reverse;
+}
+
+.dual-view .plant-volume-components small::before,
+.console-view .plant-volume-components small::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--dam-color);
+  box-shadow: 0 0 6px var(--dam-color);
+  content: "";
+}
+
+.dual-view .plant-volume-components strong,
+.console-view .plant-volume-components strong,
+.dual-view .water-usable-volume .plant-volume-components strong,
+.console-view .water-usable-volume .plant-volume-components strong {
+  color: color-mix(in srgb, var(--dam-color) 55%, #f0fbfd);
+}
+
+@media (max-width: 600px) {
+  .dual-view .combined-plant-card,
+  .console-view .combined-plant-card {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .dual-view .combined-card-metrics,
+  .console-view .combined-card-metrics {
+    gap: 10px;
+  }
+
+  .dual-view .combined-metric,
+  .console-view .combined-metric {
+    padding: 10px;
+    border-radius: 12px;
+  }
+}
+
+.console-volume-components {
+  border-color: rgba(110, 196, 214, 0.16);
+  background: rgba(5, 32, 54, 0.55);
+}
+
+/* doubled class beats the base .metric-volume-components rule below */
+.metric-volume-components.console-volume-components {
+  border-color: rgba(112, 227, 230, 0.16);
+  border-radius: 12px;
+  background: rgba(10, 60, 92, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px -8px rgba(1, 13, 38, 0.55);
+}
+
+.metric-volume-components.console-volume-components > span + span {
+  border-left: 1px dashed rgba(150, 220, 235, 0.22);
+}
+
+.metric-volume-components.console-volume-components small {
+  color: #a3c7d3;
+}
+
+.metric-volume-components.console-volume-components strong {
+  color: #d6ebf2;
+}
+
+.metric-volume-components {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(102, 193, 204, 0.14);
+  border-radius: 10px;
+  background: rgba(3, 27, 49, 0.34);
+}
+
+.metric-volume-components > span {
+  min-width: 0;
+  padding: 8px 12px;
+}
+
+.metric-volume-components > span + span {
+  border-left: 1px solid rgba(102, 193, 204, 0.14);
+}
+
+.metric-volume-components small,
+.metric-volume-components strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric-volume-components small {
+  color: #a3c7d3;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.metric-volume-components strong {
+  margin-top: 3px;
+  color: #d6ebf2;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.metric-volume-components i {
+  color: #7fa6b5;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .dashboard-header-controls {
+    gap: 7px;
+  }
+
+  .metric-console-toggle-copy {
+    display: none;
+  }
+
+  .metric-dual-toggle-copy {
+    display: none;
+  }
+
+  .metric-console-toggle,
+  .metric-dual-toggle {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    justify-content: center;
+    padding: 3px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    gap: 8px;
+  }
+
+  .dashboard-header-controls {
+    align-self: center;
+  }
+
+  .metric-console-toggle {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+  }
+
+  .metric-dual-toggle {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+  }
+
+  .metric-console-toggle-icon {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .metric-dual-toggle-icon {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .metric-volume-components > span {
+    padding: 7px 10px;
+  }
+
+  .metric-volume-components small {
+    font-size: 0.64rem;
+  }
+
+  .metric-volume-components strong {
+    font-size: 0.7rem;
   }
 }
 </style>

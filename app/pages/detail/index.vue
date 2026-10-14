@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="plant-page pa-0">
-    <main class="plant-dashboard">
+    <main class="plant-dashboard" :class="{ 'dual-view': dualView }">
       <header class="plant-header">
         <div class="plant-identity">
           <button type="button" class="icon-button back-button" aria-label="ກັບຄືນ" @click="router.back()">
@@ -84,72 +84,6 @@
         <span>{{ errorMessage }}</span>
         <button type="button" @click="loadDashboardData">ລອງໃໝ່</button>
       </div>
-
-      <section class="detail-overview-card" aria-label="ຕົວເລກສະຫຼຸບຂອງເຂື່ອນ">
-        <div class="detail-overview-grid">
-          <article class="detail-metric-block energy" :class="energyPerformance.tone">
-            <div class="detail-metric-heading">
-              <p>
-                <span class="detail-metric-icon energy"><Icon name="mdi:lightning-bolt" size="20" /></span>
-                <span>ພະລັງງານລວມ</span>
-              </p>
-              <strong class="detail-percentage">
-                <Icon :name="energyPerformance.icon" size="16" />
-                {{ energyPerformance.percentage }}
-              </strong>
-            </div>
-
-            <div class="detail-summary-panel energy">
-              <div class="detail-summary-values">
-                <div class="detail-summary-stat actual">
-                  <span>ຕົວຈິງ</span>
-                  <strong>{{ formatMetric(totalEnergy) }} <small>GWh</small></strong>
-                </div>
-                <div class="detail-summary-stat plan">
-                  <span>ແຜນ</span>
-                  <strong>{{ formatMetric(totalPlanEnergy) }} <small>GWh</small></strong>
-                </div>
-              </div>
-              <div class="detail-progress"><span :style="{ width: `${energyPerformance.bar}%` }" /></div>
-              <div class="detail-yesterday-row" :title="yesterdayDate">
-                <span><Icon name="lucide:history" size="11" /> ມື້ວານ <b>{{ hasYesterdayEnergy ? formatMetric(yesterdayEnergy) : "—" }}</b> <small>GWh</small></span>
-                <span><Icon name="lucide:history" size="11" /> ມື້ວານ <b>{{ hasYesterdayPlanEnergy ? formatMetric(yesterdayPlanEnergy) : "—" }}</b> <small>GWh</small></span>
-              </div>
-            </div>
-          </article>
-
-          <article class="detail-metric-block revenue" :class="revenuePerformance.tone">
-            <div class="detail-metric-heading">
-              <p>
-                <span class="detail-metric-icon revenue"><Icon name="lucide:dollar-sign" size="19" stroke-width="2.6" /></span>
-                <span>ລາຍຮັບລວມ</span>
-              </p>
-              <strong class="detail-percentage">
-                <Icon :name="revenuePerformance.icon" size="16" />
-                {{ revenuePerformance.percentage }}
-              </strong>
-            </div>
-
-            <div class="detail-summary-panel revenue">
-              <div class="detail-summary-values">
-                <div class="detail-summary-stat actual">
-                  <span>ຕົວຈິງ</span>
-                  <strong>{{ formatMetric(totalRevenue) }} <small>MUSD</small></strong>
-                </div>
-                <div class="detail-summary-stat plan">
-                  <span>ແຜນ</span>
-                  <strong>{{ formatMetric(totalPlanRevenue) }} <small>MUSD</small></strong>
-                </div>
-              </div>
-              <div class="detail-progress"><span :style="{ width: `${revenuePerformance.bar}%` }" /></div>
-              <div class="detail-yesterday-row" :title="yesterdayDate">
-                <span><Icon name="lucide:history" size="11" /> ມື້ວານ <b>{{ hasYesterdayRevenue ? formatMetric(yesterdayRevenue) : "—" }}</b> <small>MUSD</small></span>
-                <span><Icon name="lucide:history" size="11" /> ມື້ວານ <b>{{ hasYesterdayPlanRevenue ? formatMetric(yesterdayPlanRevenue) : "—" }}</b> <small>MUSD</small></span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
 
       <section class="analytics-section">
         <div class="section-heading">
@@ -480,10 +414,10 @@
                     </template>
                   </tr>
                   <tr>
-                    <th>ຕົວຈິງ</th>
                     <th>ແຜນ</th>
                     <th>ຕົວຈິງ</th>
                     <th>ແຜນ</th>
+                    <th>ຕົວຈິງ</th>
                   </tr>
                 </thead>
                 <tbody v-if="loading">
@@ -500,16 +434,16 @@
                   >
                     <th scope="row">{{ row.label }}</th>
                     <template v-if="chartFilterContext === 'water'">
-                      <td class="actual-value" data-label="ນ້ຳເຂົ້າຕົວຈິງ (MCM)">{{ formatMetric(row.actualInflow) }}</td>
                       <td data-label="ແຜນນ້ຳເຂົ້າ (MCM)">{{ formatMetric(row.planInflow) }}</td>
-                      <td class="actual-value water-outflow-value" data-label="ນ້ຳອອກຕົວຈິງ (MCM)">{{ formatMetric(row.actualOutflow) }}</td>
+                      <td class="actual-value" data-label="ນ້ຳເຂົ້າຕົວຈິງ (MCM)">{{ formatMetric(row.actualInflow) }}</td>
                       <td data-label="ແຜນນ້ຳອອກ (MCM)">{{ formatMetric(row.planOutflow) }}</td>
+                      <td class="actual-value water-outflow-value" data-label="ນ້ຳອອກຕົວຈິງ (MCM)">{{ formatMetric(row.actualOutflow) }}</td>
                     </template>
                     <template v-else>
-                      <td class="actual-value" data-label="ພະລັງງານຕົວຈິງ (GWh)">{{ formatMetric(row.actualEnergy) }}</td>
                       <td data-label="ແຜນພະລັງງານ (GWh)">{{ formatMetric(row.planEnergy) }}</td>
-                      <td class="actual-value revenue-value" data-label="ລາຍຮັບຕົວຈິງ (MUSD)">{{ formatMetric(row.actualRevenue) }}</td>
+                      <td class="actual-value" data-label="ພະລັງງານຕົວຈິງ (GWh)">{{ formatMetric(row.actualEnergy) }}</td>
                       <td data-label="ແຜນລາຍຮັບ (MUSD)">{{ formatMetric(row.planRevenue) }}</td>
+                      <td class="actual-value revenue-value" data-label="ລາຍຮັບຕົວຈິງ (MUSD)">{{ formatMetric(row.actualRevenue) }}</td>
                     </template>
                   </tr>
                 </tbody>
@@ -517,16 +451,16 @@
                   <tr>
                     <th>ລວມທັງໝົດ</th>
                     <template v-if="chartFilterContext === 'water'">
-                      <td data-label="ນ້ຳເຂົ້າຕົວຈິງ (MCM)">{{ formatMetric(totalInflowActual) }}</td>
                       <td data-label="ແຜນນ້ຳເຂົ້າ (MCM)">{{ formatMetric(totalInflowPlan) }}</td>
-                      <td data-label="ນ້ຳອອກຕົວຈິງ (MCM)">{{ formatMetric(totalOutflow) }}</td>
+                      <td data-label="ນ້ຳເຂົ້າຕົວຈິງ (MCM)">{{ formatMetric(totalInflowActual) }}</td>
                       <td data-label="ແຜນນ້ຳອອກ (MCM)">{{ formatMetric(totalPlanOutflow) }}</td>
+                      <td data-label="ນ້ຳອອກຕົວຈິງ (MCM)">{{ formatMetric(totalOutflow) }}</td>
                     </template>
                     <template v-else>
-                      <td data-label="ພະລັງງານຕົວຈິງ (GWh)">{{ formatMetric(totalEnergy) }}</td>
                       <td data-label="ແຜນພະລັງງານ (GWh)">{{ formatMetric(totalPlanEnergy) }}</td>
-                      <td data-label="ລາຍຮັບຕົວຈິງ (MUSD)">{{ formatMetric(totalRevenue) }}</td>
+                      <td data-label="ພະລັງງານຕົວຈິງ (GWh)">{{ formatMetric(totalEnergy) }}</td>
                       <td data-label="ແຜນລາຍຮັບ (MUSD)">{{ formatMetric(totalPlanRevenue) }}</td>
+                      <td data-label="ລາຍຮັບຕົວຈິງ (MUSD)">{{ formatMetric(totalRevenue) }}</td>
                     </template>
                   </tr>
                 </tfoot>
@@ -1422,7 +1356,17 @@ async function loadDashboardData() {
   filterOpen.value = false;
 }
 
-onMounted(loadDashboardData);
+/* Follow the display mode chosen on the main dashboard (DUAL ປຽບທຽບ / POWER ຄອນໂຊນ share one theme) */
+const dualView = ref(false);
+
+onMounted(() => {
+  try {
+    dualView.value = ["dual", "console"].includes(localStorage.getItem("dashboardMetricDisplayMode"));
+  } catch {
+    dualView.value = false;
+  }
+  loadDashboardData();
+});
 </script>
 
 <style scoped>
@@ -3133,20 +3077,20 @@ onMounted(loadDashboardData);
     line-height:1.2;
   }
   .chart-data-table tbody td:nth-of-type(1) {
-    color:#76e4df;
-    font-weight:800;
-  }
-  .chart-data-table tbody td:nth-of-type(2) {
     color:#b9d0d8;
     font-weight:700;
   }
-  .chart-data-table tbody td:nth-of-type(3) {
-    color:#ffd06b;
+  .chart-data-table tbody td:nth-of-type(2) {
+    color:#76e4df;
     font-weight:800;
   }
-  .chart-data-table tbody td:nth-of-type(4) {
+  .chart-data-table tbody td:nth-of-type(3) {
     color:#d8c69d;
     font-weight:700;
+  }
+  .chart-data-table tbody td:nth-of-type(4) {
+    color:#ffd06b;
+    font-weight:800;
   }
   .chart-data-table tbody tr:nth-child(even) {
     background:rgba(69,171,188,.065);
@@ -3388,6 +3332,310 @@ onMounted(loadDashboardData);
     width: 40px;
     height: 37px;
     padding: 2px;
+  }
+}
+
+/* ==========================================================================
+   Dual view (opened from the DUAL ປຽບທຽບ dashboard): same language as the
+   main dashboard – teal glass sections, lighter glass chart cards, glossy
+   icon badges, plan (amber, left) / actual (teal, right) total tiles.
+   ========================================================================== */
+.dual-view .analytics-section {
+  border: 1px solid rgba(112, 227, 230, 0.24);
+  border-radius: 22px;
+  background:
+    radial-gradient(70% 45% at 50% 0%, rgba(80, 220, 225, 0.08), transparent 70%),
+    linear-gradient(145deg, rgba(8, 79, 105, 0.48), rgba(7, 27, 63, 0.42));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 20px 48px rgba(1, 13, 38, 0.24);
+  backdrop-filter: blur(28px) saturate(125%);
+}
+
+.dual-view .section-heading h2 {
+  color: #f0fbfd;
+  letter-spacing: 0.01em;
+}
+
+.dual-view .chart-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(112, 227, 230, 0.2);
+  border-radius: 20px;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgba(110, 235, 235, 0.1), transparent 70%),
+    linear-gradient(160deg, rgba(22, 118, 142, 0.34), rgba(10, 62, 96, 0.26) 55%, rgba(8, 40, 78, 0.3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 12px 30px -14px rgba(1, 13, 38, 0.45);
+}
+
+.dual-view .chart-title strong {
+  color: #f0fbfd;
+  font-weight: 700;
+}
+
+.dual-view .chart-title small {
+  color: #a3c7d3;
+}
+
+/* ---- glossy icon badges (same family as the dashboard section icons) ---- */
+.dual-view .chart-icon {
+  --badge-color: #4fe0dc;
+
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--badge-color) 55%, white);
+  border-radius: 11px;
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(150deg, color-mix(in srgb, var(--badge-color) 85%, white), var(--badge-color) 45%, color-mix(in srgb, var(--badge-color) 62%, #0a3550));
+  color: #072a3c;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 4px color-mix(in srgb, var(--badge-color) 40%, #032033),
+    0 0 0 3px color-mix(in srgb, var(--badge-color) 14%, transparent),
+    0 6px 16px -4px color-mix(in srgb, var(--badge-color) 55%, transparent);
+}
+
+.dual-view .chart-icon.orange { --badge-color: #4fe0dc; }
+.dual-view .chart-icon.gold { --badge-color: #ffbd49; }
+.dual-view .chart-icon.cyan { --badge-color: #6ee6b4; }
+.dual-view .chart-icon.water-outflow-icon { --badge-color: #75d9ff; }
+.dual-view .chart-icon.blue { --badge-color: #6cc9f5; }
+
+.dual-view .chart-icon > svg {
+  color: #072a3c;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+}
+
+/* ---- totals: plan left (amber) / actual right (teal), like the gauge tiles ---- */
+.dual-view .chart-total-summary,
+.dual-view .chart-total-summary.revenue,
+.dual-view .chart-total-summary.water {
+  --dual-plan: #ffbd49;
+  --dual-actual: #4fe0dc;
+
+  position: relative;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(112, 227, 230, 0.16);
+  border-radius: 12px;
+  background:
+    radial-gradient(45% 100% at 0% 0%, color-mix(in srgb, var(--dual-plan) 8%, transparent), transparent 60%),
+    radial-gradient(45% 100% at 100% 0%, color-mix(in srgb, var(--dual-actual) 8%, transparent), transparent 60%),
+    rgba(10, 60, 92, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px -8px rgba(1, 13, 38, 0.55);
+}
+
+/* thin top edge: amber from the left (plan), teal from the right (actual) */
+.dual-view .chart-total-summary::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--dual-plan), transparent 30%, transparent 70%, var(--dual-actual));
+  content: "";
+  opacity: 0.55;
+}
+
+.dual-view .chart-total-summary > div {
+  --tile-color: var(--dual-actual);
+
+  position: relative;
+  padding: 8px 12px 7px;
+  border: 0;
+  background: none;
+}
+
+/* markup order is actual, plan → show plan first */
+.dual-view .chart-total-summary > .plan {
+  --tile-color: var(--dual-plan);
+
+  order: 1;
+}
+
+.dual-view .chart-total-summary > .actual {
+  order: 2;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.dual-view .chart-total-summary > div + div {
+  border-left: 0;
+}
+
+/* dashed divider between plan (left) and actual (right) */
+.dual-view .chart-total-summary > .actual {
+  border-left: 1px dashed rgba(150, 220, 235, 0.22);
+}
+
+.dual-view .chart-total-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #a3c7d3;
+  font-size: 0.68rem;
+}
+
+.dual-view .chart-total-summary > .actual span {
+  flex-direction: row-reverse;
+}
+
+.dual-view .chart-total-summary span::before {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--tile-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color) 20%, transparent), 0 0 8px var(--tile-color);
+  content: "";
+}
+
+.dual-view .chart-total-summary strong,
+.dual-view .chart-total-summary .plan strong {
+  margin-top: 2px;
+  color: var(--tile-color);
+  font-size: 0.98rem;
+  text-shadow: 0 1px 0 rgba(1, 13, 38, 0.6);
+}
+
+.dual-view .chart-total-summary strong small {
+  color: #7fa6b5;
+  font-size: 0.58rem;
+}
+
+@media (max-width: 600px) {
+  .dual-view .analytics-section {
+    border-radius: 18px;
+  }
+
+  .dual-view .chart-card {
+    border-radius: 16px;
+  }
+
+  .dual-view .chart-total-summary > div {
+    padding: 8px 10px 7px;
+  }
+
+  .dual-view .chart-total-summary strong,
+  .dual-view .chart-total-summary .plan strong {
+    font-size: 0.9rem;
+  }
+}
+
+/* water chart icons carry older 3-class rules – match their specificity */
+.dual-view .chart-icon.blue.water-level-icon,
+.dual-view .chart-icon.blue.water-volume-icon,
+.dual-view .chart-icon.cyan.water-inflow-icon,
+.dual-view .chart-icon.cyan.water-outflow-icon {
+  border-color: color-mix(in srgb, var(--badge-color) 55%, white);
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(150deg, color-mix(in srgb, var(--badge-color) 85%, white), var(--badge-color) 45%, color-mix(in srgb, var(--badge-color) 62%, #0a3550));
+  color: #072a3c;
+}
+
+.dual-view .chart-icon.blue.water-volume-icon { --badge-color: #5cc8f0; }
+.dual-view .water-volume-icon .water-fill { opacity: 0.38; }
+
+/* ---- water-level limit tiles: raised glass, glowing edge in limit colour ---- */
+.dual-view .water-level-limits {
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+
+.dual-view .water-level-limit {
+  position: relative;
+  padding: 10px 12px 9px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--limit-color) 20%, rgba(112, 227, 230, 0.14));
+  border-radius: 12px;
+  background:
+    radial-gradient(90% 80% at 0% 0%, color-mix(in srgb, var(--limit-color) 9%, transparent), transparent 60%),
+    rgba(10, 60, 92, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px -8px rgba(1, 13, 38, 0.55);
+}
+
+.dual-view .water-level-limit::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--limit-color), transparent 55%);
+  content: "";
+  opacity: 0.55;
+}
+
+.dual-view .water-level-limit:hover {
+  border-color: color-mix(in srgb, var(--limit-color) 38%, rgba(112, 227, 230, 0.14));
+  background:
+    radial-gradient(90% 80% at 0% 0%, color-mix(in srgb, var(--limit-color) 13%, transparent), transparent 60%),
+    rgba(12, 66, 98, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 16px -8px rgba(1, 13, 38, 0.65);
+}
+
+.dual-view .water-level-limit.is-hidden {
+  border-color: rgba(123, 157, 170, 0.22);
+  background: rgba(9, 52, 86, 0.3);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.dual-view .water-level-limit.is-hidden::before {
+  display: none;
+}
+
+.dual-view .water-level-limit > span {
+  gap: 7px;
+  color: #a3c7d3;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* direction icon in a small tinted coin */
+.dual-view .water-level-limit > span > svg:first-child {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--limit-color) 12%, transparent);
+}
+
+.dual-view .water-level-limit strong {
+  margin-top: 6px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+.dual-view .water-level-limit strong small {
+  color: #7fa6b5;
+}
+
+@media (max-width: 600px) {
+  .dual-view .water-level-limits {
+    gap: 8px;
+  }
+
+  .dual-view .water-level-limit {
+    padding: 8px 10px 7px;
+    border-radius: 11px;
+  }
+
+  .dual-view .water-level-limit strong {
+    font-size: 0.9rem;
   }
 }
 </style>
