@@ -8,17 +8,20 @@
           </button>
           <div class="plant-title-block">
             <div class="plant-title-row">
-              <span
-                class="detail-plant-logo"
-                :class="{ 'has-logo': plantBrand.logo }"
-                :style="{ '--plant-accent': plantBrand.accent }"
-              >
-                <img v-if="plantBrand.logo" :src="plantBrand.logo" :alt="`${branchName} logo`">
-                <span v-else>{{ plantBrand.mark }}</span>
-              </span>
               <h1>{{ branchName }}</h1>
             </div>
           </div>
+        </div>
+
+        <div
+          class="plant-header-brand"
+          :style="{ '--plant-accent': plantBrand.accent }"
+          :aria-label="`${branchName} logo`"
+        >
+          <span class="detail-plant-logo" :class="{ 'has-logo': plantBrand.logo }">
+            <img v-if="plantBrand.logo" :src="plantBrand.logo" :alt="`${branchName} logo`">
+            <span v-else>{{ plantBrand.mark }}</span>
+          </span>
         </div>
 
         <div class="header-actions">
@@ -3076,5 +3079,92 @@ onMounted(loadDashboardData);
   }
   .chart-data-table tbody td::before,
   .chart-data-table tfoot td::before { max-width:65%; }
+}
+
+/* Give the selected plant logo a dedicated, centered brand position. */
+.plant-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(190px, 24vw, 320px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2vw, 26px);
+}
+.plant-identity { justify-self: start; }
+.header-actions { justify-self: end; }
+.plant-header-brand {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  height: clamp(68px, 6.4vw, 82px);
+  padding: 6px 18px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--plant-accent, #38bdf8) 44%, rgba(255,255,255,.42));
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,250,252,.95));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.92),
+    0 10px 26px rgba(0,28,61,.20),
+    0 0 18px color-mix(in srgb, var(--plant-accent, #38bdf8) 16%, transparent);
+}
+.plant-header-brand::after {
+  position: absolute;
+  right: 13%;
+  bottom: 0;
+  left: 13%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, transparent, var(--plant-accent, #38bdf8), transparent);
+  content: "";
+  box-shadow: 0 0 8px color-mix(in srgb, var(--plant-accent, #38bdf8) 45%, transparent);
+  pointer-events: none;
+}
+.plant-header-brand .detail-plant-logo,
+.plant-header-brand .detail-plant-logo.has-logo {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  flex: none;
+  padding: 0;
+  place-items: center;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.plant-header-brand .detail-plant-logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 760px) {
+  .plant-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity actions"
+      "brand brand";
+    gap: 8px 10px;
+  }
+  .plant-identity { grid-area: identity; }
+  .header-actions { grid-area: actions; }
+  .plant-header-brand {
+    grid-area: brand;
+    width: min(100%, 230px);
+    height: 62px;
+    justify-self: center;
+    padding: 5px 13px;
+    border-radius: 13px;
+  }
+}
+
+@media (max-width: 420px) {
+  .plant-header-brand {
+    width: min(100%, 205px);
+    height: 57px;
+  }
 }
 </style>

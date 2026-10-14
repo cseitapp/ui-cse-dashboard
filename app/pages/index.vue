@@ -684,116 +684,58 @@
             <span class="water-period-badge">{{ selectedPeriodLabel }}</span>
           </div>
 
-          <div class="water-volume-overview">
-            <div class="water-volume-summary-strip">
-              <div class="water-total-value">
-                <span>ລວມທັງໝົດ</span>
-                <strong>{{ formatMetric(totalWaterVolume) }} <small>MCM</small></strong>
-                <em
-                  class="water-volume-achievement"
-                  :class="totalVolumeAchievement.tone"
-                  :title="`ປະລິມານຕົວຈິງ ທຽບກັບ ແຜນປະຈຳປີ: ${totalVolumeAchievement.percentage}`"
-                >
-                  <TrendIndicator :tone="totalVolumeAchievement.tone" :size="11" />
-                  {{ totalVolumeAchievement.percentage }}
-                </em>
+          <div class="water-executive-grid volume-comparison-grid">
+            <section class="water-metric-block total-volume-metric">
+              <div class="water-metric-heading">
+                <span class="metric-icon total-volume-icon"><Icon name="lucide:waves" size="19" /></span>
+                <span>ບໍລິມາດນ້ຳທັງໝົດ</span>
               </div>
-              <div class="water-volume-breakdown">
-                <span>
-                  <small>ເຂື່ອນຫຼັກ</small>
-                  <strong>{{ formatMetric(mainWaterVolume) }} <i>MCM</i></strong>
-                  <em
-                    class="water-volume-achievement"
-                    :class="mainVolumeAchievement.tone"
-                    :title="`ປະລິມານເຂື່ອນຫຼັກ ທຽບກັບ ແຜນປະຈຳປີ: ${mainVolumeAchievement.percentage}`"
-                  >
-                    <TrendIndicator :tone="mainVolumeAchievement.tone" :size="11" />
-                    {{ mainVolumeAchievement.percentage }}
-                  </em>
-                </span>
-                <span>
-                  <small>ເຂື່ອນອ່ວາຍນ້ຳ</small>
-                  <strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong>
-                  <em
-                    class="water-volume-achievement"
-                    :class="diversionVolumeAchievement.tone"
-                    :title="`ປະລິມານເຂື່ອນອ່ວາຍນ້ຳ ທຽບກັບ ແຜນປະຈຳປີ: ${diversionVolumeAchievement.percentage}`"
-                  >
-                    <TrendIndicator :tone="diversionVolumeAchievement.tone" :size="11" />
-                    {{ diversionVolumeAchievement.percentage }}
-                  </em>
-                </span>
-              </div>
-              <div class="water-volume-track">
-                <span class="main" :style="{ width: `${mainVolumeShare}%` }" />
-                <span class="diversion" :style="{ width: `${diversionVolumeShare}%` }" />
-              </div>
-            </div>
-            <div class="water-volume-plan-groups">
-              <section class="water-volume-plan-group stored-plan">
-                <div class="water-volume-plan-heading">
-                  <span><Icon name="lucide:calendar-range" size="14" /></span>
-                  <div>
-                    <strong>ແຜນບໍລິມາດນ້ຳປະຈຳປີ</strong>
+              <div class="water-summary-panel total-volume-panel">
+                <div class="kpi-summary-values">
+                  <div class="kpi-summary-stat actual">
+                    <span>ຕົວຈິງ</span>
+                    <strong>{{ formatMetric(totalWaterVolume) }} <small>MCM</small></strong>
+                  </div>
+                  <div class="kpi-summary-stat plan">
+                    <span>ແຜນ</span>
+                    <strong>{{ formatMetric(yearTotalPlanVolume) }} <small>MCM</small></strong>
                   </div>
                 </div>
-                <div class="water-volume-plan-values">
-                  <span title="YEAR_TOTAL_PLAN_VOLUME — ແຜນບໍລິມາດນ້ຳທັງໝົດ">
-                    <small>ລວມທັງໝົດ</small>
-                    <strong>{{ formatMetric(yearTotalPlanVolume) }} <i>MCM</i></strong>
-                  </span>
-                  <span title="YEAR_PLAN_MAIN_VOLUME — ແຜນບໍລິມາດນ້ຳຂອງເຂື່ອນຫຼັກທັງໝົດ">
-                    <small>ເຂື່ອນຫຼັກ</small>
-                    <strong>{{ formatMetric(yearPlanMainVolume) }} <i>MCM</i></strong>
-                  </span>
-                  <span title="YEAR_PLAN_DIVERSION_VOLUME — ແຜນບໍລິມາດນ້ຳຂອງເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ">
-                    <small>ເຂື່ອນອ່ວາຍນ້ຳ</small>
-                    <strong>{{ formatMetric(yearPlanDiversionVolume) }} <i>MCM</i></strong>
-                  </span>
+                <div class="kpi-summary-progress" aria-hidden="true">
+                  <span :style="{ width: `${totalVolumePerformance.bar}%` }" />
                 </div>
-              </section>
+                <div class="volume-component-row">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </div>
+            </section>
 
-              <section class="water-volume-plan-group usable-plan">
-                <div class="water-volume-plan-heading">
-                  <span><Icon name="lucide:droplets" size="14" /></span>
-                  <div>
-                    <strong>ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້</strong>
+            <section class="water-metric-block usable-volume-metric">
+              <div class="water-metric-heading">
+                <span class="metric-icon usable-volume-icon"><Icon name="lucide:droplets" size="19" /></span>
+                <span>ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
+              </div>
+              <div class="water-summary-panel usable-volume-panel">
+                <div class="kpi-summary-values">
+                  <div class="kpi-summary-stat actual">
+                    <span>ຕົວຈິງ</span>
+                    <strong>{{ formatMetric(totalUsableWaterVolume) }} <small>MCM</small></strong>
+                  </div>
+                  <div class="kpi-summary-stat plan">
+                    <span>ແຜນ</span>
+                    <strong>{{ formatMetric(yearTotalPlanUsableVolume) }} <small>MCM</small></strong>
                   </div>
                 </div>
-                <div class="water-volume-plan-values">
-                  <span title="YEAR_TOTAL_PLAN_VOLUMN_USABLE — ແຜນບໍລິມາດນ້ຳທັງໝົດທີ່ໃຊ້ໄດ້">
-                    <small>ລວມທີ່ໃຊ້ໄດ້</small>
-                    <strong>{{ formatMetric(yearTotalPlanUsableVolume) }} <i>MCM</i></strong>
-                  </span>
-                  <span title="YEAR_PLAN_MAIN_USABLE_VOLUME — ແຜນບໍລິມາດນ້ຳຂອງເຂື່ອນຫຼັກທັງໝົດທີ່ໃຊ້ໄດ້">
-                    <small>ເຂື່ອນຫຼັກ</small>
-                    <strong>{{ formatMetric(yearPlanMainUsableVolume) }} <i>MCM</i></strong>
-                  </span>
-                  <span title="YEAR_PLAN_DIVERSION_USABLE_VOLUME — ແຜນບໍລິມາດນ້ຳຂອງເຂື່ອນອ່ວາຍນ້ຳທັງໝົດທີ່ໃຊ້ໄດ້">
-                    <small>ເຂື່ອນອ່ວາຍນ້ຳ</small>
-                    <strong>{{ formatMetric(yearPlanDiversionUsableVolume) }} <i>MCM</i></strong>
-                  </span>
+                <div class="kpi-summary-progress" aria-hidden="true">
+                  <span :style="{ width: `${usableVolumePerformance.bar}%` }" />
                 </div>
-              </section>
-            </div>
-            <div class="water-volume-yesterday" :title="yesterdayDate">
-              <span class="water-volume-yesterday-label"><Icon name="lucide:history" size="11" /> ມື້ວານ</span>
-              <span>
-                <small>ລວມ</small>
-                <b>{{ hasYesterdayTotalVolume ? formatMetric(yesterdayTotalWaterVolume) : "—" }}</b>
-                <i>MCM</i>
-              </span>
-              <span>
-                <small>ເຂື່ອນຫຼັກ</small>
-                <b>{{ hasYesterdayMainVolume ? formatMetric(yesterdayMainWaterVolume) : "—" }}</b>
-                <i>MCM</i>
-              </span>
-              <span>
-                <small>ເຂື່ອນອ່ວາຍນ້ຳ</small>
-                <b>{{ hasYesterdayDiversionVolume ? formatMetric(yesterdayDiversionWaterVolume) : "—" }}</b>
-                <i>MCM</i>
-              </span>
-            </div>
+                <div class="volume-component-row">
+                  <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(mainUsableWaterVolume) }} <i>MCM</i></strong></span>
+                  <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(diversionUsableWaterVolume) }} <i>MCM</i></strong></span>
+                </div>
+              </div>
+            </section>
           </div>
 
           <section class="water-plants-section volume-details" :class="{ 'is-collapsed': !waterVolumePlantsExpanded }">
@@ -829,7 +771,6 @@
                   :key="plant.code"
                   type="button"
                   class="combined-plant-card water-volume-plant-card"
-                  :class="{ 'has-diversion': plant.diversionVolume > 0 }"
                   :style="{ '--plant-accent': plant.brand.accent }"
                   :title="`ເບິ່ງລາຍລະອຽດ ${plantDisplayName(plant)}`"
                   @click="openSite(plant.code)"
@@ -840,49 +781,44 @@
                       <span v-else>{{ plant.brand.mark }}</span>
                     </span>
                     <span class="combined-plant-name"><strong>{{ plantDisplayName(plant) }}</strong></span>
-                    <span class="volume-plant-total">
-                      <small>ລວມ</small>
-                      <strong>{{ formatMetric(plant.totalVolume) }} <i>MCM</i></strong>
-                      <small class="volume-plant-yesterday" :title="yesterdayDate">
-                        <Icon name="lucide:history" size="8" /> ມື້ວານ
-                        <b>{{ plant.hasYesterdayTotalVolume ? formatMetric(plant.yesterdayTotalVolume) : "—" }}</b>
-                        <i>MCM</i>
-                      </small>
-                    </span>
                   </span>
 
-                  <span class="combined-card-metrics">
-                    <span class="combined-metric water-main-volume">
+                  <span class="combined-card-metrics plant-volume-comparison-grid">
+                    <span class="combined-metric plant-volume-summary water-main-volume">
                       <span class="combined-metric-heading">
-                        <span><Icon name="lucide:landmark" size="13" /> ເຂື່ອນຫຼັກ</span>
-                        <span class="combined-performance water-tone">{{ plant.mainShare.toFixed(1) }}%</span>
-                      </span>
-                      <span class="combined-metric-values single">
-                        <span><small>ບໍລິມາດ</small><strong>{{ formatMetric(plant.mainVolume) }} <i>MCM</i></strong></span>
-                      </span>
-                      <span class="combined-progress"><i class="water-main" :style="{ width: `${plant.mainShare}%` }" /></span>
-                      <span class="combined-yesterday-values single" :title="yesterdayDate">
-                        <span>
-                          <small><Icon name="lucide:history" size="9" /> ມື້ວານ</small>
-                          <strong>{{ plant.hasYesterdayMainVolume ? formatMetric(plant.yesterdayMainVolume) : "—" }} <i>MCM</i></strong>
+                        <span><Icon name="lucide:waves" size="13" /> ບໍລິມາດນ້ຳທັງໝົດ</span>
+                        <span class="combined-performance" :class="plant.totalVolumePerf.tone">
+                          <TrendIndicator :direction="plant.totalVolumePerf.tone === 'positive' ? 'up' : plant.totalVolumePerf.tone === 'warning' ? 'down' : 'flat'" :size="11" />
+                          {{ plant.totalVolumePerf.percentage }}
                         </span>
+                      </span>
+                      <span class="combined-metric-values">
+                        <span><small>ຕົວຈິງ</small><strong>{{ formatMetric(plant.totalVolume) }} <i>MCM</i></strong></span>
+                        <span><small>ແຜນ</small><strong>{{ formatMetric(plant.planTotalVolume) }} <i>MCM</i></strong></span>
+                      </span>
+                      <span class="combined-progress"><i :class="plant.totalVolumePerf.tone" :style="{ width: `${plant.totalVolumePerf.bar}%` }" /></span>
+                      <span class="plant-volume-components">
+                        <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(plant.mainVolume) }} <i>MCM</i></strong></span>
+                        <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(plant.diversionVolume) }} <i>MCM</i></strong></span>
                       </span>
                     </span>
 
-                    <span v-if="plant.diversionVolume > 0" class="combined-metric water-diversion-volume">
+                    <span class="combined-metric plant-volume-summary water-usable-volume">
                       <span class="combined-metric-heading">
-                        <span><Icon name="lucide:waves" size="13" /> ເຂື່ອນອ່ວາຍນ້ຳ</span>
-                        <span class="combined-performance water-tone">{{ plant.diversionShare.toFixed(1) }}%</span>
-                      </span>
-                      <span class="combined-metric-values single">
-                        <span><small>ບໍລິມາດ</small><strong>{{ formatMetric(plant.diversionVolume) }} <i>MCM</i></strong></span>
-                      </span>
-                      <span class="combined-progress"><i class="water-diversion" :style="{ width: `${plant.diversionShare}%` }" /></span>
-                      <span class="combined-yesterday-values single" :title="yesterdayDate">
-                        <span>
-                          <small><Icon name="lucide:history" size="9" /> ມື້ວານ</small>
-                          <strong>{{ plant.hasYesterdayDiversionVolume ? formatMetric(plant.yesterdayDiversionVolume) : "—" }} <i>MCM</i></strong>
+                        <span><Icon name="lucide:droplets" size="13" /> ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
+                        <span class="combined-performance" :class="plant.usableVolumePerf.tone">
+                          <TrendIndicator :direction="plant.usableVolumePerf.tone === 'positive' ? 'up' : plant.usableVolumePerf.tone === 'warning' ? 'down' : 'flat'" :size="11" />
+                          {{ plant.usableVolumePerf.percentage }}
                         </span>
+                      </span>
+                      <span class="combined-metric-values">
+                        <span><small>ຕົວຈິງ</small><strong>{{ formatMetric(plant.totalUsableVolume) }} <i>MCM</i></strong></span>
+                        <span><small>ແຜນ</small><strong>{{ formatMetric(plant.planTotalUsableVolume) }} <i>MCM</i></strong></span>
+                      </span>
+                      <span class="combined-progress"><i :class="plant.usableVolumePerf.tone" :style="{ width: `${plant.usableVolumePerf.bar}%` }" /></span>
+                      <span class="plant-volume-components">
+                        <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(plant.mainUsableVolume) }} <i>MCM</i></strong></span>
+                        <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(plant.diversionUsableVolume) }} <i>MCM</i></strong></span>
                       </span>
                     </span>
                   </span>
@@ -1425,12 +1361,211 @@ const totalPlanOutflow = computed(() => {
   return 0;
 });
 
-function sumWaterRows(...fields) {
-  return volumeData.value.reduce((sum, row) => {
-    if (row.D_DAM === "ALL" || row.DAM_CODE === "ALL") return sum;
-    const field = fields.find(name => row[name] !== undefined && row[name] !== null);
-    return sum + (field ? toNumber(row[field]) : 0);
+const mainVolumeFields = ["D_MAIN_VOLUME", "MAIN_VOLUME"];
+const diversionVolumeFields = ["D_DIVERSION_VOLUME", "DIVERSION_VOLUME"];
+const totalVolumeFields = ["D_TOTAL_VOLUME", "TOTAL_VOLUME"];
+const mainUsableVolumeFields = [
+  "D_MAIN_USE_VOLUME",
+  "MAIN_USE_VOLUME",
+  "D_MAIN_USABLE_VOLUME",
+  "MAIN_USABLE_VOLUME",
+  "D_MD_USABLE_VOLUME",
+  "MD_USABLE_VOLUME",
+];
+const diversionUsableVolumeFields = [
+  "D_DIVERSION_USE_VOLUME",
+  "DIVERSION_USE_VOLUME",
+  "D_DIVERSION_USABLE_VOLUME",
+  "DIVERSION_USABLE_VOLUME",
+  "D_DIV_USABLE_VOLUME",
+  "DIV_USABLE_VOLUME",
+];
+const totalUsableVolumeFields = [
+  "D_TOTAL_USE_VOLUME",
+  "TOTAL_USE_VOLUME",
+  "D_TOTAL_USABLE_VOLUME",
+  "TOTAL_USABLE_VOLUME",
+  "D_TOTAL_VOLUMN_USABLE",
+  "TOTAL_VOLUMN_USABLE",
+];
+const mainPlanVolumeFields = [
+  "D_PLAN_MAIN_VOLUME",
+  "D_MAIN_PLAN_VOLUME",
+  "DAY_PLAN_MAIN_VOLUME",
+  "DAY_MAIN_PLAN_VOLUME",
+  "WEEK_PLAN_MAIN_VOLUME",
+  "WEEK_MAIN_PLAN_VOLUME",
+  "MONTH_PLAN_MAIN_VOLUME",
+  "MONTH_MAIN_PLAN_VOLUME",
+  "YEAR_PLAN_MAIN_VOLUME",
+  "YEAR_MAIN_PLAN_VOLUME",
+];
+const diversionPlanVolumeFields = [
+  "D_PLAN_DIVERSION_VOLUME",
+  "D_DIVERSION_PLAN_VOLUME",
+  "DAY_PLAN_DIVERSION_VOLUME",
+  "DAY_DIVERSION_PLAN_VOLUME",
+  "WEEK_PLAN_DIVERSION_VOLUME",
+  "WEEK_DIVERSION_PLAN_VOLUME",
+  "MONTH_PLAN_DIVERSION_VOLUME",
+  "MONTH_DIVERSION_PLAN_VOLUME",
+  "YEAR_PLAN_DIVERSION_VOLUME",
+  "YEAR_DIVERSION_PLAN_VOLUME",
+];
+const totalPlanVolumeFields = [
+  "D_PLAN_TOTAL_VOLUME",
+  "D_TOTAL_PLAN_VOLUME",
+  "DAY_PLAN_TOTAL_VOLUME",
+  "DAY_TOTAL_PLAN_VOLUME",
+  "WEEK_PLAN_TOTAL_VOLUME",
+  "WEEK_TOTAL_PLAN_VOLUME",
+  "MONTH_PLAN_TOTAL_VOLUME",
+  "MONTH_TOTAL_PLAN_VOLUME",
+  "YEAR_TOTAL_PLAN_VOLUME",
+  "YEAR_PLAN_TOTAL_VOLUME",
+];
+const mainPlanUsableVolumeFields = [
+  "D_PLAN_MAIN_USE_VOLUME",
+  "D_MAIN_PLAN_USE_VOLUME",
+  "D_PLAN_MAIN_USABLE_VOLUME",
+  "D_MAIN_PLAN_USABLE_VOLUME",
+  "DAY_PLAN_MAIN_USABLE_VOLUME",
+  "WEEK_PLAN_MAIN_USABLE_VOLUME",
+  "MONTH_PLAN_MAIN_USABLE_VOLUME",
+  "YEAR_PLAN_MAIN_USABLE_VOLUME",
+  "YEAR_MAIN_PLAN_USABLE_VOLUME",
+];
+const diversionPlanUsableVolumeFields = [
+  "D_PLAN_DIVERSION_USE_VOLUME",
+  "D_DIVERSION_PLAN_USE_VOLUME",
+  "D_PLAN_DIVERSION_USABLE_VOLUME",
+  "D_DIVERSION_PLAN_USABLE_VOLUME",
+  "DAY_PLAN_DIVERSION_USABLE_VOLUME",
+  "WEEK_PLAN_DIVERSION_USABLE_VOLUME",
+  "MONTH_PLAN_DIVERSION_USABLE_VOLUME",
+  "YEAR_PLAN_DIVERSION_USABLE_VOLUME",
+  "YEAR_DIVERSION_PLAN_USABLE_VOLUME",
+];
+const totalPlanUsableVolumeFields = [
+  "D_PLAN_TOTAL_USE_VOLUME",
+  "D_TOTAL_PLAN_USE_VOLUME",
+  "D_PLAN_TOTAL_USABLE_VOLUME",
+  "D_TOTAL_PLAN_USABLE_VOLUME",
+  "DAY_PLAN_TOTAL_USABLE_VOLUME",
+  "WEEK_PLAN_TOTAL_USABLE_VOLUME",
+  "MONTH_PLAN_TOTAL_USABLE_VOLUME",
+  "YEAR_TOTAL_PLAN_VOLUMN_USABLE",
+  "YEAR_TOTAL_PLAN_VOLUME_USABLE",
+  "YEAR_PLAN_TOTAL_USABLE_VOLUME",
+  "YEAR_TOTAL_PLAN_USABLE_VOLUME",
+];
+const allPlanVolumeFields = [
+  ...mainPlanVolumeFields,
+  ...diversionPlanVolumeFields,
+  ...totalPlanVolumeFields,
+  ...mainPlanUsableVolumeFields,
+  ...diversionPlanUsableVolumeFields,
+  ...totalPlanUsableVolumeFields,
+];
+
+function selectedPlanFields(fields) {
+  const preferredPrefixes = {
+    Y: ["YEAR"],
+    M: ["MONTH"],
+    W: ["WEEK"],
+    D: ["DAY", "D"],
+    Q: ["MONTH"],
+  }[selectedPeriod.value] || [];
+  const preferred = fields.filter(field => preferredPrefixes.some(prefix => field.startsWith(`${prefix}_`)));
+  return [...preferred, ...fields.filter(field => !preferred.includes(field))];
+}
+
+function volumeRowPlantCode(row) {
+  return String(row?.D_DAM ?? row?.DAM_CODE ?? row?.BR_CODE ?? row?.dam_code ?? "").trim().toUpperCase();
+}
+
+function volumeRowTimestamp(row) {
+  const raw = row?.D_DATE ?? row?.DATE ?? row?.date ?? row?.DATA_DATE ?? row?.PERIOD_DATE;
+  if (raw === undefined || raw === null || raw === "") return 0;
+  const normalized = String(raw).trim().replace(" ", "T");
+  const timestamp = Date.parse(normalized);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function hasMetricField(row, fields) {
+  return fields.some(field => row?.[field] !== undefined && row[field] !== null && row[field] !== "");
+}
+
+function rowMetricValue(row, fields) {
+  const field = fields.find(name => row?.[name] !== undefined && row[name] !== null && row[name] !== "");
+  return field ? toNumber(row[field]) : null;
+}
+
+function latestVolumeRowsFor(candidates, rows = volumeData.value) {
+  const latest = new Map();
+
+  rows.forEach((row, index) => {
+    const code = volumeRowPlantCode(row);
+    if (!code || code === "ALL" || !hasMetricField(row, candidates)) return;
+    const timestamp = volumeRowTimestamp(row);
+    const current = latest.get(code);
+    if (!current || timestamp > current.timestamp || (timestamp === current.timestamp && index > current.index)) {
+      latest.set(code, { row, timestamp, index });
+    }
+  });
+
+  return [...latest.values()].map(item => item.row);
+}
+
+const latestPlantVolumeRows = computed(() => latestVolumeRowsFor([
+  ...mainVolumeFields,
+  ...diversionVolumeFields,
+  ...totalVolumeFields,
+  ...mainUsableVolumeFields,
+  ...diversionUsableVolumeFields,
+  ...totalUsableVolumeFields,
+]));
+const latestPlantPlanVolumeRows = computed(() => latestVolumeRowsFor([
+  ...allPlanVolumeFields,
+]));
+
+function rowCompositeMetric(row, totalFields, firstFields, secondFields) {
+  if (!row) return 0;
+  const direct = rowMetricValue(row, totalFields);
+  const first = rowMetricValue(row, firstFields);
+  const second = rowMetricValue(row, secondFields);
+  const componentTotal = (first ?? 0) + (second ?? 0);
+  if (direct !== null && (direct !== 0 || componentTotal === 0)) return direct;
+  return componentTotal;
+}
+
+function sumLatestSnapshotMetric(fields, rows = latestPlantVolumeRows.value) {
+  let found = false;
+  const total = rows.reduce((sum, row) => {
+    const value = rowMetricValue(row, fields);
+    if (value === null) return sum;
+    found = true;
+    return sum + value;
   }, 0);
+  return found ? total : null;
+}
+
+function sumLatestSnapshotComposite(totalFields, firstFields, secondFields, rows = latestPlantVolumeRows.value) {
+  let found = false;
+  const total = rows.reduce((sum, row) => {
+    const direct = rowMetricValue(row, totalFields);
+    const first = rowMetricValue(row, firstFields);
+    const second = rowMetricValue(row, secondFields);
+    const componentTotal = (first ?? 0) + (second ?? 0);
+    if (direct !== null && (direct !== 0 || componentTotal === 0)) {
+      found = true;
+      return sum + direct;
+    }
+    if (first === null && second === null) return sum;
+    found = true;
+    return sum + componentTotal;
+  }, 0);
+  return found ? total : null;
 }
 
 function waterSummaryMetric(kind, fallback) {
@@ -1450,29 +1585,35 @@ function waterSummaryMetric(kind, fallback) {
   return typeof fallback === "function" ? toNumber(fallback()) : toNumber(fallback);
 }
 
-const mainWaterVolume = computed(() => waterSummaryMetric(
-  "MAIN_VOLUME",
-  () => sumWaterRows("D_MAIN_VOLUME", "MAIN_VOLUME"),
+const mainWaterVolume = computed(() => (
+  sumLatestSnapshotMetric(mainVolumeFields)
+  ?? waterSummaryMetric("MAIN_VOLUME", 0)
 ));
-const diversionWaterVolume = computed(() => waterSummaryMetric(
-  "DIVERSION_VOLUME",
-  () => sumWaterRows("D_DIVERSION_VOLUME", "DIVERSION_VOLUME"),
+const diversionWaterVolume = computed(() => (
+  sumLatestSnapshotMetric(diversionVolumeFields)
+  ?? waterSummaryMetric("DIVERSION_VOLUME", 0)
 ));
-const totalWaterVolume = computed(() => waterSummaryMetric(
-  "TOTAL_VOLUME",
-  () => sumWaterRows("D_TOTAL_VOLUME", "TOTAL_VOLUME") || mainWaterVolume.value + diversionWaterVolume.value,
+const totalWaterVolume = computed(() => (
+  sumLatestSnapshotComposite(totalVolumeFields, mainVolumeFields, diversionVolumeFields)
+  ?? waterSummaryMetric("TOTAL_VOLUME", () => mainWaterVolume.value + diversionWaterVolume.value)
+));
+const mainUsableWaterVolume = computed(() => (
+  sumLatestSnapshotMetric(mainUsableVolumeFields)
+  ?? waterSummaryMetric("MAIN_USE_VOLUME", 0)
+));
+const diversionUsableWaterVolume = computed(() => (
+  sumLatestSnapshotMetric(diversionUsableVolumeFields)
+  ?? waterSummaryMetric("DIVERSION_USE_VOLUME", 0)
+));
+const totalUsableWaterVolume = computed(() => (
+  sumLatestSnapshotComposite(totalUsableVolumeFields, mainUsableVolumeFields, diversionUsableVolumeFields)
+  ?? mainUsableWaterVolume.value + diversionUsableWaterVolume.value
 ));
 
 function annualPlanVolumeMetric(fields, fallback = 0) {
   const sourceFields = Array.isArray(fields) ? fields : [fields];
-  const totalRow = allSummary.value;
-  const totalField = sourceFields.find(field => (
-    totalRow[field] !== undefined && totalRow[field] !== null && totalRow[field] !== ""
-  ));
-  if (totalField) return toNumber(totalRow[totalField]);
-
-  const plantValues = summaryData.value
-    .filter(row => row.D_DAM !== "ALL" && row.IS_TOTAL !== 1 && row.IS_TOTAL !== "1")
+  const plantValues = latestVolumeRowsFor(sourceFields, summaryData.value)
+    .filter(row => row.IS_TOTAL !== 1 && row.IS_TOTAL !== "1")
     .map((row) => {
       const field = sourceFields.find(name => row[name] !== undefined && row[name] !== null && row[name] !== "");
       return field ? toNumber(row[field]) : null;
@@ -1480,41 +1621,51 @@ function annualPlanVolumeMetric(fields, fallback = 0) {
     .filter(value => value !== null);
 
   if (plantValues.length) return plantValues.reduce((sum, value) => sum + value, 0);
+
+  const totalRow = allSummary.value;
+  const totalField = sourceFields.find(field => (
+    totalRow[field] !== undefined && totalRow[field] !== null && totalRow[field] !== ""
+  ));
+  if (totalField) return toNumber(totalRow[totalField]);
+
   return typeof fallback === "function" ? toNumber(fallback()) : toNumber(fallback);
 }
 
-const yearPlanMainVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_PLAN_MAIN_VOLUME",
-  "YEAR_MAIN_PLAN_VOLUME",
-]));
-const yearPlanDiversionVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_PLAN_DIVERSION_VOLUME",
-  "YEAR_DIVERSION_PLAN_VOLUME",
-]));
-const yearTotalPlanVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_TOTAL_PLAN_VOLUME",
-  "YEAR_PLAN_TOTAL_VOLUME",
-], () => yearPlanMainVolume.value + yearPlanDiversionVolume.value));
-const yearPlanMainUsableVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_PLAN_MAIN_USABLE_VOLUME",
-  "YEAR_MAIN_PLAN_USABLE_VOLUME",
-]));
-const yearPlanDiversionUsableVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_PLAN_DIVERSION_USABLE_VOLUME",
-  "YEAR_DIVERSION_PLAN_USABLE_VOLUME",
-]));
-const yearTotalPlanUsableVolume = computed(() => annualPlanVolumeMetric([
-  "YEAR_TOTAL_PLAN_VOLUMN_USABLE",
-  "YEAR_TOTAL_PLAN_VOLUME_USABLE",
-  "YEAR_PLAN_TOTAL_USABLE_VOLUME",
-  "YEAR_TOTAL_PLAN_USABLE_VOLUME",
-], () => yearPlanMainUsableVolume.value + yearPlanDiversionUsableVolume.value));
-
-const mainVolumeShare = computed(() => (
-  totalWaterVolume.value > 0 ? Math.min(100, (mainWaterVolume.value / totalWaterVolume.value) * 100) : 0
+const yearPlanMainVolume = computed(() => (
+  sumLatestSnapshotMetric(selectedPlanFields(mainPlanVolumeFields), latestPlantPlanVolumeRows.value)
+  ?? annualPlanVolumeMetric(selectedPlanFields(mainPlanVolumeFields))
 ));
-const diversionVolumeShare = computed(() => (
-  totalWaterVolume.value > 0 ? Math.min(100 - mainVolumeShare.value, (diversionWaterVolume.value / totalWaterVolume.value) * 100) : 0
+const yearPlanDiversionVolume = computed(() => (
+  sumLatestSnapshotMetric(selectedPlanFields(diversionPlanVolumeFields), latestPlantPlanVolumeRows.value)
+  ?? annualPlanVolumeMetric(selectedPlanFields(diversionPlanVolumeFields))
+));
+const yearTotalPlanVolume = computed(() => (
+  sumLatestSnapshotComposite(
+    selectedPlanFields(totalPlanVolumeFields),
+    selectedPlanFields(mainPlanVolumeFields),
+    selectedPlanFields(diversionPlanVolumeFields),
+    latestPlantPlanVolumeRows.value,
+  )
+  ?? annualPlanVolumeMetric(selectedPlanFields(totalPlanVolumeFields), () => yearPlanMainVolume.value + yearPlanDiversionVolume.value)
+));
+const yearPlanMainUsableVolume = computed(() => (
+  sumLatestSnapshotMetric(selectedPlanFields(mainPlanUsableVolumeFields), latestPlantPlanVolumeRows.value)
+  ?? annualPlanVolumeMetric(selectedPlanFields(mainPlanUsableVolumeFields))
+));
+const yearPlanDiversionUsableVolume = computed(() => (
+  sumLatestSnapshotMetric(selectedPlanFields(diversionPlanUsableVolumeFields), latestPlantPlanVolumeRows.value)
+  ?? annualPlanVolumeMetric(selectedPlanFields(diversionPlanUsableVolumeFields))
+));
+const yearTotalPlanUsableVolume = computed(() => (
+  sumLatestSnapshotComposite(
+    selectedPlanFields(totalPlanUsableVolumeFields),
+    selectedPlanFields(mainPlanUsableVolumeFields),
+    selectedPlanFields(diversionPlanUsableVolumeFields),
+    latestPlantPlanVolumeRows.value,
+  )
+  ?? annualPlanVolumeMetric(selectedPlanFields(totalPlanUsableVolumeFields), () => (
+    yearPlanMainUsableVolume.value + yearPlanDiversionUsableVolume.value
+  ))
 ));
 
 const apiTotalInflow = computed(() => waterSummaryMetric("ACTUAL_INFLOW", () => totalInflow.value));
@@ -1618,58 +1769,77 @@ const waterPlantList = computed(() => {
 
 const waterVolumePlantList = computed(() => {
   const totals = new Map();
-  const prefix = waterPeriodPrefix.value;
-  const hasSummaryVolume = Boolean(prefix) && summaryData.value.some((row) => (
-    row.D_DAM !== "ALL"
-    && ["TOTAL_VOLUME", "MAIN_VOLUME", "DIVERSION_VOLUME"].some(kind => (
-      row[`${prefix}_${kind}`] !== undefined && row[`${prefix}_${kind}`] !== null
-    ))
-  ));
+  const planRowsByPlant = new Map();
 
-  if (hasSummaryVolume) {
-    summaryData.value.forEach((row) => {
-      const code = row.D_DAM;
-      if (!code || code === "ALL") return;
-      const mainVolume = toNumber(row[`${prefix}_MAIN_VOLUME`]);
-      const diversionVolume = toNumber(row[`${prefix}_DIVERSION_VOLUME`]);
-      totals.set(code, {
-        code,
-        label: row.branch?.BR_NAME || row.BR_NAME || code,
-        shortName: getPlantShortName(code, row.branch?.BR_NAME_EN || row.BR_NAME_EN),
-        mainVolume,
-        diversionVolume,
-        totalVolume: toNumber(row[`${prefix}_TOTAL_VOLUME`]) || mainVolume + diversionVolume,
-      });
+  latestVolumeRowsFor(allPlanVolumeFields, summaryData.value).forEach((row) => {
+    const code = volumeRowPlantCode(row);
+    if (code && code !== "ALL") planRowsByPlant.set(code, row);
+  });
+  latestPlantPlanVolumeRows.value.forEach((row) => {
+    const code = volumeRowPlantCode(row);
+    if (code && code !== "ALL") planRowsByPlant.set(code, row);
+  });
+
+  const selectedMainPlanFields = selectedPlanFields(mainPlanVolumeFields);
+  const selectedDiversionPlanFields = selectedPlanFields(diversionPlanVolumeFields);
+  const selectedTotalPlanFields = selectedPlanFields(totalPlanVolumeFields);
+  const selectedMainUsablePlanFields = selectedPlanFields(mainPlanUsableVolumeFields);
+  const selectedDiversionUsablePlanFields = selectedPlanFields(diversionPlanUsableVolumeFields);
+  const selectedTotalUsablePlanFields = selectedPlanFields(totalPlanUsableVolumeFields);
+
+  latestPlantVolumeRows.value.forEach((row) => {
+    const code = volumeRowPlantCode(row);
+    if (!code || code === "ALL") return;
+    const summaryRow = summaryData.value.find(item => volumeRowPlantCode(item) === code);
+    const planRow = planRowsByPlant.get(code) || summaryRow;
+    const mainVolume = rowMetricValue(row, mainVolumeFields) ?? 0;
+    const diversionVolume = rowMetricValue(row, diversionVolumeFields) ?? 0;
+    const mainUsableVolume = rowMetricValue(row, mainUsableVolumeFields) ?? 0;
+    const diversionUsableVolume = rowMetricValue(row, diversionUsableVolumeFields) ?? 0;
+    const planMainVolume = rowMetricValue(planRow, selectedMainPlanFields) ?? 0;
+    const planDiversionVolume = rowMetricValue(planRow, selectedDiversionPlanFields) ?? 0;
+    const planMainUsableVolume = rowMetricValue(planRow, selectedMainUsablePlanFields) ?? 0;
+    const planDiversionUsableVolume = rowMetricValue(planRow, selectedDiversionUsablePlanFields) ?? 0;
+    totals.set(code, {
+      code,
+      label: row.branch?.BR_NAME || row.BR_NAME || summaryRow?.branch?.BR_NAME || summaryRow?.BR_NAME || code,
+      shortName: getPlantShortName(code, row.branch?.BR_NAME_EN || row.BR_NAME_EN || summaryRow?.BR_NAME_EN),
+      mainVolume,
+      diversionVolume,
+      totalVolume: rowCompositeMetric(row, totalVolumeFields, mainVolumeFields, diversionVolumeFields),
+      mainUsableVolume,
+      diversionUsableVolume,
+      totalUsableVolume: rowCompositeMetric(row, totalUsableVolumeFields, mainUsableVolumeFields, diversionUsableVolumeFields),
+      planMainVolume,
+      planDiversionVolume,
+      planTotalVolume: rowCompositeMetric(planRow, selectedTotalPlanFields, selectedMainPlanFields, selectedDiversionPlanFields),
+      planMainUsableVolume,
+      planDiversionUsableVolume,
+      planTotalUsableVolume: rowCompositeMetric(
+        planRow,
+        selectedTotalUsablePlanFields,
+        selectedMainUsablePlanFields,
+        selectedDiversionUsablePlanFields,
+      ),
     });
-  } else {
-    volumeData.value.forEach((row) => {
-      const code = row.D_DAM || row.DAM_CODE || row.BR_CODE || row.dam_code;
-      if (!code || code === "ALL") return;
-      const summaryRow = summaryData.value.find(item => item.D_DAM === code);
-      const current = totals.get(code) || {
-        code,
-        label: row.branch?.BR_NAME || row.BR_NAME || summaryRow?.branch?.BR_NAME || summaryRow?.BR_NAME || code,
-        shortName: getPlantShortName(code, row.branch?.BR_NAME_EN || row.BR_NAME_EN || summaryRow?.BR_NAME_EN),
-        mainVolume: 0,
-        diversionVolume: 0,
-        totalVolume: 0,
-      };
-      current.mainVolume += toNumber(row.D_MAIN_VOLUME ?? row.MAIN_VOLUME);
-      current.diversionVolume += toNumber(row.D_DIVERSION_VOLUME ?? row.DIVERSION_VOLUME);
-      current.totalVolume += toNumber(row.D_TOTAL_VOLUME ?? row.TOTAL_VOLUME);
-      totals.set(code, current);
-    });
-  }
+  });
 
   return [...totals.values()]
     .map((plant) => {
       const totalVolume = plant.totalVolume || plant.mainVolume + plant.diversionVolume;
+      const totalUsableVolume = plant.totalUsableVolume || plant.mainUsableVolume + plant.diversionUsableVolume;
+      const planTotalVolume = plant.planTotalVolume || plant.planMainVolume + plant.planDiversionVolume;
+      const planTotalUsableVolume = plant.planTotalUsableVolume
+        || plant.planMainUsableVolume + plant.planDiversionUsableVolume;
       return {
         ...plant,
         totalVolume,
+        totalUsableVolume,
+        planTotalVolume,
+        planTotalUsableVolume,
         brand: getPlantBrand(plant.code),
-        mainShare: totalVolume > 0 ? Math.min(100, (plant.mainVolume / totalVolume) * 100) : 0,
-        diversionShare: totalVolume > 0 ? Math.min(100, (plant.diversionVolume / totalVolume) * 100) : 0,
+        totalVolumePerf: performance(totalVolume, planTotalVolume),
+        usableVolumePerf: performance(totalUsableVolume, planTotalUsableVolume),
         hasYesterdayMainVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.mainVolume),
         hasYesterdayDiversionVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.diversionVolume),
         hasYesterdayTotalVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.totalVolume)
@@ -1700,9 +1870,8 @@ const energyPerformance = computed(() => performance(totalEnergy.value, totalPla
 const revenuePerformance = computed(() => performance(totalRevenue.value, totalPlanRevenue.value));
 const inflowPerformance = computed(() => performance(apiTotalInflow.value, apiPlanInflow.value));
 const flowComparison = computed(() => performance(apiTotalInflow.value, apiTotalOutflow.value));
-const totalVolumeAchievement = computed(() => performance(totalWaterVolume.value, yearTotalPlanVolume.value));
-const mainVolumeAchievement = computed(() => performance(mainWaterVolume.value, yearPlanMainVolume.value));
-const diversionVolumeAchievement = computed(() => performance(diversionWaterVolume.value, yearPlanDiversionVolume.value));
+const totalVolumePerformance = computed(() => performance(totalWaterVolume.value, yearTotalPlanVolume.value));
+const usableVolumePerformance = computed(() => performance(totalUsableWaterVolume.value, yearTotalPlanUsableVolume.value));
 const outflowPerformance = computed(() => {
   if (apiPlanOutflow.value > 0) {
     return performance(apiTotalOutflow.value, apiPlanOutflow.value);
@@ -4821,6 +4990,91 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .water-metric-block.positive .kpi-summary-progress > span { background: linear-gradient(90deg,#25b97c,#65e6a7); }
 .water-summary-panel.outflow-panel .kpi-summary-progress > span { background: linear-gradient(90deg,#359fd8,#78d9f6); }
 
+.volume-comparison-grid .water-summary-panel {
+  min-height: 110px;
+}
+.total-volume-icon,
+.usable-volume-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(88, 213, 225, .26);
+  background: linear-gradient(145deg, rgba(34, 184, 200, .24), rgba(45, 113, 188, .20));
+  color: #71dfe8;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 0 10px rgba(52, 197, 210, .08);
+}
+.usable-volume-icon {
+  border-color: rgba(91, 221, 180, .26);
+  background: linear-gradient(145deg, rgba(45, 179, 139, .23), rgba(28, 113, 112, .20));
+  color: #72e2b9;
+}
+.total-volume-panel {
+  border-color: rgba(80, 205, 220, .21);
+}
+.usable-volume-panel {
+  border-color: rgba(91, 221, 180, .20);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(67, 190, 151, .10), transparent 55%),
+    linear-gradient(145deg, rgba(7, 60, 72, .72), rgba(4, 29, 55, .68));
+}
+.total-volume-panel .kpi-summary-progress > span {
+  background: linear-gradient(90deg, #2dbfd1, #77e3e8);
+}
+.usable-volume-panel .kpi-summary-progress > span {
+  background: linear-gradient(90deg, #2fbd88, #70e3b1);
+  box-shadow: 0 0 9px rgba(69, 207, 158, .25);
+}
+.volume-component-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(111, 187, 203, .12);
+  font-variant-numeric: tabular-nums;
+}
+.volume-component-row > span {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 5px;
+}
+.volume-component-row > span + span {
+  position: relative;
+  padding-left: 11px;
+}
+.volume-component-row > span + span::before {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(112, 190, 206, .42), transparent);
+  content: "";
+}
+.volume-component-row small {
+  overflow: hidden;
+  color: #789da9;
+  font-size: clamp(.7rem, .75vw, .79rem);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.volume-component-row strong {
+  overflow: hidden;
+  color: #c7e0e6;
+  font-size: clamp(.8rem, .86vw, .9rem);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.usable-volume-panel .volume-component-row strong { color: #82dbb9; }
+.volume-component-row i {
+  color: #6f929f;
+  font-size: clamp(.59rem, .63vw, .66rem);
+  font-weight: 700;
+  font-style: normal;
+}
+
 .water-total-value { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 8px; }
 .water-total-value > span { color: #8fb0bd; font-size: .62rem; font-weight: 600; }
 .water-total-value strong { color: #fff; font-size: clamp(1.12rem,1.75vw,1.42rem); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -4838,7 +5092,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .water-volume-plan-groups {
   display:grid;
   grid-column:1 / -1;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:minmax(0,1fr);
   gap:8px;
   margin-top:4px;
 }
@@ -4973,7 +5227,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
   justify-content: center;
   flex-direction: column;
   gap: 3px;
-  padding: 0 88px 0 2px;
+  padding: 0 12px 0 2px;
 }
 .water-volume-overview .water-total-value > span,
 .water-volume-overview .water-volume-breakdown small {
@@ -5005,7 +5259,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
   min-height: 54px;
   justify-content: center;
   gap: 3px;
-  padding: 0 78px 0 15px;
+  padding: 0 12px 0 15px;
   overflow: hidden;
 }
 .water-volume-overview .water-volume-breakdown > span + span {
@@ -5041,39 +5295,6 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .water-volume-overview .water-volume-breakdown > span + span small::before {
   background: #73baf0;
   box-shadow: 0 0 7px rgba(115,186,240,.34);
-}
-.water-volume-achievement {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  display: inline-flex;
-  min-height: 23px;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 3px 7px;
-  transform: translateY(-50%);
-  border: 1px solid rgba(111, 202, 214, .25);
-  border-radius: 999px;
-  background: rgba(4, 40, 67, .82);
-  color: #9bb9c4;
-  font-size: clamp(.59rem,.64vw,.68rem);
-  font-style: normal;
-  font-weight: 850;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(0,18,39,.16), inset 0 1px 0 rgba(255,255,255,.05);
-}
-.water-volume-achievement.warning {
-  border-color: rgba(245, 184, 76, .30);
-  background: rgba(121, 78, 14, .18);
-  color: #ffc45c;
-}
-.water-volume-achievement.positive {
-  border-color: rgba(83, 220, 170, .30);
-  background: rgba(24, 126, 91, .17);
-  color: #70e2ad;
 }
 .water-volume-overview .water-volume-track {
   grid-column: 1 / -1;
@@ -5118,6 +5339,11 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .water-summary-panel { margin-top: 6px; padding: 8px 9px; }
   .water-summary-panel .kpi-summary-stat strong,
   .water-summary-panel .kpi-summary-stat.plan strong { font-size: 1rem; }
+  .volume-component-row > span {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1px;
+  }
   .water-total-value strong { font-size: 1rem; }
   .water-volume-overview { grid-template-columns: 1fr; gap: 7px; padding: 9px; }
   .water-volume-overview .water-volume-track { grid-column: 1; }
@@ -5196,7 +5422,75 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .combined-metric.water-diversion-volume { border-color: rgba(82, 154, 230, .18); }
 .combined-metric.water-main-volume .combined-metric-heading > span:first-child { color: #70dedf; }
 .combined-metric.water-diversion-volume .combined-metric-heading > span:first-child { color: #86bff4; }
+.combined-metric.water-usable-volume {
+  --plant-metric-divider: rgba(89, 220, 176, .46);
+  --plant-metric-divider-glow: rgba(69, 207, 158, .13);
+  border-color: rgba(91, 221, 180, .18);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(67, 190, 151, .08), transparent 58%),
+    rgba(3, 39, 51, .32);
+}
+.combined-metric.water-usable-volume .combined-metric-heading > span:first-child { color: #72e2b9; }
 .combined-performance.water-tone { color: #82dbe9; }
+.plant-volume-summary.water-main-volume .combined-progress i {
+  background: linear-gradient(90deg, #2dbfd1, #77e3e8);
+  box-shadow: 0 0 5px rgba(56, 198, 213, .23);
+}
+.plant-volume-summary.water-usable-volume .combined-progress i {
+  background: linear-gradient(90deg, #2fbd88, #70e3b1);
+  box-shadow: 0 0 5px rgba(69, 207, 158, .23);
+}
+.plant-volume-components {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(111, 187, 203, .12);
+  font-variant-numeric: tabular-nums;
+}
+.plant-volume-components > span {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 4px;
+}
+.plant-volume-components > span + span {
+  position: relative;
+  padding-left: 8px;
+}
+.plant-volume-components > span + span::before {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
+  content: "";
+}
+.plant-volume-components small {
+  overflow: hidden;
+  color: #789da9;
+  font-size: clamp(.58rem, .63vw, .67rem);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plant-volume-components strong {
+  overflow: hidden;
+  color: #c7e0e6;
+  font-size: clamp(.68rem, .73vw, .78rem);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.water-usable-volume .plant-volume-components strong { color: #82dbb9; }
+.plant-volume-components i {
+  color: #6f929f;
+  font-size: clamp(.49rem, .53vw, .57rem);
+  font-style: normal;
+  font-weight: 700;
+}
 .combined-progress i.water-main {
   background: linear-gradient(90deg,#2cb9cb,#6fdce4);
   box-shadow: 0 0 4px rgba(55,194,207,.20);
@@ -5208,6 +5502,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
 
 @media (max-width: 600px) {
   .water-plants-grid { grid-template-columns: 1fr; gap: 8px; }
+  .plant-volume-comparison-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
@@ -6402,16 +6697,16 @@ onBeforeUnmount(() => activeRequestController?.abort());
     font-size: clamp(0.92rem, 0.95vw, 1rem);
   }
 
-  :is(.executive-overview-card, .water-executive-card) .kpi-summary-stat > span {
+  :is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat > span {
     font-size: clamp(0.75rem, 0.78vw, 0.82rem);
   }
 
-  :is(.executive-overview-card, .water-executive-card) .kpi-summary-stat strong,
-  :is(.executive-overview-card, .water-executive-card) .kpi-summary-stat.plan strong {
+  :is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat strong,
+  :is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat.plan strong {
     font-size: clamp(1.55rem, 1.75vw, 1.82rem);
   }
 
-  :is(.executive-overview-card, .water-executive-card) .kpi-summary-stat small {
+  :is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat small {
     font-size: clamp(0.6rem, 0.62vw, 0.66rem);
   }
 
@@ -6523,13 +6818,13 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 /* Accessible supporting text on phones, tablets and desktop screens. */
-:is(.executive-overview-card, .water-executive-card) .kpi-summary-stat > span {
+:is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat > span {
   font-size: clamp(0.72rem, 0.78vw, 0.82rem);
   font-weight: 700;
   line-height: 1.25;
 }
 
-:is(.executive-overview-card, .water-executive-card) .kpi-summary-stat small {
+:is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat small {
   font-size: clamp(0.56rem, 0.62vw, 0.66rem);
   line-height: 1;
 }
@@ -6630,11 +6925,11 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 /* Final metadata scale: keep secondary figures legible at every viewport. */
-:is(.executive-overview-card, .water-executive-card) .kpi-summary-stat > span {
+:is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat > span {
   font-size: clamp(0.78rem, 0.84vw, 0.88rem);
 }
 
-:is(.executive-overview-card, .water-executive-card) .kpi-summary-stat small {
+:is(.executive-overview-card, .water-executive-card, .water-volume-executive-card) .kpi-summary-stat small {
   font-size: clamp(0.62rem, 0.67vw, 0.7rem);
 }
 
@@ -7139,21 +7434,6 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .water-volume-overview .water-volume-breakdown > span + span {
     min-height: 70px;
     padding: 0 6px 0 8px;
-  }
-
-  .water-volume-achievement {
-    position: static;
-    min-height: 18px;
-    align-self: flex-start;
-    margin-top: 2px;
-    padding: 2px 5px;
-    transform: none;
-    font-size: clamp(.52rem, 2.25vw, .6rem);
-  }
-
-  .water-volume-achievement > svg {
-    width: 9px;
-    height: 9px;
   }
 
   .water-volume-overview .water-total-value > span::before,
