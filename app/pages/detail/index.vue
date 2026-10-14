@@ -1399,7 +1399,33 @@ onMounted(loadDashboardData);
 }
 
 @media (max-width: 420px) {
-  .water-level-limits { grid-template-columns:1fr; }
+  .water-level-limits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .water-level-limit {
+    min-height: 62px;
+    padding: 7px 8px;
+    border-left-width: 2px;
+    border-radius: 8px;
+  }
+  .water-level-limit > span {
+    align-items: flex-start;
+    gap: 4px;
+    font-size: .6rem;
+    line-height: 1.2;
+  }
+  .water-level-limit > span svg {
+    width: 13px;
+    height: 13px;
+    margin-top: 1px;
+  }
+  .water-level-limit strong {
+    margin-top: 5px;
+    font-size: .82rem;
+  }
+  .water-level-limit strong small { font-size: .5rem; }
 }
 
 @media (max-width: 600px) {
@@ -2606,13 +2632,24 @@ onMounted(loadDashboardData);
 
 @media (max-width:760px) {
   .chart-range-filter-button {
-    width:38px;
+    width:auto;
+    min-width:78px;
     min-height:38px;
+    flex:0 0 auto;
     justify-content:center;
-    padding:0;
+    gap:5px;
+    padding:0 9px;
   }
-  .chart-range-filter-button > span,
-  .chart-range-filter-button > svg:last-child { display:none; }
+  .chart-range-filter-button > span {
+    display:inline;
+    max-width:none;
+    overflow:visible;
+    color:#f3ffff;
+    font-size:.68rem;
+    text-overflow:clip;
+  }
+  .chart-range-filter-button > svg { flex:0 0 auto; }
+  .chart-range-filter-button > svg:last-child { display:block; }
   .chart-range-filter-panel { grid-template-columns:1fr 1fr; }
   .chart-range-filter-actions { grid-column:1 / -1;justify-content:flex-end; }
 }

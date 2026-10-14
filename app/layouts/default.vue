@@ -10,9 +10,16 @@
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
         <v-toolbar-title class="brand-title">
-          <div class="header-logo-shell">
-            <v-img src="/assets/images/logo_cse.png" class="header-logo" />
-          </div>
+          <NuxtLink
+            to="/"
+            class="header-logo-home"
+            aria-label="ກັບໄປໜ້າຫຼັກ"
+            title="ກັບໄປໜ້າຫຼັກ"
+          >
+            <div class="header-logo-shell">
+              <v-img src="/assets/images/logo_cse.png" class="header-logo" />
+            </div>
+          </NuxtLink>
         </v-toolbar-title>
 
         <v-avatar class="d-none d-lg-block">
@@ -32,8 +39,8 @@
               <h5 class="font-weight-thin">{{ item.MENU_NAME_LA }}</h5>
             </v-list-item-title>
             <v-list v-if="item.submenus.length">
-              <v-list-item class="px-0" v-for="sub in item.submenus" :key="sub.MENU_ID"
-                :active="$route.path === sub.PATH && !(sub.PATH === '/' && $route.query.view === 'plants')" @click="handleMenuClick(sub)" link color="primary">
+              <v-list-item class="drawer-menu-link px-0" v-for="sub in item.submenus" :key="sub.MENU_ID"
+                :active="$route.path === sub.PATH && !(sub.PATH === '/' && $route.query.view === 'plants')" @click="handleMenuClick(sub)" link>
                 <v-list-item-title class="d-flex px-4" :value="sub.PATH">
                   <Icon :icon="sub.CSS_ICON" class="mr-2" width="20" height="20" />
                   <h5 class="font-weight-thin">{{ sub.MENU_NAME_LA }}</h5>
@@ -42,11 +49,10 @@
             </v-list>
           </v-list-item>
           <v-list-item
-            class="plant-details-menu px-0"
+            class="drawer-menu-link plant-details-menu px-0"
             :active="$route.path === '/' && $route.query.view === 'plants'"
             @click="handlePlantDetailsClick"
             link
-            color="primary"
           >
             <v-list-item-title class="d-flex px-4">
               <Icon icon="lucide:building-2" class="mr-2" width="20" height="20" />
@@ -195,6 +201,24 @@ watch(mobile, (isMobile) => {
   backdrop-filter: blur(16px);
 }
 .brand-title { overflow: visible; }
+.header-logo-home {
+  display: inline-flex;
+  max-width: 100%;
+  border-radius: 14px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .18s ease, filter .18s ease;
+}
+.header-logo-home:hover {
+  filter: brightness(1.035);
+  transform: translateY(-1px);
+}
+.header-logo-home:focus-visible {
+  outline: 3px solid rgba(95, 240, 235, .88);
+  outline-offset: 3px;
+}
+.header-logo-home:active { transform: translateY(0) scale(.99); }
 .header-logo-shell {
   position: relative;
   width: min(218px, calc(100vw - 98px));
@@ -519,5 +543,30 @@ watch(mobile, (isMobile) => {
   }
   .header-logo-shell { width:100%; margin:0 auto; }
   .app-main { background:linear-gradient(165deg,#087b90,#07516f 35%,#093657 64%,#0b1d42) !important; }
+}
+
+/* Keep the selected route unmistakable against the dark glass drawer. */
+:deep(.app-drawer .drawer-menu-link.v-list-item--active) {
+  background: linear-gradient(100deg, rgba(28, 199, 203, .28), rgba(9, 102, 132, .22)) !important;
+  color: #fff !important;
+  box-shadow: inset 4px 0 0 #5ff0eb, inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+:deep(.app-drawer .drawer-menu-link.v-list-item--active .v-list-item__content),
+:deep(.app-drawer .drawer-menu-link.v-list-item--active .v-list-item-title),
+:deep(.app-drawer .drawer-menu-link.v-list-item--active h5),
+:deep(.app-drawer .drawer-menu-link.v-list-item--active .iconify) {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+:deep(.app-drawer .drawer-menu-link.v-list-item--active h5) {
+  font-weight: 700 !important;
+  text-shadow: 0 1px 7px rgba(117, 242, 239, .20);
+}
+:deep(.app-drawer .drawer-menu-link.v-list-item--active .iconify) {
+  filter: drop-shadow(0 0 4px rgba(101, 240, 235, .24));
+}
+:deep(.app-drawer .drawer-menu-link:focus-visible) {
+  outline: 2px solid rgba(111, 239, 235, .78);
+  outline-offset: -2px;
 }
 </style>

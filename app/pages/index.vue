@@ -913,7 +913,7 @@
           </div>
           <div v-else class="site-list">
             <button
-              v-for="(plant, index) in combinedPlantList"
+              v-for="plant in combinedPlantList"
               :key="plant.code"
               type="button"
               class="combined-plant-card details-plant-card"
@@ -927,7 +927,6 @@
                   <span v-else>{{ plant.brand.mark }}</span>
                 </span>
                 <span class="combined-plant-name details-plant-name">
-                  <small>PLANT {{ String(index + 1).padStart(2, '0') }}</small>
                   <strong>{{ plantDisplayName(plant) }}</strong>
                 </span>
               </span>
@@ -6905,16 +6904,9 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .details-plant-name {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-}
-
-.details-plant-name small {
-  color: #5fd8dc;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
 }
 
 .details-plant-card .details-plant-metrics {
