@@ -67,6 +67,8 @@ const props = defineProps({
     planLabel: String,
     dark: { type: Boolean, default: false },
     dayOnlyLabels: { type: Boolean, default: false },
+    // tag each data line with its value at the currentMarker date
+    showLatestValues: { type: Boolean, default: false },
     currentMarker: {
         type: Object,
         default: null
@@ -110,6 +112,47 @@ function valuesForSeries(series) {
     }
 
     return sortedData.value.map(row => numericValue(row[series.field]))
+}
+
+// Tag each data line with its value at the "latest data" marker date.
+// Actual lines are tagged left of the marker, plan lines (dashed / *PLAN* field) right,
+// so an actual value and its plan never overlap.
+function isPlanSeries(series) {
+    return series.lineType === 'dashed' || /PLAN/i.test(String(series.field || ''))
+}
+
+function latestValueMarkPoints(series, values) {
+    const markerX = props.currentMarker?.value
+    if (!props.showLatestValues || !markerX || series.referenceLine || series.hideInLegend) return []
+    const index = sortedData.value.findIndex(row => row[props.xField] === markerX)
+    const value = index >= 0 ? values[index] : null
+    if (value === null || value === undefined) return []
+
+    const color = series.color || '#4fe0dc'
+    const onLeft = !isPlanSeries(series)
+    // small quantities (e.g. volume in MCM) need a third decimal
+    const digits = Math.abs(Number(value)) < 10 ? 3 : 2
+    return [{
+        name: 'ລ່າສຸດ',
+        coord: [markerX, value],
+        value,
+        symbol: 'circle',
+        symbolSize: isCompact.value ? 7 : 9,
+        itemStyle: { color, borderColor: '#f1fcff', borderWidth: 2 },
+        label: {
+            show: true,
+            position: onLeft ? 'left' : 'right',
+            distance: 8,
+            formatter: () => Number(value).toFixed(digits),
+            color: '#06263a',
+            backgroundColor: color,
+            borderRadius: 6,
+            padding: isCompact.value ? [2, 5] : [3, 7],
+            fontFamily: FONT,
+            fontSize: isCompact.value ? 9 : 11,
+            fontWeight: 800
+        }
+    }]
 }
 
 const markPointOption = {
@@ -206,8 +249,11 @@ const option = computed(() => ({
         axisLabel: { color: props.dark ? '#93b4c1' : '#666', fontFamily: FONT, fontSize: isCompact.value ? 10 : 12, hideOverlap: true },
         splitLine: { lineStyle: { color: props.dark ? 'rgba(150, 210, 225, 0.1)' : '#e5e5e5', type: props.dark ? 'dashed' : 'solid' } }
     },
-    dataZoom: [{ type: 'inside' }, {
+    // always open on the full selected date range
+    dataZoom: [{ type: 'inside', start: 0, end: 100 }, {
         type: 'slider',
+        start: 0,
+        end: 100,
         bottom: isCompact.value ? 4 : undefined,
         height: isCompact.value ? 16 : undefined,
         handleSize: isCompact.value ? 12 : undefined,
@@ -250,24 +296,30 @@ const option = computed(() => ({
         }),
         labelLayout: isCompact.value ? { hideOverlap: true, moveOverlap: 'shiftY' } : undefined,
         data: valuesForSeries(s),
-        markPoint: s.referenceLine || s.markPoint === false ? undefined : {
-            ...markPointOption,
-            symbolSize: isCompact.value ? 32 : markPointOption.symbolSize,
-            label: {
-                ...markPointOption.label,
-                fontSize: isCompact.value ? 7.5 : markPointOption.label.fontSize
+        markPoint: (() => {
+            const pins = s.referenceLine || s.markPoint === false ? [] : markPointOption.data
+            const latest = latestValueMarkPoints(s, valuesForSeries(s))
+            if (!pins.length && !latest.length) return undefined
+            return {
+                ...markPointOption,
+                symbolSize: isCompact.value ? 32 : markPointOption.symbolSize,
+                label: {
+                    ...markPointOption.label,
+                    fontSize: isCompact.value ? 7.5 : markPointOption.label.fontSize
+                },
+                data: [...pins, ...latest]
             }
-        },
+        })(),
         markLine: index === 0 && props.currentMarker?.value ? {
             silent: true,
             symbol: ['none', 'none'],
             animation: false,
             lineStyle: {
                 color: props.currentMarker.color || '#ff6673',
-                width: 2.25,
-                type: 'solid',
+                width: 1.75,
+                type: props.currentMarker.lineType || 'solid',
                 shadowBlur: 6,
-                shadowColor: 'rgba(255,102,115,.32)'
+                shadowColor: props.currentMarker.shadowColor || 'rgba(228, 243, 248, 0.35)'
             },
             label: {
                 show: true,
@@ -277,8 +329,10 @@ const option = computed(() => ({
                 verticalAlign: 'middle',
                 offset: [10, 0],
                 formatter: props.currentMarker.label || 'Latest update',
-                color: '#fff',
+                color: props.currentMarker.textColor || '#fff',
                 backgroundColor: props.currentMarker.color || '#e85564',
+                shadowBlur: 8,
+                shadowColor: 'rgba(1, 13, 38, 0.45)',
                 borderRadius: 6,
                 padding: isCompact.value ? [3, 5] : [5, 8],
                 fontFamily: FONT,

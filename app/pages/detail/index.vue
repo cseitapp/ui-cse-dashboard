@@ -278,7 +278,11 @@
             />
           </article>
 
-          <article class="chart-card chart-card-wide">
+          <article
+            v-for="chart in waterLevelCharts"
+            :key="chart.key"
+            class="chart-card chart-card-wide"
+          >
             <div class="chart-title">
               <span class="chart-icon blue reservoir-metric-icon water-level-icon" title="ລະດັບນ້ຳ" role="img" aria-label="ລະດັບນ້ຳ">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -288,18 +292,18 @@
                   <path class="level-indicator" d="M11 9.5h7m-2.5-2.25L18 9.5l-2.5 2.25" />
                 </svg>
               </span>
-              <div><strong>ລະດັບນ້ຳຂອງເຂື່ອນ</strong><small>MASL</small></div>
+              <div><strong>{{ chart.title }}</strong><small>MASL</small></div>
             </div>
-            <div v-if="waterLevelLimits.length" class="water-level-limits" aria-label="ຂອບເຂດລະດັບນ້ຳ">
+            <div v-if="chart.limits.length" class="water-level-limits two-up" aria-label="ຂອບເຂດລະດັບນ້ຳ">
               <button
-                v-for="limit in waterLevelLimits"
+                v-for="limit in chart.limits"
                 :key="limit.field"
                 type="button"
                 class="water-level-limit"
                 :class="{ 'is-hidden': !isWaterLevelLimitVisible(limit.field) }"
                 :style="{ '--limit-color': limit.color }"
                 :aria-pressed="isWaterLevelLimitVisible(limit.field)"
-                :title="`${isWaterLevelLimitVisible(limit.field) ? 'Hide' : 'Show'} ${limit.label}`"
+                :title="`${isWaterLevelLimitVisible(limit.field) ? 'ເຊື່ອງ' : 'ສະແດງ'} ${limit.label}`"
                 @click="toggleWaterLevelLimit(limit.field)"
               >
                 <span>
@@ -323,12 +327,17 @@
               x-field="D_DATE"
               :dark="true"
               :day-only-labels="activeType === 'D'"
-              :series="waterLevelSeries"
-              :current-marker="latestWaterLevelMarker"
+              :series="chart.series"
+              :current-marker="chart.marker"
+              show-latest-values
             />
           </article>
 
-          <article class="chart-card chart-card-wide">
+          <article
+            v-for="chart in waterVolumeCharts"
+            :key="chart.key"
+            class="chart-card chart-card-wide"
+          >
             <div class="chart-title">
               <span class="chart-icon blue reservoir-metric-icon water-volume-icon" title="ບໍລິມາດນ້ຳ" role="img" aria-label="ບໍລິມາດນ້ຳ">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -338,7 +347,7 @@
                   <path class="capacity-mark" d="M7 9h3" />
                 </svg>
               </span>
-              <div><strong>ບໍລິມາດນ້ຳຂອງເຂື່ອນ</strong><small>MCM</small></div>
+              <div><strong>{{ chart.title }}</strong><small>MCM</small></div>
             </div>
             <div v-if="loading" class="chart-state"><span class="loader" /><span>ກຳລັງໂຫຼດ...</span></div>
             <div v-else-if="!waterData.length" class="chart-state"><Icon name="lucide:database" size="32" /><span>ບໍ່ມີຂໍ້ມູນ</span></div>
@@ -349,8 +358,9 @@
               x-field="D_DATE"
               :dark="true"
               :day-only-labels="activeType === 'D'"
-              :series="waterVolumeSeries"
-              :current-marker="latestWaterVolumeMarker"
+              :series="chart.series"
+              :current-marker="chart.marker"
+              show-latest-values
             />
           </article>
         </div>
@@ -970,10 +980,10 @@ const outflowSeries = computed(() => [
 ]);
 
 const waterLevelLimitDefinitions = [
-  { field: "HIGH_WATER_LEVEL", label: "ສູງສຸດເຂື່ອນຫຼັກ", kind: "high", color: "#ff5667" },
-  { field: "LOW_WATER_LEVEL", label: "ຕ່ຳສຸດເຂື່ອນຫຼັກ", kind: "low", color: "#55aaff" },
-  { field: "HIGH_WATER_LEVEL_DIVERSION", label: "ສູງສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "high", color: "#ff8791" },
-  { field: "LOW_WATER_LEVEL_DIVERSION", label: "ຕ່ຳສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "low", color: "#a795ff" },
+  { field: "HIGH_WATER_LEVEL", label: "ສູງສຸດເຂື່ອນຫຼັກ", kind: "high", color: "#ff5667", dam: "main" },
+  { field: "LOW_WATER_LEVEL", label: "ຕ່ຳສຸດເຂື່ອນຫຼັກ", kind: "low", color: "#55aaff", dam: "main" },
+  { field: "HIGH_WATER_LEVEL_DIVERSION", label: "ສູງສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "high", color: "#ff8791", dam: "diversion" },
+  { field: "LOW_WATER_LEVEL_DIVERSION", label: "ຕ່ຳສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "low", color: "#a795ff", dam: "diversion" },
 ];
 
 function isWaterLevelLimitVisible(field) {
@@ -1007,6 +1017,7 @@ const mainWaterLevelPlanFields = [
   "D_PLAN_WL_MAIN",
 ];
 const diversionWaterLevelPlanFields = [
+  "D_PLAN_DIVERSION", // field returned by /api/data/dam
   "D_PLAN_DIVERSION_WL",
   "D_DIVERSION_PLAN_WL",
   "D_PLAN_WL_DIVERSION",
@@ -1024,13 +1035,35 @@ function firstNumericFieldValue(row, fields) {
   return field ? toNumber(row[field]) : null;
 }
 
+/* Drop plan levels that are clearly mistyped (e.g. 7828 instead of 782.8) –
+   anything more than 20 m outside the dam's own high/low limits. */
+const PLAN_LEVEL_TOLERANCE_M = 20;
+
+function plausiblePlanLevel(value, lowField, highField, limitValues) {
+  if (value === null) return null;
+  const low = limitValues[lowField];
+  const high = limitValues[highField];
+  if (low == null || high == null) return value;
+  return value < low - PLAN_LEVEL_TOLERANCE_M || value > high + PLAN_LEVEL_TOLERANCE_M ? null : value;
+}
+
 const waterLevelChartData = computed(() => {
   const limitValues = Object.fromEntries(waterLevelLimits.value.map(limit => [limit.field, limit.value]));
   return waterData.value.map(row => ({
     ...row,
     ...limitValues,
-    __MAIN_PLAN_WL: firstNumericFieldValue(row, mainWaterLevelPlanFields),
-    __DIVERSION_PLAN_WL: firstNumericFieldValue(row, diversionWaterLevelPlanFields),
+    __MAIN_PLAN_WL: plausiblePlanLevel(
+      firstNumericFieldValue(row, mainWaterLevelPlanFields),
+      "LOW_WATER_LEVEL",
+      "HIGH_WATER_LEVEL",
+      limitValues,
+    ),
+    __DIVERSION_PLAN_WL: plausiblePlanLevel(
+      firstNumericFieldValue(row, diversionWaterLevelPlanFields),
+      "LOW_WATER_LEVEL_DIVERSION",
+      "HIGH_WATER_LEVEL_DIVERSION",
+      limitValues,
+    ),
   }));
 });
 
@@ -1102,43 +1135,104 @@ function latestWaterMarker(fields) {
   return {
     value: latestRow.D_DATE,
     label: `ຂໍ້ມູນລ່າສຸດ\n${moment(latestRow.D_DATE).format("DD/MM/YYYY")}`,
-    color: "#f6bd55",
+    // neutral ice-white "now" marker – distinct from actual (blue) and plan (amber) lines
+    color: "#e4f3f8",
+    textColor: "#06263a",
+    lineType: "dashed",
   };
 }
 
-const latestWaterLevelMarker = computed(() => latestWaterMarker(["D_MAIN", "D_DIVERSION"]));
-const latestWaterVolumeMarker = computed(() => latestWaterMarker([
-  "D_MAIN_VOLUME",
-  "D_DIVERSION_VOLUME",
-  "D_MAIN_USE_VOLUME",
-  "D_DIVERSION_USE_VOLUME",
-]));
 
-const waterLevelSeries = computed(() => [
-  { field: "D_MAIN", label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນຫຼັກ)", color: "#2f8dea" },
-  { field: "D_DIVERSION", label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#38b9d6" },
-  { field: "__MAIN_PLAN_WL", label: "ແຜນລະດັບນ້ຳ (ເຂື່ອນຫຼັກ)", color: "#74cda8", area: false },
-  { field: "__DIVERSION_PLAN_WL", label: "ແຜນລະດັບນ້ຳ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#f6c85f", area: false },
-  ...waterLevelLimitDefinitions
-    .filter(limit => isWaterLevelLimitVisible(limit.field))
-    .map(limit => ({
-    ...limit,
-    area: false,
-    hideInLegend: true,
-    markPoint: false,
-    referenceLine: true,
-    })),
-]);
-const waterVolumeSeries = [
-  { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກທັງໝົດ", color: "#2f8dea" },
-  { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#38b9d6" },
-  { field: "D_MAIN_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນຫຼັກທັງໝົດ", color: "#74cda8", area: false },
-  { field: "D_DIVERSION_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ເຂື່ອນອ່ວາຍນ້ຳທັງໝົດ", color: "#9bc9f5", area: false },
-  { field: "__MAIN_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ (ເຂື່ອນຫຼັກ)", color: "#f6c85f", area: false, lineType: "dashed" },
-  { field: "__DIVERSION_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#f0a957", area: false, lineType: "dashed" },
-  { field: "__MAIN_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ (ເຂື່ອນຫຼັກ)", color: "#d5e86a", area: false, lineType: "dashed" },
-  { field: "__DIVERSION_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ (ເຂື່ອນອ່ວາຍນ້ຳ)", color: "#c9a7ff", area: false, lineType: "dashed" },
-];
+
+/* One water-level chart per dam: actual + plan line + that dam's high/low limits */
+function waterLevelSeriesFor(dam, actual) {
+  return [
+    { field: actual.field, label: actual.label, color: actual.color },
+    { field: actual.planField, label: actual.planLabel, color: "#f6c85f", area: false },
+    ...waterLevelLimitDefinitions
+      .filter(limit => limit.dam === dam && isWaterLevelLimitVisible(limit.field))
+      .map(limit => ({
+        ...limit,
+        area: false,
+        hideInLegend: true,
+        markPoint: false,
+        referenceLine: true,
+      })),
+  ];
+}
+
+const hasDiversionWaterLevel = computed(() => (
+  waterData.value.some(row => toNumber(row.D_DIVERSION) > 0)
+  || waterLevelLimits.value.some(limit => limit.dam === "diversion")
+));
+
+const waterLevelCharts = computed(() => {
+  const charts = [{
+    key: "main",
+    title: "ລະດັບນ້ຳເຂື່ອນຫຼັກ",
+    limits: waterLevelLimits.value.filter(limit => limit.dam === "main"),
+    series: waterLevelSeriesFor("main", {
+      field: "D_MAIN",
+      label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນຫຼັກ)",
+      color: "#2f8dea",
+      planField: "__MAIN_PLAN_WL",
+      planLabel: "ແຜນລະດັບນ້ຳ (ເຂື່ອນຫຼັກ)",
+    }),
+    marker: latestWaterMarker(["D_MAIN"]),
+  }];
+
+  if (hasDiversionWaterLevel.value) {
+    charts.push({
+      key: "diversion",
+      title: "ລະດັບນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      limits: waterLevelLimits.value.filter(limit => limit.dam === "diversion"),
+      series: waterLevelSeriesFor("diversion", {
+        field: "D_DIVERSION",
+        label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+        color: "#38b9d6",
+        planField: "__DIVERSION_PLAN_WL",
+        planLabel: "ແຜນລະດັບນ້ຳ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+      }),
+      marker: latestWaterMarker(["D_DIVERSION"]),
+    });
+  }
+
+  return charts;
+});
+/* One volume chart per dam: total + usable volume, actual (solid) and plan (dashed) */
+const hasDiversionVolume = computed(() => waterData.value.some(row => (
+  toNumber(row.D_DIVERSION_VOLUME) > 0 || toNumber(row.D_DIVERSION_USE_VOLUME) > 0
+)));
+
+const waterVolumeCharts = computed(() => {
+  const charts = [{
+    key: "main",
+    title: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ",
+    series: [
+      { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳທັງໝົດ (ຕົວຈິງ)", color: "#2f8dea" },
+      { field: "D_MAIN_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ (ຕົວຈິງ)", color: "#74cda8", area: false },
+      { field: "__MAIN_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f6c85f", area: false, lineType: "dashed" },
+      { field: "__MAIN_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#d5e86a", area: false, lineType: "dashed" },
+    ],
+    marker: latestWaterMarker(["D_MAIN_VOLUME", "D_MAIN_USE_VOLUME"]),
+  }];
+
+  if (hasDiversionVolume.value) {
+    charts.push({
+      key: "diversion",
+      title: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      series: [
+        { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳທັງໝົດ (ຕົວຈິງ)", color: "#38b9d6" },
+        { field: "D_DIVERSION_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ (ຕົວຈິງ)", color: "#9bc9f5", area: false },
+        { field: "__DIVERSION_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f0a957", area: false, lineType: "dashed" },
+        { field: "__DIVERSION_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#c9a7ff", area: false, lineType: "dashed" },
+      ],
+      marker: latestWaterMarker(["D_DIVERSION_VOLUME", "D_DIVERSION_USE_VOLUME"]),
+    });
+  }
+
+  return charts;
+});
 
 function toNumber(value) {
   const parsed = Number(String(value ?? 0).replace(/,/g, ""));
@@ -1477,6 +1571,11 @@ onMounted(() => {
 .water-level-limits {
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.water-level-limits.two-up {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.water-level-limits {
   gap:8px;
   margin:12px 0 4px;
 }
