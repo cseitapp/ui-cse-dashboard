@@ -293,6 +293,16 @@
                 </svg>
               </span>
               <div><strong>{{ chart.title }}</strong><small>MASL</small></div>
+              <span
+                v-if="chart.comparison"
+                class="chart-percent-chip"
+                :class="chart.comparison.tone"
+                :title="`ລະດັບນ້ຳຕົວຈິງ ${chart.comparison.actual} ÷ ແຜນ ${chart.comparison.plan} (${chart.comparison.date})`"
+              >
+                <Icon :name="chart.comparison.icon" size="13" />
+                <b>{{ chart.comparison.percentage }}</b>
+                <small>ທຽບກັບແຜນ</small>
+              </span>
             </div>
             <div v-if="chart.limits.length" class="water-level-limits two-up" aria-label="ຂອບເຂດລະດັບນ້ຳ">
               <button
@@ -1166,6 +1176,26 @@ const hasDiversionWaterLevel = computed(() => (
   || waterLevelLimits.value.some(limit => limit.dam === "diversion")
 ));
 
+/* Latest actual ÷ plan level on the "latest data" date (2 decimals – levels sit near 100%) */
+function latestLevelComparison(marker, actualField, planField) {
+  if (!marker?.value) return null;
+  const row = waterLevelChartData.value.find(item => item.D_DATE === marker.value);
+  const actual = row ? toNumber(row[actualField]) : 0;
+  const plan = row?.[planField];
+  if (!actual || !plan) return null;
+
+  const ratio = (actual / plan) * 100;
+  const reached = ratio >= 100;
+  return {
+    percentage: `${ratio.toFixed(2)}%`,
+    tone: reached ? "positive" : "warning",
+    icon: reached ? "lucide:trending-up" : "lucide:trending-down",
+    actual: actual.toFixed(2),
+    plan: Number(plan).toFixed(2),
+    date: moment(marker.value).format("DD/MM/YYYY"),
+  };
+}
+
 const waterLevelCharts = computed(() => {
   const charts = [{
     key: "main",
@@ -1180,6 +1210,7 @@ const waterLevelCharts = computed(() => {
     }),
     marker: latestWaterMarker(["D_MAIN"]),
   }];
+  charts[0].comparison = latestLevelComparison(charts[0].marker, "D_MAIN", "__MAIN_PLAN_WL");
 
   if (hasDiversionWaterLevel.value) {
     charts.push({
@@ -1195,6 +1226,7 @@ const waterLevelCharts = computed(() => {
       }),
       marker: latestWaterMarker(["D_DIVERSION"]),
     });
+    charts[1].comparison = latestLevelComparison(charts[1].marker, "D_DIVERSION", "__DIVERSION_PLAN_WL");
   }
 
   return charts;
@@ -3643,6 +3675,48 @@ onMounted(() => {
   .dual-view .chart-total-summary strong,
   .dual-view .chart-total-summary .plan strong {
     font-size: 0.9rem;
+  }
+}
+
+/* actual vs plan chip at the end of a chart title row */
+.chart-percent-chip {
+  --chip-tone: #8fb3c1;
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 4px 11px;
+  border: 1px solid color-mix(in srgb, var(--chip-tone) 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip-tone) 12%, rgba(8, 48, 78, 0.55));
+  color: color-mix(in srgb, var(--chip-tone) 85%, #e8f6fa);
+  white-space: nowrap;
+}
+
+.chart-percent-chip.warning { --chip-tone: #ffc95c; }
+.chart-percent-chip.positive { --chip-tone: #6ff0c8; }
+
+.chart-percent-chip b {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.chart-percent-chip small {
+  color: #a3c7d3;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+@media (max-width: 420px) {
+  .chart-percent-chip {
+    padding: 3px 8px;
+  }
+
+  .chart-percent-chip small {
+    display: none;
   }
 }
 

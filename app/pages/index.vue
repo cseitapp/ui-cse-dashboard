@@ -762,7 +762,7 @@
           </div>
 
           <div class="water-executive-grid volume-comparison-grid">
-            <section class="water-metric-block total-volume-metric">
+            <section class="water-metric-block total-volume-metric" :class="totalVolumePerformance.tone">
               <div class="water-metric-heading">
                 <span class="metric-icon total-volume-icon reservoir-volume-symbol" role="img" aria-label="ບໍລິມາດນ້ຳທັງໝົດ">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -792,6 +792,10 @@
                 </div>
               </MetricDualArc>
               <div v-else class="water-summary-panel total-volume-panel">
+                <strong class="water-summary-center-percentage water-performance">
+                  <TrendIndicator :tone="totalVolumePerformance.tone" :size="13" />
+                  <span>{{ totalVolumePerformance.percentage }}</span>
+                </strong>
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -812,7 +816,7 @@
               </div>
             </section>
 
-            <section class="water-metric-block usable-volume-metric">
+            <section class="water-metric-block usable-volume-metric" :class="usableVolumePerformance.tone">
               <div class="water-metric-heading">
                 <span class="metric-icon usable-volume-icon"><Icon name="lucide:droplets" size="19" /></span>
                 <span>ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
@@ -835,6 +839,10 @@
                 </div>
               </MetricDualArc>
               <div v-else class="water-summary-panel usable-volume-panel">
+                <strong class="water-summary-center-percentage water-performance">
+                  <TrendIndicator :tone="usableVolumePerformance.tone" :size="13" />
+                  <span>{{ usableVolumePerformance.percentage }}</span>
+                </strong>
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -7635,7 +7643,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .executive-overview-card .summary-center-percentage,
-.water-executive-card .water-summary-center-percentage {
+.water-executive-card .water-summary-center-percentage,
+.water-volume-executive-card .water-summary-center-percentage {
   position: absolute;
   top: clamp(32px, 2.2vw, 38px);
   left: 50%;
@@ -7660,7 +7669,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .executive-overview-card .summary-center-percentage > svg,
-.water-executive-card .water-summary-center-percentage > svg {
+.water-executive-card .water-summary-center-percentage > svg,
+.water-volume-executive-card .water-summary-center-percentage > svg {
   width: clamp(11px, 0.8vw, 13px);
   height: clamp(11px, 0.8vw, 13px);
 }
@@ -8804,5 +8814,87 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .metric-volume-components strong {
     font-size: 0.7rem;
   }
+}
+
+/* Classic comparison standard: Plan on the left, Actual on the right.
+   Keep the source data order intact and move only the presentation so every
+   summary and plant-detail box follows the same visual convention. */
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .plan,
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .plan {
+  order: 1;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .actual,
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .actual {
+  position: relative;
+  order: 2;
+  margin-left: 14px;
+  padding-left: 14px;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .actual {
+  align-items: flex-end;
+  text-align: right;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .actual {
+  justify-content: flex-end;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.kpi-summary-stat.plan, .kpi-yesterday-value.plan)::before {
+  display: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(137, 207, 218, 0.52) 22%, rgba(137, 207, 218, 0.52) 78%, transparent);
+  box-shadow: 0 0 5px rgba(75, 199, 211, 0.14);
+  content: "";
+  pointer-events: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .revenue-summary :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  background: linear-gradient(180deg, transparent, rgba(242, 194, 86, 0.48) 22%, rgba(242, 194, 86, 0.48) 78%, transparent);
+  box-shadow: 0 0 5px rgba(242, 194, 86, 0.12);
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .outflow-panel :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  background: linear-gradient(180deg, transparent, rgba(112, 204, 241, 0.5) 22%, rgba(112, 204, 241, 0.5) 78%, transparent);
+  box-shadow: 0 0 5px rgba(112, 204, 241, 0.13);
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span:first-child {
+  position: relative;
+  order: 2;
+  align-items: flex-end;
+  padding-left: 8px;
+  text-align: right;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span + span {
+  order: 1;
+  padding-left: 0;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span + span::before {
+  display: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span:first-child::before {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
+  box-shadow: 0 0 5px var(--plant-metric-divider-glow);
+  content: "";
+  pointer-events: none;
 }
 </style>
