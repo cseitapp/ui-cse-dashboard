@@ -71,22 +71,32 @@ const columns = [
     { key: "energy_actual", label: "Actual Energy\n(GWh)", type: "num" },
     { key: "revenue_plan", label: "Plan Revenue\n(MUSD)", type: "num" },
     { key: "revenue_actual", label: "Actual Revenue\n(MUSD)", type: "num" },
+    { key: "turbine_flow_plan", label: "Plan Turbine Flow\n(MCM)", type: "num" },
     { key: "turbine_flow", label: "Turbine Flow\n(MCM)", type: "num" },
     { key: "spill", label: "Spill\n(MCM)", type: "num" },
     { key: "total_outflow", label: "Total Outflow\n(MCM)", type: "num" },
     { key: "inflow_plan", label: "Inflow Plan\n(MCM)", type: "num" },
     { key: "inflow_actual", label: "Actual Inflow\n(MCM)", type: "num" },
-    { key: "plan_wl", label: "Plan WL\n(masl)", type: "num" },
+
+    // Main dam (MD)
+    { key: "md_plan_wl", label: "Plan\nMD WL\n(masl)", type: "num" },
+    { key: "md_plan_total_volume", label: "Plan\nMD total Volume\n(MCM)", type: "num" },
+    { key: "md_plan_usable_volume", label: "Plan\nUsable water volume\n(MCM)", type: "num" },
     { key: "md_actual_wl", label: "MD actual WL\n(masl)", type: "num" },
     { key: "md_total_volume", label: "MD total Volume\n(MCM)", type: "num" },
     { key: "md_usable_volume", label: "Usable water volume\n(MCM)", type: "num" },
+
+    // Diversion dam (DIV)
+    { key: "div_plan_wl", label: "Plan\nDIV WL\n(masl)", type: "num" },
+    { key: "div_plan_total_volume", label: "Plan\nDIV total Volume\n(MCM)", type: "num" },
+    { key: "div_plan_usable_volume", label: "Plan\nUsable water volume\n(MCM)", type: "num" },
     { key: "div_actual_wl", label: "DIV actual WL\n(masl)", type: "num" },
     { key: "div_total_volume", label: "DIV total Volume\n(MCM)", type: "num" },
     { key: "div_usable_volume", label: "Usable water volume\n(MCM)", type: "num" },
+
     { key: "tailrace_wl", label: "Tailrace WL\nmasl", type: "num" },
     { key: "rainfall", label: "Rainfall\nmm", type: "num" },
 ];
-
 // ---------- helpers ----------
 const pad = (n) => String(n).padStart(2, "0");
 const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase();
