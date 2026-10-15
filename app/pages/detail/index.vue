@@ -102,7 +102,7 @@
               @click="toggleChartFilter('energy')"
             >
               <Icon name="lucide:table-properties" size="18" />
-              <span>Data</span>
+              <span>ຂໍ້ມູນ</span>
               <Icon :name="chartFilterOpen && chartFilterContext === 'energy' ? 'lucide:chevron-up' : 'lucide:chevron-down'" size="15" />
             </button>
           </div>
@@ -194,7 +194,7 @@
               @click="toggleChartFilter('water')"
             >
               <Icon name="lucide:table-properties" size="18" />
-              <span>Data</span>
+              <span>ຂໍ້ມູນ</span>
               <Icon :name="chartFilterOpen && chartFilterContext === 'water' ? 'lucide:chevron-up' : 'lucide:chevron-down'" size="15" />
             </button>
           </div>
@@ -482,7 +482,7 @@ import axios from "axios";
 import moment from "moment";
 import EChart from "~~/components/common/EChart.vue";
 import InfoDialog from "~~/components/common/InfoDialog.vue";
-import { getPlantBrand, getPlantShortName } from "~~/app/utils/plantNames";
+import { getPlantBrand, getPlantLaoName, getPlantShortName } from "~~/app/utils/plantNames";
 
 const BarChart = defineAsyncComponent(() => import("~~/components/common/BarChart.vue"));
 
@@ -501,7 +501,7 @@ function getRouteItem() {
 
 const plant = getRouteItem();
 const code = plant.D_DAM || String(route.query.code || "");
-const branchName = getPlantShortName(code, plant.branch?.BR_NAME_EN || plant.BR_NAME_EN);
+const branchName = getPlantLaoName(code, getPlantShortName(code, plant.branch?.BR_NAME_EN || plant.BR_NAME_EN));
 const plantBrand = getPlantBrand(code, plant.branch?.BR_NAME_EN || plant.BR_NAME_EN);
 
 const dialog = ref(false);
@@ -699,15 +699,6 @@ const chartTableRows = computed(() => {
 
 const energySeries = computed(() => [
   {
-    name: "ພະລັງງານຕົວຈິງ",
-    data: allData.value.map(row => row.SUM_ACTUAL_ENERGY),
-    color: "#24d1dc",
-    barMaxWidth: 18,
-    radius: [4, 4, 0, 0],
-    showValues: true,
-    labelColor: "#9af5f3",
-  },
-  {
     name: "ພະລັງງານໃນແຜນ",
     data: allData.value.map(row => row.SUM_PLAN_ENERGY),
     color: "#f6c85f",
@@ -716,18 +707,18 @@ const energySeries = computed(() => [
     showValues: true,
     labelColor: "#ffe2a0",
   },
-]);
-
-const revenueSeries = computed(() => [
   {
-    name: "ລາຍຮັບຕົວຈິງ",
-    data: allData.value.map(row => row.SUM_ACTUAL_REVENUE),
+    name: "ພະລັງງານຕົວຈິງ",
+    data: allData.value.map(row => row.SUM_ACTUAL_ENERGY),
     color: "#24d1dc",
     barMaxWidth: 18,
     radius: [4, 4, 0, 0],
     showValues: true,
     labelColor: "#9af5f3",
   },
+]);
+
+const revenueSeries = computed(() => [
   {
     name: "ລາຍຮັບໃນແຜນ",
     data: allData.value.map(row => row.SUM_PLAN_REVENUE),
@@ -736,6 +727,15 @@ const revenueSeries = computed(() => [
     radius: [4, 4, 0, 0],
     showValues: true,
     labelColor: "#ffe2a0",
+  },
+  {
+    name: "ລາຍຮັບຕົວຈິງ",
+    data: allData.value.map(row => row.SUM_ACTUAL_REVENUE),
+    color: "#24d1dc",
+    barMaxWidth: 18,
+    radius: [4, 4, 0, 0],
+    showValues: true,
+    labelColor: "#9af5f3",
   },
 ]);
 
@@ -777,15 +777,6 @@ const inflowSeries = computed(() => {
 
   return [
     {
-      name: "ນ້ຳເຂົ້າຕົວຈິງ",
-      data: actualData,
-      color: "#24d1dc",
-      barMaxWidth: 18,
-      radius: [4, 4, 0, 0],
-      showValues: true,
-      labelColor: "#9af5f3",
-    },
-    {
       name: "ແຜນນ້ຳເຂົ້າ",
       data: planData,
       color: "#f6c85f",
@@ -793,6 +784,15 @@ const inflowSeries = computed(() => {
       radius: [4, 4, 0, 0],
       showValues: true,
       labelColor: "#ffe2a0",
+    },
+    {
+      name: "ນ້ຳເຂົ້າຕົວຈິງ",
+      data: actualData,
+      color: "#24d1dc",
+      barMaxWidth: 18,
+      radius: [4, 4, 0, 0],
+      showValues: true,
+      labelColor: "#9af5f3",
     },
   ];
 });
@@ -950,15 +950,6 @@ const outflowPlanSeriesData = computed(() => allData.value.map((row, index) => {
 
 const outflowSeries = computed(() => [
   {
-    name: "ນ້ຳອອກຕົວຈິງ",
-    data: allData.value.map(row => row.SUM_OUTFLOW),
-    color: "#24d1dc",
-    barMaxWidth: 18,
-    radius: [4, 4, 0, 0],
-    showValues: true,
-    labelColor: "#9af5f3",
-  },
-  {
     name: "ແຜນນ້ຳອອກ",
     data: outflowPlanSeriesData.value,
     color: "#f6c85f",
@@ -966,6 +957,15 @@ const outflowSeries = computed(() => [
     radius: [4, 4, 0, 0],
     showValues: true,
     labelColor: "#ffe2a0",
+  },
+  {
+    name: "ນ້ຳອອກຕົວຈິງ",
+    data: allData.value.map(row => row.SUM_OUTFLOW),
+    color: "#24d1dc",
+    barMaxWidth: 18,
+    radius: [4, 4, 0, 0],
+    showValues: true,
+    labelColor: "#9af5f3",
   },
 ]);
 
@@ -2534,7 +2534,11 @@ onMounted(() => {
   .chart-card { padding:12px 6px; border-radius:13px; }
   .chart-card-header { min-height:40px; padding:0 5px; gap:8px; }
   .chart-total-summary { min-width:176px; }
-  .chart-total-summary > div { padding:6px 7px; }
+  .chart-total-summary > div {
+    align-items:center;
+    padding:6px 7px;
+    text-align:center;
+  }
 }
 
 @media (max-width:420px) {
@@ -3522,8 +3526,19 @@ onMounted(() => {
     border-radius: 16px;
   }
 
-  .dual-view .chart-total-summary > div {
+  /* both halves centred on mobile – class selectors so they outrank the
+     desktop ".actual" right-alignment */
+  .dual-view .chart-total-summary > .plan,
+  .dual-view .chart-total-summary > .actual {
+    align-items: center;
+    justify-content: center;
     padding: 8px 10px 7px;
+    text-align: center;
+  }
+
+  /* same label order on both sides: dot first, then text */
+  .dual-view .chart-total-summary > .actual span {
+    flex-direction: row;
   }
 
   .dual-view .chart-total-summary strong,

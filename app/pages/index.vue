@@ -15,14 +15,11 @@
             :class="{ active: metricDisplayMode === 'dual' }"
             type="button"
             :aria-pressed="metricDisplayMode === 'dual'"
-            title="ປ່ຽນເປັນຮູບແບບປຽບທຽບຄູ່"
+            :title="metricDisplayMode === 'dual' ? 'ຮູບແບບປຽບທຽບ: ເປີດ (ກົດເພື່ອປິດ)' : 'ຮູບແບບປຽບທຽບ: ປິດ (ກົດເພື່ອເປີດ)'"
+            :aria-label="metricDisplayMode === 'dual' ? 'ປິດຮູບແບບປຽບທຽບ' : 'ເປີດຮູບແບບປຽບທຽບ'"
             @click="toggleDualDisplayMode"
           >
             <span class="metric-dual-toggle-icon"><Icon name="lucide:git-compare-arrows" size="18" /></span>
-            <span class="metric-dual-toggle-copy">
-              <small>DUAL</small>
-              <strong>ປຽບທຽບ</strong>
-            </span>
           </button>
 
 
@@ -782,7 +779,7 @@
                 :actual="totalWaterVolume"
                 :plan="yearTotalPlanVolume"
                 unit="MCM"
-                icon="lucide:archive"
+                icon="reservoir-volume"
                 :performance="totalVolumePerformance"
                 :yesterday-actual="yesterdayTotalWaterVolume"
                 :yesterday-plan="yesterdayPlanWaterVolume"
@@ -907,7 +904,7 @@
                   <span class="combined-card-metrics plant-volume-comparison-grid">
                     <span class="combined-metric plant-volume-summary water-main-volume">
                       <span class="combined-metric-heading">
-                        <span>
+                        <span title="ບໍລິມາດນ້ຳທັງໝົດ">
                           <span class="reservoir-volume-symbol plant-volume-heading-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                               <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
@@ -919,7 +916,7 @@
                           ບໍລິມາດນ້ຳທັງໝົດ
                         </span>
                         <span class="combined-performance" :class="plant.totalVolumePerf.tone">
-                          <TrendIndicator :direction="plant.totalVolumePerf.tone === 'positive' ? 'up' : plant.totalVolumePerf.tone === 'warning' ? 'down' : 'flat'" :size="11" />
+                          <TrendIndicator :tone="plant.totalVolumePerf.tone" :size="11" />
                           {{ plant.totalVolumePerf.percentage }}
                         </span>
                       </span>
@@ -936,9 +933,9 @@
 
                     <span class="combined-metric plant-volume-summary water-usable-volume">
                       <span class="combined-metric-heading">
-                        <span><Icon name="lucide:droplets" size="13" /> ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
+                        <span title="ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ"><Icon name="lucide:droplets" size="13" /> ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
                         <span class="combined-performance" :class="plant.usableVolumePerf.tone">
-                          <TrendIndicator :direction="plant.usableVolumePerf.tone === 'positive' ? 'up' : plant.usableVolumePerf.tone === 'warning' ? 'down' : 'flat'" :size="11" />
+                          <TrendIndicator :tone="plant.usableVolumePerf.tone" :size="11" />
                           {{ plant.usableVolumePerf.percentage }}
                         </span>
                       </span>
@@ -1133,7 +1130,7 @@
 
 <script setup>
 import axios from "axios";
-import { getPlantBrand, getPlantShortName } from "~~/app/utils/plantNames";
+import { PLANT_LAO_NAMES, getPlantBrand, getPlantShortName } from "~~/app/utils/plantNames";
 import MetricDualArc from "~~/components/common/MetricDualArc.vue";
 import TrendIndicator from "~~/components/common/TrendIndicator.vue";
 
@@ -2179,23 +2176,12 @@ function formatMetric(value) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(toNumber(value));
 }
 
-const plantLaoNames = {
-  NEM: "ນ້ຳອີມູນ",
-  NP: "ນ້ຳປາກຊ່ອງ",
-  NPC: "ນ້ຳປາກຊ່ອງ",
-  NK2: "ນ້ຳກົງ 2",
-  NK3: "ນ້ຳກົງ 3",
-  NGG3A: "ນ້ຳງຽບ 3ເອ",
-  NNG3A: "ນ້ຳງຽບ 3ເອ",
-  XNN1: "ເຊນ້ຳນ້ອຍ 1",
-};
-
 function plantDisplayName(plant) {
   const code = String(plant?.code || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
   const apiLabel = String(plant?.label || "").trim();
   const conciseApiLabel = apiLabel.replace(/^ເຂື່ອນໄຟຟ້າ\s*/, "").trim();
 
-  return plantLaoNames[code] || conciseApiLabel || plant?.shortName || plant?.code || "-";
+  return PLANT_LAO_NAMES[code] || conciseApiLabel || plant?.shortName || plant?.code || "-";
 }
 
 function buildSiteData(rows) {
@@ -7611,7 +7597,11 @@ onBeforeUnmount(() => activeRequestController?.abort());
     background: linear-gradient(180deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
   }
 
-  .executive-overview-card .embedded-plant-collapse .combined-metric-values strong {
+  :is(
+    .executive-overview-card .embedded-plant-collapse,
+    .water-executive-card .water-plants-section,
+    .water-volume-executive-card .volume-details
+  ) .combined-metric-values strong {
     display: flex;
     min-width: 0;
     align-items: baseline;
@@ -7624,7 +7614,11 @@ onBeforeUnmount(() => activeRequestController?.abort());
     white-space: nowrap;
   }
 
-  .executive-overview-card .embedded-plant-collapse .combined-metric-values i {
+  :is(
+    .executive-overview-card .embedded-plant-collapse,
+    .water-executive-card .water-plants-section,
+    .water-volume-executive-card .volume-details
+  ) .combined-metric-values i {
     flex: 0 0 auto;
     font-size: 0.53rem;
     font-weight: 700;
@@ -7914,33 +7908,23 @@ onBeforeUnmount(() => activeRequestController?.abort());
   white-space: nowrap;
 }
 
+/* Icon-only DUAL toggle: muted when off, bright gradient + glow when on */
 .metric-dual-toggle {
   position: relative;
-  display: inline-flex;
+  display: inline-grid;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
   min-height: 46px;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px 5px 6px;
-  overflow: hidden;
-  border: 1px solid rgba(89, 210, 218, 0.34);
-  border-radius: 999px;
-  background: linear-gradient(145deg, rgba(5, 40, 62, 0.96), rgba(5, 26, 49, 0.96));
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(150, 210, 225, 0.22);
+  border-radius: 50%;
+  background: rgba(5, 32, 54, 0.55);
   color: #e7f8fa;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 22px rgba(0, 21, 45, 0.22);
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-}
-
-.metric-dual-toggle::after {
-  position: absolute;
-  right: -10px;
-  bottom: -19px;
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  background: linear-gradient(120deg, rgba(255, 187, 70, 0.14), rgba(76, 223, 218, 0.18));
-  content: "";
-  filter: blur(9px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(0, 21, 45, 0.18);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
 }
 
 .metric-dual-toggle:hover {
@@ -7955,9 +7939,9 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .metric-dual-toggle.active {
-  border-color: rgba(91, 235, 228, 0.74);
+  border-color: rgba(91, 235, 228, 0.7);
   background: linear-gradient(145deg, rgba(7, 55, 72, 0.98), rgba(5, 28, 51, 0.98));
-  box-shadow: 0 0 0 3px rgba(78, 224, 220, 0.08), 0 0 22px rgba(78, 224, 220, 0.15);
+  box-shadow: 0 0 0 3px rgba(78, 224, 220, 0.14), 0 0 20px rgba(78, 224, 220, 0.28);
 }
 
 .metric-dual-toggle-icon {
@@ -7968,11 +7952,24 @@ onBeforeUnmount(() => activeRequestController?.abort());
   height: 34px;
   flex: 0 0 34px;
   place-items: center;
-  border: 1px solid rgba(192, 246, 244, 0.44);
+  border: 1px solid rgba(150, 210, 225, 0.28);
   border-radius: 50%;
+  /* off: flat, muted glyph */
+  background: rgba(150, 210, 225, 0.1);
+  color: #7f9fac;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+/* on: amber/teal split gradient, dark glyph, soft glow */
+.metric-dual-toggle.active .metric-dual-toggle-icon {
+  border-color: rgba(192, 246, 244, 0.5);
   background: linear-gradient(135deg, #ffc45a 0 46%, #58e0dc 54% 100%);
   color: #082c3d;
-  box-shadow: 0 0 14px rgba(72, 220, 218, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.58);
+  box-shadow: 0 0 14px rgba(72, 220, 218, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.58);
+}
+
+.metric-dual-toggle:not(.active):hover .metric-dual-toggle-icon {
+  color: #b9dbe5;
 }
 
 .metric-dual-toggle-copy {
@@ -8211,9 +8208,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
   }
 }
 
-/* Dual view: dam breakdown as ONE raised glass bar. Left half mirrors the
-   plan tile (left aligned, dot first); right half mirrors the actual tile
-   (right aligned, dot last). Doubled class beats the base rule below. */
+/* Dual view: dam breakdown as ONE raised glass bar. The two labels stay
+   clean and text-only so the component reads consistently at every size. */
 .metric-volume-components.dual-volume-components {
   position: relative;
   margin-top: 12px;
@@ -8256,25 +8252,12 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .metric-volume-components.dual-volume-components small {
   display: flex;
   align-items: center;
-  gap: 7px;
-  /* base rule clips overflow, which cut off the dot's ring and glow */
-  overflow: visible;
+  gap: 0;
   padding-inline: 2px;
 }
 
 .metric-volume-components.dual-volume-components > span + span small {
   flex-direction: row-reverse;
-}
-
-/* colour dot, like the plan / actual tiles */
-.metric-volume-components.dual-volume-components small::before {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--dam-color);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--dam-color) 20%, transparent), 0 0 8px var(--dam-color);
-  content: "";
 }
 
 .metric-volume-components.dual-volume-components strong {
@@ -8595,8 +8578,7 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .console-view .plant-volume-components small {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  overflow: visible;
+  gap: 0;
   padding-inline: 2px;
   color: #a3c7d3;
 }
@@ -8604,17 +8586,6 @@ onBeforeUnmount(() => activeRequestController?.abort());
 .dual-view .plant-volume-components > span + span small,
 .console-view .plant-volume-components > span + span small {
   flex-direction: row-reverse;
-}
-
-.dual-view .plant-volume-components small::before,
-.console-view .plant-volume-components small::before {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--dam-color);
-  box-shadow: 0 0 6px var(--dam-color);
-  content: "";
 }
 
 .dual-view .plant-volume-components strong,
@@ -8640,6 +8611,51 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .console-view .combined-metric {
     padding: 10px;
     border-radius: 12px;
+  }
+
+  .combined-plant-card .combined-performance {
+    gap: 2px;
+    font-size: clamp(0.52rem, 2.35vw, 0.58rem);
+    line-height: 1;
+  }
+
+  .dual-view .combined-plant-card .combined-performance,
+  .console-view .combined-plant-card .combined-performance {
+    padding: 2px 6px;
+  }
+
+  .combined-plant-card .combined-performance :deep(svg) {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* long labels (e.g. ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ) wrap instead of being cut off;
+     the % chip drops below when there is no room beside it */
+  .dual-view .combined-metric-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .dual-view .combined-metric-heading > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start;
+    overflow: visible;
+    line-height: 1.35;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .dual-view .combined-metric-heading > span:first-child > svg,
+  .dual-view .combined-metric-heading > span:first-child > .plant-volume-heading-icon {
+    flex: 0 0 auto;
+    margin-top: 2px;
+  }
+
+  .dual-view .combined-performance {
+    margin-left: auto;
   }
 }
 

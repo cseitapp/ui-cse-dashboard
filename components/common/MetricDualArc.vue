@@ -109,7 +109,20 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         </g>
       </svg>
 
-      <span class="dual-apex"><Icon :name="icon" size="14" /></span>
+      <span class="dual-apex">
+        <svg
+          v-if="icon === 'reservoir-volume'"
+          class="dual-apex-reservoir"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
+          <path class="water-fill" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72L18.6 18H5.4L5 12.5Z" />
+          <path class="volume-surface" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72" />
+          <path class="capacity-mark" d="M7 9h3" />
+        </svg>
+        <Icon v-else :name="icon" size="14" />
+      </span>
 
       <div class="dual-center-readout">
         <strong>{{ displayPercentage }}</strong>
@@ -318,6 +331,27 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
     0 0 0 4px var(--dual-ring),
     0 6px 14px rgba(0, 10, 24, 0.45);
 }
+
+.dual-apex-reservoir {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+  filter: drop-shadow(0 0 3px rgba(103, 234, 219, 0.3));
+}
+
+.dual-apex-reservoir .reservoir-basin { stroke-width: 1.9; }
+.dual-apex-reservoir .water-fill {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.38;
+}
+.dual-apex-reservoir .volume-surface { stroke-width: 1.9; }
+.dual-apex-reservoir .capacity-mark { opacity: 0.8; }
 
 .dual-center-readout {
   position: absolute;

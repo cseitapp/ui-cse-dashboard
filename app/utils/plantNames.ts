@@ -9,6 +9,18 @@ const PLANT_SHORT_NAMES: Record<string, string> = {
   XNN1: "XNN 1",
 };
 
+/* Lao display names, shown in the UI instead of the English short codes */
+const PLANT_LAO_NAMES: Record<string, string> = {
+  NEM: "ນ້ຳອີມູນ",
+  NP: "ນ້ຳປາກຊ່ອງ",
+  NPC: "ນ້ຳປາກຊ່ອງ",
+  NK2: "ນ້ຳກົງ 2",
+  NK3: "ນ້ຳກົງ 3",
+  NGG3A: "ນ້ຳງຽບ 3ເອ",
+  NNG3A: "ນ້ຳງຽບ 3ເອ",
+  XNN1: "ເຊນ້ຳນ້ອຍ 1",
+};
+
 export type PlantBrand = {
   shortName: string;
   mark: string;
@@ -41,6 +53,10 @@ export function getPlantShortName(code?: string | null, apiName?: string | null)
   return rawCode || providedName || "-";
 }
 
+export function getPlantLaoName(code?: string | null, fallback?: string | null) {
+  return PLANT_LAO_NAMES[normalizePlantCode(code)] || String(fallback || "").trim() || String(code || "").trim() || "-";
+}
+
 export function getPlantBrand(code?: string | null, apiName?: string | null): PlantBrand {
   const normalizedCode = normalizePlantCode(code);
   const shortName = getPlantShortName(code, apiName);
@@ -52,4 +68,4 @@ export function getPlantBrand(code?: string | null, apiName?: string | null): Pl
   return { shortName, mark: fallbackMark, accent: "#38bdf8" };
 }
 
-export { PLANT_BRANDS, PLANT_SHORT_NAMES };
+export { PLANT_BRANDS, PLANT_LAO_NAMES, PLANT_SHORT_NAMES };
