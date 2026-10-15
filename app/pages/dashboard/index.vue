@@ -15,7 +15,7 @@
       <!-- 📅 DATE RANGE -->
       <v-row class="ma-3 d-flex align-center">
         <v-col v-if="role === 'ADMIN' || role === 'DIRECTOR'">
-          <v-select v-model="selected" :items="dams" item-title="BR_SHORT_NAME" item-value="BR_CODE" variant="outlined"
+          <v-select v-model="selected" :items="dams" item-title="BR_CODE" item-value="BR_CODE" variant="outlined"
             hide-details density="compact" color="primary" placeholder="ກະລຸນາເລືອກເຂື່ອນ" />
         </v-col>
 
@@ -55,7 +55,6 @@
       <template #item.total_power="{ item }">
         <strong>{{ formatNumber(item.total_power) }}</strong>
       </template>
-      <template #item.D_DAM="{ item }">{{ getPlantShortName(item.D_DAM) }}</template>
     </v-data-table>
   </v-container>
 </template>
@@ -64,7 +63,6 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 import { useAuthUser } from '~~/composables/useAuth'
-import { getPlantShortName } from '~~/app/utils/plantNames'
 
 const user = useAuthUser();
 const nuxtApp = useNuxtApp();
@@ -120,19 +118,33 @@ const quickRanges = [
 const headers = [
   { title: "ວັນ ແລະ ເວລາ", key: "D_DATE" },
   { title: "ເຂື່ອນ", key: "D_DAM" },
+
+  // Main dam
+  { title: "ແຜນລະດັບນ້ຳເຂື່ອນຫຼັກ", key: "D_PLAN_WL" },
   { title: "ເຂື່ອນຫຼັກ", key: "D_MAIN" },
-  { title: "ເຂື່ອນຫຼັກນຳໃຊ້", key: "D_MAIN_USE_VOLUME" },
+  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນຫຼັກສູງສຸດ", key: "D_PLAN_MAIN_VOLUME" },
   { title: "ເຂື່ອນຫຼັກນຳໃຊ້ສູງສຸດ", key: "D_MAIN_VOLUME" },
+  { title: "ແຜນເຂື່ອນຫຼັກນຳໃຊ້", key: "D_PLAN_MAIN_USABLE_VOLUME" },
+  { title: "ເຂື່ອນຫຼັກນຳໃຊ້", key: "D_MAIN_USE_VOLUME" },
+
+  // Diversion dam
+  { title: "ແຜນລະດັບນ້ຳເຂື່ອນນ້ຳອ່ວາຍ", key: "D_PLAN_DIVERSION" },
   { title: "ເຂື່ອນນ້ຳອ່ວາຍ", key: "D_DIVERSION" },
-  { title: "ເຂື່ອນນຳໃຊ້", key: "D_DIVERSION_USE_VOLUME" },
+  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_PLAN_DIVERSION_VOLUME" },
   { title: "ເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_DIVERSION_VOLUME" },
+  { title: "ແຜນເຂື່ອນນຳໃຊ້", key: "D_PLAN_DIVERSION_USABLE_VOLUME" },
+  { title: "ເຂື່ອນນຳໃຊ້", key: "D_DIVERSION_USE_VOLUME" },
+
+  // Energy & revenue
   { title: "ພະລັງງານຜະລິດໄດ້", key: "D_ACTUAL_ENERGY" },
   { title: "ແຜນພະລັງງານ", key: "D_PLAN_ENERGY" },
   { title: "ລາຍຮັບ", key: "D_ACTUAL_REVENUE" },
   { title: "ແຜນລາຍຮັບ", key: "D_PLAN_REVENUE" },
-  { title: "ແອ່າງເກັບນ້ຳ", key: "D_PLAN_WL" },
+
+  // Flow
   { title: "ອັດຕານ້ຳເຂົ້າ", key: "D_ACTUAL_INFLOW" },
   { title: "ແຜນອັດຕານ້ຳເຂົ້າ", key: "D_INFLOW_PLAN" },
+  { title: "ແຜນນ້ຳໄຫຼຜ່ານຈັກ", key: "D_PLAN_TURBINE" },
   { title: "ນ້ຳອອກຈາກປະຕູ", key: "D_SPAILWAY" },
   { title: "ນ້ຳໄຫຼຜ່ານຈັກ", key: "D_TAILRACE" },
   { title: "ອັດຕານ້ຳອອກທັງໝົດ", key: "D_TOTAL_OUTFLOW" },
@@ -176,10 +188,7 @@ const getBranch = async () => {
   loading.value = true
   try {
     const res = await axios.get("/api/branch",);
-    dams.value = (res.data.DATA || []).map(item => ({
-      ...item,
-      BR_SHORT_NAME: getPlantShortName(item.BR_CODE, item.BR_NAME_EN),
-    }));
+    dams.value = res.data.DATA;
   } catch (err) {
     console.error(err);
   } finally {
@@ -198,6 +207,8 @@ onMounted(() => {
   loadData();
   getBranch()
 })
+
+loadData();
 
 
 </script>
