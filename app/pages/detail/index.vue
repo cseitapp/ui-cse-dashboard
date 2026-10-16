@@ -283,26 +283,38 @@
             :key="chart.key"
             class="chart-card chart-card-wide"
           >
-            <div class="chart-title">
-              <span class="chart-icon blue reservoir-metric-icon water-level-icon" title="ລະດັບນ້ຳ" role="img" aria-label="ລະດັບນ້ຳ">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path class="measure-post" d="M5 3v18M5 6h3M5 10h2M5 14h3M5 18h2" />
-                  <path class="water-surface" d="M9.5 13.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0 2.4-1 3.6 0" />
-                  <path class="water-surface water-surface-secondary" d="M9.5 17.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0 2.4-1 3.6 0" />
-                  <path class="level-indicator" d="M11 9.5h7m-2.5-2.25L18 9.5l-2.5 2.25" />
-                </svg>
-              </span>
-              <div><strong>{{ chart.title }}</strong><small>MASL</small></div>
-              <span
-                v-if="chart.comparison"
-                class="chart-percent-chip"
-                :class="chart.comparison.tone"
-                :title="`ລະດັບນ້ຳຕົວຈິງ ${chart.comparison.actual} ÷ ແຜນ ${chart.comparison.plan} (${chart.comparison.date})`"
-              >
-                <Icon :name="chart.comparison.icon" size="13" />
-                <b>{{ chart.comparison.percentage }}</b>
-                <small>ທຽບກັບແຜນ</small>
-              </span>
+            <div class="chart-card-header">
+              <div class="chart-title">
+                <span class="chart-icon blue reservoir-metric-icon water-level-icon" title="ລະດັບນ້ຳ" role="img" aria-label="ລະດັບນ້ຳ">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="measure-post" d="M5 3v18M5 6h3M5 10h2M5 14h3M5 18h2" />
+                    <path class="water-surface" d="M9.5 13.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0 2.4-1 3.6 0" />
+                    <path class="water-surface water-surface-secondary" d="M9.5 17.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0 2.4-1 3.6 0" />
+                    <path class="level-indicator" d="M11 9.5h7m-2.5-2.25L18 9.5l-2.5 2.25" />
+                  </svg>
+                </span>
+                <div><strong>{{ chart.title }}</strong><small>MASL</small></div>
+                <span
+                  v-if="chart.comparison"
+                  class="chart-percent-chip"
+                  :class="chart.comparison.tone"
+                  :title="`ລະດັບນ້ຳຕົວຈິງ ${chart.comparison.actual} ÷ ແຜນ ${chart.comparison.plan} (${chart.comparison.date})`"
+                >
+                  <Icon :name="chart.comparison.icon" size="13" />
+                  <b>{{ chart.comparison.percentage }}</b>
+                  <small>ທຽບກັບແຜນ</small>
+                </span>
+              </div>
+              <div v-if="chart.latestActual || chart.latestPlan" class="chart-total-summary water" aria-label="ຂໍ້ມູນລະດັບນ້ຳ">
+                <div class="actual">
+                  <span>{{ chart.actualLabelShort || 'ຕົວຈິງລ່າສຸດ' }}</span>
+                  <strong>{{ formatMetric(chart.latestActual) }} <small>MASL</small></strong>
+                </div>
+                <div class="plan">
+                  <span>{{ chart.planLabelShort || 'ແຜນ' }}</span>
+                  <strong>{{ formatMetric(chart.latestPlan) }} <small>MASL</small></strong>
+                </div>
+              </div>
             </div>
             <div v-if="chart.limits.length" class="water-level-limits two-up" aria-label="ຂອບເຂດລະດັບນ້ຳ">
               <button
@@ -348,7 +360,8 @@
             :key="chart.key"
             class="chart-card chart-card-wide"
           >
-            <div class="chart-title">
+            <div class="chart-card-header">
+              <div class="chart-title">
               <span class="chart-icon blue reservoir-metric-icon water-volume-icon" title="ບໍລິມາດນ້ຳ" role="img" aria-label="ບໍລິມາດນ້ຳ">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
@@ -357,7 +370,28 @@
                   <path class="capacity-mark" d="M7 9h3" />
                 </svg>
               </span>
-              <div><strong>{{ chart.title }}</strong><small>MCM</small></div>
+                <div><strong>{{ chart.title }}</strong><small>MCM</small></div>
+                <span
+                  v-if="chart.comparison"
+                  class="chart-percent-chip"
+                  :class="chart.comparison.tone"
+                  :title="`ບໍລິມາດນ້ຳຕົວຈິງ ${chart.comparison.actual} ÷ ແຜນ ${chart.comparison.plan} (${chart.comparison.date})`"
+                >
+                  <Icon :name="chart.comparison.icon" size="13" />
+                  <b>{{ chart.comparison.percentage }}</b>
+                  <small>ທຽບກັບແຜນ</small>
+                </span>
+              </div>
+              <div v-if="chart.latestActual || chart.latestPlan" class="chart-total-summary water" aria-label="ຂໍ້ມູນບໍລິມາດນ້ຳ">
+                <div class="actual">
+                  <span>ຕົວຈິງລ່າສຸດ</span>
+                  <strong>{{ formatMetric(chart.latestActual) }} <small>MCM</small></strong>
+                </div>
+                <div class="plan">
+                  <span>ແຜນ</span>
+                  <strong>{{ formatMetric(chart.latestPlan) }} <small>MCM</small></strong>
+                </div>
+              </div>
             </div>
             <div v-if="loading" class="chart-state"><span class="loader" /><span>ກຳລັງໂຫຼດ...</span></div>
             <div v-else-if="!waterData.length" class="chart-state"><Icon name="lucide:database" size="32" /><span>ບໍ່ມີຂໍ້ມູນ</span></div>
@@ -521,6 +555,26 @@ function getRouteItem() {
 
 const plant = getRouteItem();
 const code = plant.D_DAM || String(route.query.code || "");
+
+function normalizedPlantDataCode(value) {
+  const normalized = String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return ["NP", "NPC", "NPS"].includes(normalized) ? "NP" : normalized;
+}
+
+function rowsForCurrentPlant(rows) {
+  if (!Array.isArray(rows)) return [];
+  const selectedCode = normalizedPlantDataCode(code);
+  const rowsWithCodes = rows.filter(row => (
+    row?.D_DAM || row?.DAM_CODE || row?.BR_CODE || row?.dam_code
+  ));
+  if (!rowsWithCodes.length) return rows;
+
+  return rowsWithCodes.filter(row => normalizedPlantDataCode(
+    row.D_DAM || row.DAM_CODE || row.BR_CODE || row.dam_code,
+  ) === selectedCode);
+}
+
+const isNamPakChongPlant = normalizedPlantDataCode(code) === "NP";
 const branchName = getPlantLaoName(code, getPlantShortName(code, plant.branch?.BR_NAME_EN || plant.BR_NAME_EN));
 const plantBrand = getPlantBrand(code, plant.branch?.BR_NAME_EN || plant.BR_NAME_EN);
 
@@ -989,11 +1043,15 @@ const outflowSeries = computed(() => [
   },
 ]);
 
+// Nam Pak Chong's main dam is Nam Pa and its diversion dam is Phou Pong
+const mainDamName = isNamPakChongPlant ? "ເຂື່ອນນ້ຳປາ" : "ເຂື່ອນຫຼັກ";
+const diversionDamName = isNamPakChongPlant ? "ເຂື່ອນພູປົ່ງ" : "ເຂື່ອນອວ່າຍນ້ຳ";
+
 const waterLevelLimitDefinitions = [
-  { field: "HIGH_WATER_LEVEL", label: "ສູງສຸດເຂື່ອນຫຼັກ", kind: "high", color: "#ff5667", dam: "main" },
-  { field: "LOW_WATER_LEVEL", label: "ຕ່ຳສຸດເຂື່ອນຫຼັກ", kind: "low", color: "#55aaff", dam: "main" },
-  { field: "HIGH_WATER_LEVEL_DIVERSION", label: "ສູງສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "high", color: "#ff8791", dam: "diversion" },
-  { field: "LOW_WATER_LEVEL_DIVERSION", label: "ຕ່ຳສຸດເຂື່ອນອວ່າຍນ້ຳ", kind: "low", color: "#a795ff", dam: "diversion" },
+  { field: "HIGH_WATER_LEVEL", label: `ສູງສຸດ${mainDamName}`, kind: "high", color: "#ff5667", dam: "main" },
+  { field: "LOW_WATER_LEVEL", label: `ຕ່ຳສຸດ${mainDamName}`, kind: "low", color: "#55aaff", dam: "main" },
+  { field: "HIGH_WATER_LEVEL_DIVERSION", label: `ສູງສຸດ${diversionDamName}`, kind: "high", color: "#ff8791", dam: "diversion" },
+  { field: "LOW_WATER_LEVEL_DIVERSION", label: `ຕ່ຳສຸດ${diversionDamName}`, kind: "low", color: "#a795ff", dam: "diversion" },
 ];
 
 function isWaterLevelLimitVisible(field) {
@@ -1021,28 +1079,137 @@ const waterLevelLimits = computed(() => waterLevelLimitDefinitions
   .filter(limit => limit.value !== null));
 
 const mainWaterLevelPlanFields = [
-  "D_PLAN_WL",
+  "D_PLAN_MAIN", // NP main-dam plan returned by /api/data/dam
+  "d_plan_main",
   "D_PLAN_MAIN_WL",
   "D_MAIN_PLAN_WL",
   "D_PLAN_WL_MAIN",
+  "D_PLAN_WL",
+  "d_plan_wl",
+  "PLAN_MAIN",
+  "plan_main",
+  "D_MAIN_PLAN",
+  "MAIN_PLAN",
+  "DAY_PLAN_MAIN",
+  "DAY_PLAN_WL",
+  "PLAN_WL",
+  "D_PLAN_WATER_LEVEL",
+  "D_PLAN_MAIN_WATER_LEVEL",
+  "D_MAIN_PLAN_WATER_LEVEL",
+  "main_dam",
+  "MAIN_DAM_PLAN",
+  "PLAN_MAIN_DAM",
 ];
+
+const mainWaterLevelActualFields = [
+  "D_MAIN",
+  "d_main",
+  "D_MAIN_WL",
+  "MAIN_WL",
+  "D_ACTUAL_MAIN",
+  "ACTUAL_MAIN",
+  "MAIN_DAM",
+  "main_dam_actual",
+];
+
 const diversionWaterLevelPlanFields = [
   "D_PLAN_DIVERSION", // field returned by /api/data/dam
+  "d_plan_diversion",
   "D_PLAN_DIVERSION_WL",
   "D_DIVERSION_PLAN_WL",
   "D_PLAN_WL_DIVERSION",
   "D_DIVERSION_WL_PLAN",
+  "PLAN_DIVERSION",
+  "plan_diversion",
+  "D_DIVERSION_PLAN",
+  "DIVERSION_PLAN",
+  "DAY_PLAN_DIVERSION",
+  "diversion",
+  "DIVERSION_DAM_PLAN",
+  "PLAN_DIVERSION_DAM",
+];
+
+const diversionWaterLevelActualFields = [
+  "D_DIVERSION",
+  "d_diversion",
+  "D_DIVERSION_WL",
+  "DIVERSION_WL",
+  "D_ACTUAL_DIVERSION",
+  "ACTUAL_DIVERSION",
+  "DIVERSION_DAM",
 ];
 
 function firstNumericFieldValue(row, fields) {
+  if (!row) return null;
   const field = fields.find((name) => {
     const value = row?.[name];
-    return value !== undefined
-      && value !== null
-      && value !== ""
-      && Number.isFinite(Number(String(value).replace(/,/g, "")));
+    if (value === undefined || value === null || value === "") return false;
+    const num = Number(String(value).replace(/,/g, ""));
+    return Number.isFinite(num) && num > 0;
   });
   return field ? toNumber(row[field]) : null;
+}
+
+function getWaterLevelPlanForRow(row, fields) {
+  if (!row) return null;
+  // 1. Direct row in waterData
+  const val = firstNumericFieldValue(row, fields);
+  if (val !== null) return val;
+
+  // 2. Matching row in allData by exact date or month
+  if (row?.D_DATE && allData.value?.length) {
+    const rowDate = moment(row.D_DATE);
+    if (rowDate.isValid()) {
+      const matchExact = allData.value.find(p => moment(p.D_DATE).isSame(rowDate, "day"));
+      const exactVal = firstNumericFieldValue(matchExact, fields);
+      if (exactVal !== null) return exactVal;
+
+      const matchMonth = allData.value.find(p => moment(p.D_DATE).isSame(rowDate, "month"));
+      const monthVal = firstNumericFieldValue(matchMonth, fields);
+      if (monthVal !== null) return monthVal;
+    }
+  }
+
+  return null;
+}
+
+/* A water-level target is sometimes returned once for the whole selected
+   period (or only on the summary row). Forward-fill date-specific targets and
+   carry forward the active plan so every date has valid comparison data. */
+function waterLevelPlanValues(rows, fields) {
+  const rawValues = rows.map(row => getWaterLevelPlanForRow(row, fields));
+
+  const filteredSummaryRows = rowsForCurrentPlant(summaryData.value);
+  const summaryRowsForPlant = filteredSummaryRows.length
+    ? filteredSummaryRows
+    : [plantSummaryRow(summaryData.value)].filter(Boolean);
+  const summaryValue = summaryRowsForPlant
+    .map(row => firstNumericFieldValue(row, fields))
+    .find(value => value !== null && value > 0);
+
+  const yesterdayValue = yesterdayData.value?.length
+    ? firstNumericFieldValue(plantSummaryRow(yesterdayData.value) || yesterdayData.value[0], fields)
+    : null;
+
+  const anyAllDataValue = allData.value?.length
+    ? allData.value.map(row => firstNumericFieldValue(row, fields)).find(v => v !== null && v > 0)
+    : null;
+
+  const anyRawValue = rawValues.find(v => v !== null && v > 0);
+
+  const fallbackTarget = anyRawValue ?? summaryValue ?? yesterdayValue ?? anyAllDataValue ?? null;
+
+  if (fallbackTarget === null) {
+    return rawValues;
+  }
+
+  let current = rawValues.find(v => v !== null && v > 0) ?? fallbackTarget;
+  return rawValues.map((val) => {
+    if (val !== null && val > 0) {
+      current = val;
+    }
+    return current;
+  });
 }
 
 /* Drop plan levels that are clearly mistyped (e.g. 7828 instead of 782.8) –
@@ -1050,7 +1217,7 @@ function firstNumericFieldValue(row, fields) {
 const PLAN_LEVEL_TOLERANCE_M = 20;
 
 function plausiblePlanLevel(value, lowField, highField, limitValues) {
-  if (value === null) return null;
+  if (value === null || value === undefined || value <= 0) return null;
   const low = limitValues[lowField];
   const high = limitValues[highField];
   if (low == null || high == null) return value;
@@ -1059,22 +1226,36 @@ function plausiblePlanLevel(value, lowField, highField, limitValues) {
 
 const waterLevelChartData = computed(() => {
   const limitValues = Object.fromEntries(waterLevelLimits.value.map(limit => [limit.field, limit.value]));
-  return waterData.value.map(row => ({
-    ...row,
-    ...limitValues,
-    __MAIN_PLAN_WL: plausiblePlanLevel(
-      firstNumericFieldValue(row, mainWaterLevelPlanFields),
+  const mainPlanValues = waterLevelPlanValues(waterData.value, mainWaterLevelPlanFields);
+  const diversionPlanValues = waterLevelPlanValues(waterData.value, diversionWaterLevelPlanFields);
+  return waterData.value.map((row, index) => {
+    const mainActual = firstNumericFieldValue(row, mainWaterLevelActualFields);
+    const diversionActual = firstNumericFieldValue(row, diversionWaterLevelActualFields);
+    const mainPlan = plausiblePlanLevel(
+      mainPlanValues[index],
       "LOW_WATER_LEVEL",
       "HIGH_WATER_LEVEL",
       limitValues,
-    ),
-    __DIVERSION_PLAN_WL: plausiblePlanLevel(
-      firstNumericFieldValue(row, diversionWaterLevelPlanFields),
+    );
+    const diversionPlan = plausiblePlanLevel(
+      diversionPlanValues[index],
       "LOW_WATER_LEVEL_DIVERSION",
       "HIGH_WATER_LEVEL_DIVERSION",
       limitValues,
-    ),
-  }));
+    );
+    return {
+      ...row,
+      ...limitValues,
+      D_MAIN: mainActual ?? row.D_MAIN,
+      D_PLAN_MAIN: mainPlan ?? row.D_PLAN_MAIN,
+      D_DIVERSION: diversionActual ?? row.D_DIVERSION,
+      D_PLAN_DIVERSION: diversionPlan ?? row.D_PLAN_DIVERSION,
+      __MAIN_ACTUAL_WL: mainActual ?? (row.D_MAIN ? toNumber(row.D_MAIN) : null),
+      __MAIN_PLAN_WL: mainPlan,
+      __DIVERSION_ACTUAL_WL: diversionActual ?? (row.D_DIVERSION ? toNumber(row.D_DIVERSION) : null),
+      __DIVERSION_PLAN_WL: diversionPlan,
+    };
+  });
 });
 
 const mainPlanVolumeFields = [
@@ -1154,11 +1335,25 @@ function latestWaterMarker(fields) {
 
 
 
-/* One water-level chart per dam: actual + plan line + that dam's high/low limits */
+/* One water-level chart per dam: plan on the left, actual on the right, then limits */
 function waterLevelSeriesFor(dam, actual) {
   return [
-    { field: actual.field, label: actual.label, color: actual.color },
-    { field: actual.planField, label: actual.planLabel, color: "#f6c85f", area: false },
+    {
+      field: actual.planField,
+      fallbackField: actual.fallbackPlanField,
+      label: actual.planLabel,
+      color: "#f6c85f",
+      area: false,
+      z: 4,
+      latestValuePosition: "left",
+    },
+    {
+      field: actual.field,
+      fallbackField: actual.fallbackActualField,
+      label: actual.label,
+      color: actual.color,
+      latestValuePosition: "right",
+    },
     ...waterLevelLimitDefinitions
       .filter(limit => limit.dam === dam && isWaterLevelLimitVisible(limit.field))
       .map(limit => ({
@@ -1180,8 +1375,8 @@ const hasDiversionWaterLevel = computed(() => (
 function latestLevelComparison(marker, actualField, planField) {
   if (!marker?.value) return null;
   const row = waterLevelChartData.value.find(item => item.D_DATE === marker.value);
-  const actual = row ? toNumber(row[actualField]) : 0;
-  const plan = row?.[planField];
+  const actual = row ? (toNumber(row[actualField]) || toNumber(row.D_MAIN) || toNumber(row.D_DIVERSION)) : 0;
+  const plan = row ? (toNumber(row[planField]) || toNumber(row.D_PLAN_MAIN) || toNumber(row.D_PLAN_DIVERSION)) : 0;
   if (!actual || !plan) return null;
 
   const ratio = (actual / plan) * 100;
@@ -1197,69 +1392,191 @@ function latestLevelComparison(marker, actualField, planField) {
 }
 
 const waterLevelCharts = computed(() => {
-  const charts = [{
+  const charts = [];
+
+  // ── Main Dam (e.g. Nam Pa for NP) ──────────────────────
+  const mainMarker = latestWaterMarker(mainWaterLevelActualFields);
+  const mainLatestRow = (mainMarker?.value
+    ? waterLevelChartData.value.find(item => item.D_DATE === mainMarker.value)
+    : null) ?? [...waterLevelChartData.value].reverse().find(item => (
+      toNumber(item.D_MAIN) > 0 || toNumber(item.__MAIN_ACTUAL_WL) > 0
+    ));
+
+  const mainActual = mainLatestRow
+    ? (toNumber(mainLatestRow.D_MAIN) || toNumber(mainLatestRow.__MAIN_ACTUAL_WL))
+    : 0;
+
+  const mainPlan = mainLatestRow
+    ? (toNumber(mainLatestRow.__MAIN_PLAN_WL) || toNumber(mainLatestRow.D_PLAN_MAIN))
+    : ([...waterLevelChartData.value].reverse().find(item => toNumber(item.__MAIN_PLAN_WL) > 0)?.__MAIN_PLAN_WL ?? 0);
+
+  const mainComparison = latestLevelComparison(mainMarker, "D_MAIN", "__MAIN_PLAN_WL")
+    || (mainActual > 0 && mainPlan > 0 ? {
+      percentage: `${((mainActual / mainPlan) * 100).toFixed(2)}%`,
+      tone: (mainActual / mainPlan) >= 1 ? "positive" : "warning",
+      icon: (mainActual / mainPlan) >= 1 ? "lucide:trending-up" : "lucide:trending-down",
+      actual: mainActual.toFixed(2),
+      plan: Number(mainPlan).toFixed(2),
+      date: mainMarker?.value ? moment(mainMarker.value).format("DD/MM/YYYY") : "",
+    } : null);
+
+  charts.push({
     key: "main",
-    title: "ລະດັບນ້ຳເຂື່ອນຫຼັກ",
+    title: isNamPakChongPlant
+      ? "ລະດັບນ້ຳເຂື່ອນນ້ຳປາ"
+      : "ລະດັບນ້ຳເຂື່ອນຫຼັກ",
+    actualLabelShort: isNamPakChongPlant ? "ຕົວຈິງ (ເຂື່ອນນ້ຳປາ)" : "ຕົວຈິງ (ເຂື່ອນຫຼັກ)",
+    planLabelShort: isNamPakChongPlant ? "ແຜນ (ເຂື່ອນນ້ຳປາ)" : "ແຜນ (ເຂື່ອນຫຼັກ)",
+    latestActual: mainActual,
+    latestPlan: mainPlan,
+    latestDate: mainMarker?.value ? moment(mainMarker.value).format("DD/MM/YYYY") : "",
     limits: waterLevelLimits.value.filter(limit => limit.dam === "main"),
     series: waterLevelSeriesFor("main", {
       field: "D_MAIN",
-      label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນຫຼັກ)",
+      fallbackActualField: "__MAIN_ACTUAL_WL",
+      label: isNamPakChongPlant
+        ? "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນນ້ຳປາ)"
+        : "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນຫຼັກ)",
       color: "#2f8dea",
       planField: "__MAIN_PLAN_WL",
-      planLabel: "ແຜນລະດັບນ້ຳ (ເຂື່ອນຫຼັກ)",
+      fallbackPlanField: "D_PLAN_MAIN",
+      planLabel: isNamPakChongPlant
+        ? "ແຜນລະດັບນ້ຳ (ເຂື່ອນນ້ຳປາ)"
+        : "ແຜນລະດັບນ້ຳ (ເຂື່ອນຫຼັກ)",
     }),
-    marker: latestWaterMarker(["D_MAIN"]),
-  }];
-  charts[0].comparison = latestLevelComparison(charts[0].marker, "D_MAIN", "__MAIN_PLAN_WL");
+    marker: mainMarker,
+    comparison: mainComparison,
+  });
 
+  // ── Diversion Dam (e.g. Phou Pong for NP) ──────────────
   if (hasDiversionWaterLevel.value) {
+    const divMarker = latestWaterMarker(diversionWaterLevelActualFields);
+    const divLatestRow = (divMarker?.value
+      ? waterLevelChartData.value.find(item => item.D_DATE === divMarker.value)
+      : null) ?? [...waterLevelChartData.value].reverse().find(item => (
+        toNumber(item.D_DIVERSION) > 0 || toNumber(item.__DIVERSION_ACTUAL_WL) > 0
+      ));
+
+    const divActual = divLatestRow
+      ? (toNumber(divLatestRow.D_DIVERSION) || toNumber(divLatestRow.__DIVERSION_ACTUAL_WL))
+      : 0;
+
+    const divPlan = divLatestRow
+      ? (toNumber(divLatestRow.__DIVERSION_PLAN_WL) || toNumber(divLatestRow.D_PLAN_DIVERSION))
+      : ([...waterLevelChartData.value].reverse().find(item => toNumber(item.__DIVERSION_PLAN_WL) > 0)?.__DIVERSION_PLAN_WL ?? 0);
+
+    const divComparison = latestLevelComparison(divMarker, "D_DIVERSION", "__DIVERSION_PLAN_WL")
+      || (divActual > 0 && divPlan > 0 ? {
+        percentage: `${((divActual / divPlan) * 100).toFixed(2)}%`,
+        tone: (divActual / divPlan) >= 1 ? "positive" : "warning",
+        icon: (divActual / divPlan) >= 1 ? "lucide:trending-up" : "lucide:trending-down",
+        actual: divActual.toFixed(2),
+        plan: Number(divPlan).toFixed(2),
+        date: divMarker?.value ? moment(divMarker.value).format("DD/MM/YYYY") : "",
+      } : null);
+
     charts.push({
       key: "diversion",
-      title: "ລະດັບນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      title: isNamPakChongPlant
+        ? "ລະດັບນ້ຳເຂື່ອນພູປົ່ງ"
+        : "ລະດັບນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      actualLabelShort: isNamPakChongPlant ? "ຕົວຈິງ (ເຂື່ອນພູປົ່ງ)" : "ຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+      planLabelShort: isNamPakChongPlant ? "ແຜນ (ເຂື່ອນພູປົ່ງ)" : "ແຜນ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+      latestActual: divActual,
+      latestPlan: divPlan,
+      latestDate: divMarker?.value ? moment(divMarker.value).format("DD/MM/YYYY") : "",
       limits: waterLevelLimits.value.filter(limit => limit.dam === "diversion"),
       series: waterLevelSeriesFor("diversion", {
         field: "D_DIVERSION",
-        label: "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+        fallbackActualField: "__DIVERSION_ACTUAL_WL",
+        label: isNamPakChongPlant
+          ? "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນພູປົ່ງ)"
+          : "ລະດັບນ້ຳຕົວຈິງ (ເຂື່ອນອ່ວາຍນ້ຳ)",
         color: "#38b9d6",
         planField: "__DIVERSION_PLAN_WL",
-        planLabel: "ແຜນລະດັບນ້ຳ (ເຂື່ອນອ່ວາຍນ້ຳ)",
+        fallbackPlanField: "D_PLAN_DIVERSION",
+        planLabel: isNamPakChongPlant
+          ? "ແຜນລະດັບນ້ຳ (ເຂື່ອນພູປົ່ງ)"
+          : "ແຜນລະດັບນ້ຳ (ເຂື່ອນອ່ວາຍນ້ຳ)",
       }),
-      marker: latestWaterMarker(["D_DIVERSION"]),
+      marker: divMarker,
+      comparison: divComparison,
     });
-    charts[1].comparison = latestLevelComparison(charts[1].marker, "D_DIVERSION", "__DIVERSION_PLAN_WL");
   }
 
   return charts;
 });
+
 /* One volume chart per dam: total + usable volume, actual (solid) and plan (dashed) */
 const hasDiversionVolume = computed(() => waterData.value.some(row => (
   toNumber(row.D_DIVERSION_VOLUME) > 0 || toNumber(row.D_DIVERSION_USE_VOLUME) > 0
 )));
 
+function latestVolumeComparison(actual, plan, marker) {
+  if (actual <= 0 || plan <= 0) return null;
+
+  const ratio = (actual / plan) * 100;
+  const reached = ratio >= 100;
+  return {
+    percentage: `${ratio.toFixed(2)}%`,
+    tone: reached ? "positive" : "warning",
+    icon: reached ? "lucide:trending-up" : "lucide:trending-down",
+    actual: actual.toFixed(2),
+    plan: plan.toFixed(2),
+    date: marker?.value ? moment(marker.value).format("DD/MM/YYYY") : "",
+  };
+}
+
 const waterVolumeCharts = computed(() => {
+  const mainVolMarker = latestWaterMarker(["D_MAIN_VOLUME", "D_MAIN_USE_VOLUME"]);
+  const mainVolRow = (mainVolMarker?.value
+    ? waterVolumeChartData.value.find(item => item.D_DATE === mainVolMarker.value)
+    : null) ?? [...waterVolumeChartData.value].reverse().find(item => toNumber(item.D_MAIN_VOLUME) > 0);
+
+  const mainActualVol = mainVolRow ? toNumber(mainVolRow.D_MAIN_VOLUME) : 0;
+  const mainPlanVol = mainVolRow ? toNumber(mainVolRow.__MAIN_PLAN_VOLUME) : 0;
+
   const charts = [{
     key: "main",
-    title: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ",
+    title: isNamPakChongPlant
+      ? "ບໍລິມາດນ້ຳເຂື່ອນນ້ຳປາ"
+      : "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ",
+    latestActual: mainActualVol,
+    latestPlan: mainPlanVol,
+    comparison: latestVolumeComparison(mainActualVol, mainPlanVol, mainVolMarker),
     series: [
+      { field: "__MAIN_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f6c85f", area: false, lineType: "dashed", z: 4 },
+      { field: "__MAIN_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#d5e86a", area: false, lineType: "dashed", z: 4 },
       { field: "D_MAIN_VOLUME", label: "ບໍລິມາດນ້ຳທັງໝົດ (ຕົວຈິງ)", color: "#2f8dea" },
       { field: "D_MAIN_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ (ຕົວຈິງ)", color: "#74cda8", area: false },
-      { field: "__MAIN_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f6c85f", area: false, lineType: "dashed" },
-      { field: "__MAIN_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#d5e86a", area: false, lineType: "dashed" },
     ],
-    marker: latestWaterMarker(["D_MAIN_VOLUME", "D_MAIN_USE_VOLUME"]),
+    marker: mainVolMarker,
   }];
 
   if (hasDiversionVolume.value) {
+    const divVolMarker = latestWaterMarker(["D_DIVERSION_VOLUME", "D_DIVERSION_USE_VOLUME"]);
+    const divVolRow = (divVolMarker?.value
+      ? waterVolumeChartData.value.find(item => item.D_DATE === divVolMarker.value)
+      : null) ?? [...waterVolumeChartData.value].reverse().find(item => toNumber(item.D_DIVERSION_VOLUME) > 0);
+
+    const divActualVol = divVolRow ? toNumber(divVolRow.D_DIVERSION_VOLUME) : 0;
+    const divPlanVol = divVolRow ? toNumber(divVolRow.__DIVERSION_PLAN_VOLUME) : 0;
+
     charts.push({
       key: "diversion",
-      title: "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      title: isNamPakChongPlant
+        ? "ບໍລິມາດນ້ຳເຂື່ອນພູປົ່ງ"
+        : "ບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍນ້ຳ",
+      latestActual: divActualVol,
+      latestPlan: divPlanVol,
+      comparison: latestVolumeComparison(divActualVol, divPlanVol, divVolMarker),
       series: [
+        { field: "__DIVERSION_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f0a957", area: false, lineType: "dashed", z: 4 },
+        { field: "__DIVERSION_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#c9a7ff", area: false, lineType: "dashed", z: 4 },
         { field: "D_DIVERSION_VOLUME", label: "ບໍລິມາດນ້ຳທັງໝົດ (ຕົວຈິງ)", color: "#38b9d6" },
         { field: "D_DIVERSION_USE_VOLUME", label: "ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ (ຕົວຈິງ)", color: "#9bc9f5", area: false },
-        { field: "__DIVERSION_PLAN_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທັງໝົດ", color: "#f0a957", area: false, lineType: "dashed" },
-        { field: "__DIVERSION_PLAN_USABLE_VOLUME", label: "ແຜນບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້", color: "#c9a7ff", area: false, lineType: "dashed" },
       ],
-      marker: latestWaterMarker(["D_DIVERSION_VOLUME", "D_DIVERSION_USE_VOLUME"]),
+      marker: divVolMarker,
     });
   }
 

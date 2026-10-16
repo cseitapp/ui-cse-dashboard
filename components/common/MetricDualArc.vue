@@ -41,12 +41,24 @@ const trendIcon = computed(() => {
   if (planValue.value <= 0) return "lucide:minus";
   return percentageValue.value >= 100 ? "lucide:trending-up" : "lucide:trending-down";
 });
+const needleAngle = computed(() => -135 + arcCompletion.value * 2.7);
+/* Keep the readout in the half of the dial the needle is NOT in: under the pivot
+   while the needle points up, above it once the needle swings below horizontal
+   (under ~17% or over ~83%), so the tip never runs through the value. */
+const readoutPosition = computed(() => (Math.abs(needleAngle.value) > 90 ? "top" : "bottom"));
 const dualStyle = computed(() => ({
   "--dual-actual": props.actualColor,
   "--dual-plan": props.planColor,
-  "--needle-angle": `${-135 + arcCompletion.value * 2.7}deg`,
+  "--needle-angle": `${needleAngle.value}deg`,
 }));
-const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const numberFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const yesterdayNumberFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 </script>
 
 <template>
@@ -76,13 +88,15 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         </g>
       </svg>
 
-      <div class="dual-center-readout">
-        <strong>{{ displayPercentage }}</strong>
-        <small class="dual-trend">
-          <Icon :name="trendIcon" size="12" />
-          ທຽບກັບແຜນ
-        </small>
-      </div>
+      <Transition name="dual-readout" mode="out-in">
+        <div :key="readoutPosition" class="dual-center-readout" :class="`is-${readoutPosition}`">
+          <strong>{{ displayPercentage }}</strong>
+          <small class="dual-trend">
+            <Icon :name="trendIcon" size="12" />
+            ທຽບກັບແຜນ
+          </small>
+        </div>
+      </Transition>
     </div>
 
     <div class="dual-compare">
@@ -94,7 +108,7 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         <strong class="dual-tile-value">{{ numberFormatter.format(planValue) }} <i>{{ unit }}</i></strong>
         <div class="dual-tile-foot" title="ແຜນມື້ວານ">
           <span><Icon name="lucide:history" size="12" /> ມື້ວານ</span>
-          <b>{{ hasYesterdayPlan ? numberFormatter.format(numeric(yesterdayPlan)) : '—' }} <i>{{ unit }}</i></b>
+          <b>{{ hasYesterdayPlan ? yesterdayNumberFormatter.format(numeric(yesterdayPlan)) : '—' }} <i>{{ unit }}</i></b>
         </div>
       </div>
 
@@ -108,7 +122,7 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         <strong class="dual-tile-value">{{ numberFormatter.format(actualValue) }} <i>{{ unit }}</i></strong>
         <div class="dual-tile-foot" title="ຕົວຈິງມື້ວານ">
           <span><Icon name="lucide:history" size="12" /> ມື້ວານ</span>
-          <b>{{ hasYesterdayActual ? numberFormatter.format(numeric(yesterdayActual)) : '—' }} <i>{{ unit }}</i></b>
+          <b>{{ hasYesterdayActual ? yesterdayNumberFormatter.format(numeric(yesterdayActual)) : '—' }} <i>{{ unit }}</i></b>
         </div>
       </div>
     </div>
@@ -253,10 +267,11 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
   fill: #8aa6b1;
 }
 
-/* value sits in the lower half of the dial, under the pivot */
+/* Value sits in whichever half of the dial the needle leaves free.
+   Pivot is at 100/180 of the gauge height (1 : 0.9 box); the needle cap reaches
+   ~13/180 above it, so the top position ends just clear of the cap. */
 .dual-center-readout {
   position: absolute;
-  top: 66%;
   left: 50%;
   z-index: 3;
   display: flex;
@@ -264,6 +279,31 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
   flex-direction: column;
   transform: translateX(-50%);
   text-align: center;
+}
+
+.dual-center-readout.is-bottom {
+  top: 66%;
+}
+
+.dual-center-readout.is-top {
+  bottom: 53.5%;
+}
+
+.dual-readout-enter-active,
+.dual-readout-leave-active {
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+
+.dual-readout-enter-from.is-top,
+.dual-readout-leave-to.is-top {
+  opacity: 0;
+  translate: 0 6px;
+}
+
+.dual-readout-enter-from.is-bottom,
+.dual-readout-leave-to.is-bottom {
+  opacity: 0;
+  translate: 0 -6px;
 }
 
 .dual-center-readout strong {
@@ -471,7 +511,9 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
 
 @media (prefers-reduced-motion: reduce) {
   .dual-gauge-band,
-  .dual-needle {
+  .dual-needle,
+  .dual-readout-enter-active,
+  .dual-readout-leave-active {
     animation: none;
     transition: none;
   }

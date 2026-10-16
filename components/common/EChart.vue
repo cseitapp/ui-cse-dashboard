@@ -111,14 +111,25 @@ function valuesForSeries(series) {
         return sortedData.value.map(() => referenceValue ?? null)
     }
 
-    return sortedData.value.map(row => numericValue(row[series.field]))
+    return sortedData.value.map(row => {
+        const val = numericValue(row[series.field])
+        if (val !== null) return val
+        if (series.fallbackField) {
+            const fallbackVal = numericValue(row[series.fallbackField])
+            if (fallbackVal !== null) return fallbackVal
+        }
+        return null
+    })
 }
 
 // Tag each data line with its value at the "latest data" marker date.
-// Actual lines are tagged left of the marker, plan lines (dashed / *PLAN* field) right,
-// so an actual value and its plan never overlap.
+// A series can choose a side explicitly; otherwise plan stays on the left and
+// actual stays on the right to prevent overlap.
 function isPlanSeries(series) {
-    return series.lineType === 'dashed' || /PLAN/i.test(String(series.field || ''))
+    return series.lineType === 'dashed'
+        || /PLAN/i.test(String(series.field || ''))
+        || /PLAN/i.test(String(series.fallbackField || ''))
+        || /ແຜນ/i.test(String(series.label || ''))
 }
 
 function latestValueMarkPoints(series, values) {
@@ -129,7 +140,8 @@ function latestValueMarkPoints(series, values) {
     if (value === null || value === undefined) return []
 
     const color = series.color || '#4fe0dc'
-    const onLeft = !isPlanSeries(series)
+    const labelPosition = series.latestValuePosition
+        ?? (isPlanSeries(series) ? 'left' : 'right')
     // small quantities (e.g. volume in MCM) need a third decimal
     const digits = Math.abs(Number(value)) < 10 ? 3 : 2
     return [{
@@ -141,7 +153,7 @@ function latestValueMarkPoints(series, values) {
         itemStyle: { color, borderColor: '#f1fcff', borderWidth: 2 },
         label: {
             show: true,
-            position: onLeft ? 'left' : 'right',
+            position: labelPosition,
             distance: 8,
             formatter: () => Number(value).toFixed(digits),
             color: '#06263a',
@@ -157,7 +169,19 @@ function latestValueMarkPoints(series, values) {
 
 const markPointOption = {
     symbolSize: 50,
-    label: { fontFamily: FONT, fontSize: 11, color: '#fff' },
+    label: {
+        fontFamily: FONT,
+        fontSize: 11,
+        color: '#fff',
+        formatter: (params) => {
+            const val = params.value;
+            if (val === undefined || val === null || val === '') return '';
+            const num = Number(val);
+            if (!Number.isFinite(num)) return String(val);
+            const digits = Math.abs(num) < 10 ? 3 : 2;
+            return num.toFixed(digits);
+        }
+    },
     data: [
         { type: 'max', name: 'ສູງສຸດ' },
         { type: 'min', name: 'ຕ່ຳສຸດ' }
@@ -283,7 +307,7 @@ const option = computed(() => ({
         smooth: s.referenceLine ? false : (s.smooth ?? true),
         showSymbol: s.showSymbol ?? false,
         connectNulls: true,
-        z: s.referenceLine ? 2 : 3,
+        z: s.z ?? (s.referenceLine ? 2 : 3),
         lineStyle: {
             width: s.width ?? (s.referenceLine ? 1.75 : 2.5),
             type: s.lineType ?? (s.referenceLine ? 'dashed' : 'solid'),
@@ -297,7 +321,8 @@ const option = computed(() => ({
         labelLayout: isCompact.value ? { hideOverlap: true, moveOverlap: 'shiftY' } : undefined,
         data: valuesForSeries(s),
         markPoint: (() => {
-            const pins = s.referenceLine || s.markPoint === false ? [] : markPointOption.data
+            const showPins = s.markPoint === true || (s.markPoint !== false && !s.referenceLine && !isPlanSeries(s))
+            const pins = showPins ? markPointOption.data : []
             const latest = latestValueMarkPoints(s, valuesForSeries(s))
             if (!pins.length && !latest.length) return undefined
             return {
@@ -346,5 +371,5 @@ const option = computed(() => ({
 </script>
 
 <template>
-    <VChart :option="option" autoresize />
+    <VChart :option="option" :not-merge="true" autoresize />
 </template>
