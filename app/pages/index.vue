@@ -8881,6 +8881,42 @@ onBeforeUnmount(() => activeRequestController?.abort());
   }
 }
 
+/* Plant metric boxes get narrow on tablets (two plants × two boxes per row):
+   let the label wrap and drop the % chip below it instead of overflowing the
+   box. Wide screens are unaffected because everything still fits on one line. */
+.combined-plant-card .combined-metric {
+  min-width: 0;
+}
+
+.combined-plant-card .combined-metric-heading {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 4px;
+  min-width: 0;
+}
+
+.combined-plant-card .combined-metric-heading > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: flex-start;
+  overflow: visible;
+  line-height: 1.3;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.combined-plant-card .combined-metric-heading > span:first-child > svg,
+.combined-plant-card .combined-metric-heading > span:first-child > .plant-volume-heading-icon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.combined-plant-card .combined-performance {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
 .console-volume-components {
   border-color: rgba(110, 196, 214, 0.16);
   background: rgba(5, 32, 54, 0.55);
