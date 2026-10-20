@@ -13,22 +13,11 @@ const props = defineProps({
   hasYesterdayPlan: { type: Boolean, default: false },
 });
 const componentId = useId().replace(/:/g, "");
-const planGradientId = `dual-plan-${componentId}`;
-const actualGradientId = `dual-actual-${componentId}`;
-const glowFilterId = `dual-glow-${componentId}`;
+const needleGradientId = `dual-needle-${componentId}`;
 
-/* Arc geometry (viewBox 0 5 260 135 – top trimmed to the tick ring): centre (130,128), radius 102 */
-const CX = 130;
-const CY = 128;
-const R = 102;
-const PLAN_PATH = `M${CX - R} ${CY} A${R} ${R} 0 0 1 ${CX} ${CY - R}`;
-const ACTUAL_PATH = `M${CX} ${CY - R} A${R} ${R} 0 0 1 ${CX + R} ${CY}`;
-const TRACK_PATH = `M${CX - R} ${CY} A${R} ${R} 0 0 1 ${CX + R} ${CY}`;
-const HR = R + 2.4;
-const PLAN_HIGHLIGHT = `M${CX - HR} ${CY} A${HR} ${HR} 0 0 1 ${CX} ${CY - HR}`;
-const ACTUAL_HIGHLIGHT = `M${CX} ${CY - HR} A${HR} ${HR} 0 0 1 ${CX + HR} ${CY}`;
-const TR = R + 15;
-const TICK_PATH = `M${CX - TR} ${CY} A${TR} ${TR} 0 0 1 ${CX + TR} ${CY}`;
+/* Speedometer: 270deg sweep from bottom-left (0%) over the top to bottom-right (100%).
+   Needle is drawn pointing straight up (50%) in a 200x200 box centred on the pivot. */
+const NEEDLE_PATH = "M100 38 L110 97 A10.4 10.4 0 1 1 90 97 Z";
 
 function numeric(value) {
   const parsed = Number(String(value ?? 0).replace(/,/g, ""));
@@ -52,85 +41,62 @@ const trendIcon = computed(() => {
   if (planValue.value <= 0) return "lucide:minus";
   return percentageValue.value >= 100 ? "lucide:trending-up" : "lucide:trending-down";
 });
-/* Knob sits at the leading edge of the actual arc */
-const knob = computed(() => {
-  const theta = (Math.PI / 2) * (1 - arcCompletion.value / 100);
-  return { x: CX + R * Math.cos(theta), y: CY - R * Math.sin(theta) };
-});
+const needleAngle = computed(() => -135 + arcCompletion.value * 2.7);
+/* Keep the readout in the half of the dial the needle is NOT in: under the pivot
+   while the needle points up, above it once the needle swings below horizontal
+   (under ~17% or over ~83%), so the tip never runs through the value. */
+const readoutPosition = computed(() => (Math.abs(needleAngle.value) > 90 ? "top" : "bottom"));
 const dualStyle = computed(() => ({
   "--dual-actual": props.actualColor,
   "--dual-plan": props.planColor,
-  "--actual-offset": `${100 - arcCompletion.value}`,
+  "--needle-angle": `${needleAngle.value}deg`,
 }));
-const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const numberFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const yesterdayNumberFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 </script>
 
 <template>
   <div class="dual-arc-card" :class="performance?.tone || 'neutral'" :style="dualStyle">
-    <div class="dual-arc-stage" aria-hidden="true">
-      <span class="dual-floor" />
+    <div class="dual-gauge">
+      <!-- 270deg colour band (conic gradient masked into a ring) -->
+      <div class="dual-gauge-band-wrap" aria-hidden="true">
+        <span class="dual-gauge-band" />
+        <span class="dual-gauge-band-shine" />
+      </div>
 
-      <svg class="dual-arc-svg" viewBox="0 5 260 135">
+      <!-- raised dial face -->
+      <div class="dual-gauge-disc" aria-hidden="true" />
+
+      <!-- tapered needle -->
+      <svg class="dual-gauge-needle" viewBox="0 0 200 200" aria-hidden="true">
         <defs>
-          <linearGradient :id="planGradientId" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0" style="stop-color: var(--dual-plan)" stop-opacity=".5" />
-            <stop offset=".55" style="stop-color: var(--dual-plan)" />
-            <stop offset="1" style="stop-color: color-mix(in srgb, var(--dual-plan) 75%, white)" />
+          <linearGradient :id="needleGradientId" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#f6fcfe" />
+            <stop offset=".5" stop-color="#dbe9ee" />
+            <stop offset="1" stop-color="#9fb8c2" />
           </linearGradient>
-          <linearGradient :id="actualGradientId" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" style="stop-color: color-mix(in srgb, var(--dual-actual) 80%, white)" />
-            <stop offset=".45" style="stop-color: var(--dual-actual)" />
-            <stop offset="1" style="stop-color: var(--dual-actual)" stop-opacity=".55" />
-          </linearGradient>
-          <filter :id="glowFilterId" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
         </defs>
-
-        <!-- Scale -->
-        <path class="dual-tick-minor" :d="TICK_PATH" pathLength="100" />
-        <path class="dual-tick-major" :d="TICK_PATH" pathLength="100" />
-
-        <!-- Soft track -->
-        <path class="dual-track" :d="TRACK_PATH" />
-
-        <!-- Value arcs -->
-        <path class="dual-plan-arc" :stroke="`url(#${planGradientId})`" :filter="`url(#${glowFilterId})`" :d="PLAN_PATH" pathLength="100" />
-        <path class="dual-actual-arc" :stroke="`url(#${actualGradientId})`" :filter="`url(#${glowFilterId})`" :d="ACTUAL_PATH" pathLength="100" />
-
-        <!-- Gentle sheen along the outer edge gives the arc a rounded feel -->
-        <path class="dual-gloss" :d="PLAN_HIGHLIGHT" pathLength="100" />
-        <path class="dual-gloss dual-gloss-actual" :d="ACTUAL_HIGHLIGHT" pathLength="100" />
-
-        <g v-if="arcCompletion > 0" class="dual-knob">
-          <circle class="dual-knob-halo" :cx="knob.x" :cy="knob.y" r="9" />
-          <circle class="dual-knob-body" :cx="knob.x" :cy="knob.y" r="5" />
+        <g class="dual-needle">
+          <path :d="NEEDLE_PATH" :fill="`url(#${needleGradientId})`" />
+          <circle class="dual-needle-cap" cx="100" cy="100" r="4" />
         </g>
       </svg>
 
-      <span class="dual-apex">
-        <svg
-          v-if="icon === 'reservoir-volume'"
-          class="dual-apex-reservoir"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path class="reservoir-basin" d="M3.5 6.5h17L19 19.5H5L3.5 6.5Z" />
-          <path class="water-fill" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72L18.6 18H5.4L5 12.5Z" />
-          <path class="volume-surface" d="M5 12.5c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0c.55.4 1.1.65 1.65.72" />
-          <path class="capacity-mark" d="M7 9h3" />
-        </svg>
-        <Icon v-else :name="icon" size="14" />
-      </span>
-
-      <div class="dual-center-readout">
-        <strong>{{ displayPercentage }}</strong>
-        <small class="dual-trend">
-          <Icon :name="trendIcon" size="12" />
-          ທຽບກັບແຜນ
-        </small>
-      </div>
+      <Transition name="dual-readout" mode="out-in">
+        <div :key="readoutPosition" class="dual-center-readout" :class="`is-${readoutPosition}`">
+          <strong>{{ displayPercentage }}</strong>
+          <small class="dual-trend">
+            <Icon :name="trendIcon" size="12" />
+            ທຽບກັບແຜນ
+          </small>
+        </div>
+      </Transition>
     </div>
 
     <div class="dual-compare">
@@ -142,7 +108,7 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         <strong class="dual-tile-value">{{ numberFormatter.format(planValue) }} <i>{{ unit }}</i></strong>
         <div class="dual-tile-foot" title="ແຜນມື້ວານ">
           <span><Icon name="lucide:history" size="12" /> ມື້ວານ</span>
-          <b>{{ hasYesterdayPlan ? numberFormatter.format(numeric(yesterdayPlan)) : '—' }} <i>{{ unit }}</i></b>
+          <b>{{ hasYesterdayPlan ? yesterdayNumberFormatter.format(numeric(yesterdayPlan)) : '—' }} <i>{{ unit }}</i></b>
         </div>
       </div>
 
@@ -156,7 +122,7 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
         <strong class="dual-tile-value">{{ numberFormatter.format(actualValue) }} <i>{{ unit }}</i></strong>
         <div class="dual-tile-foot" title="ຕົວຈິງມື້ວານ">
           <span><Icon name="lucide:history" size="12" /> ມື້ວານ</span>
-          <b>{{ hasYesterdayActual ? numberFormatter.format(numeric(yesterdayActual)) : '—' }} <i>{{ unit }}</i></b>
+          <b>{{ hasYesterdayActual ? yesterdayNumberFormatter.format(numeric(yesterdayActual)) : '—' }} <i>{{ unit }}</i></b>
         </div>
       </div>
     </div>
@@ -200,164 +166,114 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
     0 16px 34px -14px rgba(1, 13, 38, 0.55);
 }
 
-/* ================= Arc stage ================= */
-.dual-arc-stage {
+/* ================= Speedometer ================= */
+.dual-gauge {
   position: relative;
-  width: min(100%, 320px);
-  aspect-ratio: 260 / 135;
-  margin: 0 auto;
+  width: min(100%, 236px);
+  aspect-ratio: 1 / 0.9;
+  margin: 6px auto 0;
 }
 
-.dual-arc-svg {
+/* wrapper carries the drop shadow (a filter on the masked band itself would be clipped) */
+.dual-gauge-band-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  filter: drop-shadow(0 6px 10px rgba(1, 13, 38, 0.45));
+}
+
+.dual-gauge-band,
+.dual-gauge-band-shine {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* soft colour pool under the arc */
-.dual-floor {
-  position: absolute;
-  bottom: -4%;
-  left: 10%;
-  right: 10%;
-  height: 22%;
   border-radius: 50%;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--dual-plan) 26%, transparent), transparent 50%, color-mix(in srgb, var(--dual-actual) 26%, transparent));
-  filter: blur(18px);
-  opacity: 0.6;
-  pointer-events: none;
 }
 
-.dual-tick-minor,
-.dual-tick-major {
-  fill: none;
-  stroke-linecap: butt;
+.dual-gauge-band {
+  background: conic-gradient(
+    from 225deg,
+    #d8101c 0deg,
+    #ec3a10 45deg,
+    #f57806 90deg,
+    #f2b805 135deg,
+    #a3c40a 185deg,
+    #4dae18 230deg,
+    #1c9a34 270deg,
+    transparent 270deg
+  );
+  filter: saturate(1.2) contrast(1.06);
+  -webkit-mask: radial-gradient(farthest-side, transparent 80.5%, #000 81.5%);
+  mask: radial-gradient(farthest-side, transparent 80.5%, #000 81.5%);
+  animation: dual-fade-in 500ms ease both;
 }
 
-.dual-tick-minor {
-  stroke: rgba(160, 210, 225, 0.22);
-  stroke-width: 4;
-  stroke-dasharray: 0.2 1.8;
+/* soft light along the band mid-line + top for a rounded, dimensional feel */
+.dual-gauge-band-shine {
+  background:
+    radial-gradient(farthest-side, transparent 82%, rgba(255, 255, 255, 0.12) 89%, transparent 97%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 60%);
+  -webkit-mask:
+    radial-gradient(farthest-side, transparent 80.5%, #000 81.5%),
+    conic-gradient(from 225deg, #000 0deg 270deg, transparent 270deg);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(farthest-side, transparent 80.5%, #000 81.5%) intersect,
+    conic-gradient(from 225deg, #000 0deg 270deg, transparent 270deg);
+  mix-blend-mode: soft-light;
 }
 
-.dual-tick-major {
-  stroke: rgba(200, 235, 245, 0.45);
-  stroke-width: 7;
-  /* majors at 25 / 50 / 75 only – no stray dashes at the arc ends */
-  stroke-dasharray: 0.4 24.6 0.4 24.6 0.4 49.6;
-  stroke-dashoffset: -24.8;
-}
-
-.dual-track,
-.dual-plan-arc,
-.dual-actual-arc,
-.dual-gloss {
-  fill: none;
-  stroke-linecap: round;
-}
-
-.dual-track {
-  stroke: rgba(4, 30, 56, 0.45);
-  stroke-width: 12;
-}
-
-.dual-plan-arc,
-.dual-actual-arc {
-  stroke-width: 10;
-}
-
-.dual-plan-arc {
-  stroke-dasharray: 100;
-  stroke-dashoffset: 0;
-  animation: dual-arc-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.dual-actual-arc {
-  stroke-dasharray: 100;
-  stroke-dashoffset: var(--actual-offset);
-  transition: stroke-dashoffset 600ms cubic-bezier(0.22, 1, 0.36, 1);
-  animation: dual-arc-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
-}
-
-.dual-gloss {
-  stroke: rgba(255, 255, 255, 0.35);
-  stroke-width: 1.2;
-  stroke-dasharray: 100;
-  animation: dual-arc-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.dual-gloss-actual {
-  stroke-dashoffset: var(--actual-offset);
-  animation: dual-arc-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
-}
-
-.dual-knob {
-  animation: dual-fade-in 400ms ease 1000ms both;
-}
-
-.dual-knob-halo {
-  fill: color-mix(in srgb, var(--dual-actual) 22%, transparent);
-  animation: dual-halo 2.6s ease-in-out 1.4s infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.dual-knob-body {
-  fill: var(--dual-actual);
-  stroke: #f1fcff;
-  stroke-width: 2.2;
-  filter: drop-shadow(0 2px 3px rgba(0, 10, 24, 0.55));
-}
-
-/* apex badge */
-.dual-apex {
+/* raised navy dial face */
+.dual-gauge-disc {
   position: absolute;
-  top: calc(21 / 135 * 100%);
-  left: 50%;
-  z-index: 2;
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  transform: translate(-50%, -50%);
-  border: 1px solid rgba(202, 244, 242, 0.3);
+  top: 14%;
+  left: 14%;
+  width: 72%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(160, 225, 238, 0.18);
   border-radius: 50%;
-  background: linear-gradient(180deg, #1c6385, #0d3a5c);
-  color: #e9fcfb;
+  background:
+    radial-gradient(90% 70% at 50% 18%, rgba(130, 220, 235, 0.18), transparent 60%),
+    linear-gradient(180deg, #145574, #0b3554 70%, #0a2f4c);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 0 0 4px var(--dual-ring),
-    0 6px 14px rgba(0, 10, 24, 0.45);
+    inset 0 -6px 14px rgba(1, 13, 38, 0.35),
+    0 10px 22px rgba(1, 13, 38, 0.5),
+    0 2px 4px rgba(1, 13, 38, 0.35);
 }
 
-.dual-apex-reservoir {
-  width: 18px;
-  height: 18px;
+.dual-gauge-needle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  aspect-ratio: 1;
   overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.9;
-  filter: drop-shadow(0 0 3px rgba(103, 234, 219, 0.3));
 }
 
-.dual-apex-reservoir .reservoir-basin { stroke-width: 1.9; }
-.dual-apex-reservoir .water-fill {
-  fill: currentColor;
-  stroke: none;
-  opacity: 0.38;
+/* needle: rotates about the pivot from 0% (bottom-left) to 100% (bottom-right) */
+.dual-needle {
+  transform: rotate(var(--needle-angle));
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: dual-needle-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+  filter: drop-shadow(1px 3px 3px rgba(1, 13, 38, 0.55));
 }
-.dual-apex-reservoir .volume-surface { stroke-width: 1.9; }
-.dual-apex-reservoir .capacity-mark { opacity: 0.8; }
 
+.dual-needle-cap {
+  fill: #8aa6b1;
+}
+
+/* Value sits in whichever half of the dial the needle leaves free.
+   Pivot is at 100/180 of the gauge height (1 : 0.9 box); the needle cap reaches
+   ~13/180 above it, so the top position ends just clear of the cap. */
 .dual-center-readout {
   position: absolute;
-  top: 48%;
   left: 50%;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -365,9 +281,34 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
   text-align: center;
 }
 
+.dual-center-readout.is-bottom {
+  top: 66%;
+}
+
+.dual-center-readout.is-top {
+  bottom: 53.5%;
+}
+
+.dual-readout-enter-active,
+.dual-readout-leave-active {
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+
+.dual-readout-enter-from.is-top,
+.dual-readout-leave-to.is-top {
+  opacity: 0;
+  translate: 0 6px;
+}
+
+.dual-readout-enter-from.is-bottom,
+.dual-readout-leave-to.is-bottom {
+  opacity: 0;
+  translate: 0 -6px;
+}
+
 .dual-center-readout strong {
   color: #f4fcff;
-  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-size: clamp(1.4rem, 2vw, 1.7rem);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -379,8 +320,8 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 8px;
-  padding: 3px 10px;
+  margin-top: 5px;
+  padding: 2px 9px;
   border: 1px solid color-mix(in srgb, var(--dual-tone) 34%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--dual-tone) 12%, rgba(8, 48, 78, 0.55));
@@ -559,27 +500,22 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
 }
 
 /* ================= Motion ================= */
-@keyframes dual-arc-in {
-  from { stroke-dashoffset: 100; }
-}
-
 @keyframes dual-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes dual-halo {
-  0%, 100% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.35); }
+@keyframes dual-needle-in {
+  from { transform: rotate(-135deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dual-plan-arc,
-  .dual-actual-arc,
-  .dual-gloss,
-  .dual-knob,
-  .dual-knob-halo {
+  .dual-gauge-band,
+  .dual-needle,
+  .dual-readout-enter-active,
+  .dual-readout-leave-active {
     animation: none;
+    transition: none;
   }
 }
 
@@ -590,17 +526,12 @@ const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 
     border-radius: 16px;
   }
 
-  .dual-arc-stage {
-    width: min(100%, 280px);
-  }
-
-  .dual-apex {
-    width: 26px;
-    height: 26px;
+  .dual-gauge {
+    width: min(100%, 220px);
   }
 
   .dual-center-readout strong {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
   }
 
   .dual-trend {

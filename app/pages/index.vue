@@ -762,7 +762,7 @@
           </div>
 
           <div class="water-executive-grid volume-comparison-grid">
-            <section class="water-metric-block total-volume-metric">
+            <section class="water-metric-block total-volume-metric" :class="totalVolumePerformance.tone">
               <div class="water-metric-heading">
                 <span class="metric-icon total-volume-icon reservoir-volume-symbol" role="img" aria-label="ບໍລິມາດນ້ຳທັງໝົດ">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -792,6 +792,10 @@
                 </div>
               </MetricDualArc>
               <div v-else class="water-summary-panel total-volume-panel">
+                <strong class="water-summary-center-percentage water-performance">
+                  <TrendIndicator :tone="totalVolumePerformance.tone" :size="13" />
+                  <span>{{ totalVolumePerformance.percentage }}</span>
+                </strong>
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -812,7 +816,7 @@
               </div>
             </section>
 
-            <section class="water-metric-block usable-volume-metric">
+            <section class="water-metric-block usable-volume-metric" :class="usableVolumePerformance.tone">
               <div class="water-metric-heading">
                 <span class="metric-icon usable-volume-icon"><Icon name="lucide:droplets" size="19" /></span>
                 <span>ບໍລິມາດນ້ຳທີ່ໃຊ້ໄດ້ທັງໝົດ</span>
@@ -835,6 +839,10 @@
                 </div>
               </MetricDualArc>
               <div v-else class="water-summary-panel usable-volume-panel">
+                <strong class="water-summary-center-percentage water-performance">
+                  <TrendIndicator :tone="usableVolumePerformance.tone" :size="13" />
+                  <span>{{ usableVolumePerformance.percentage }}</span>
+                </strong>
                 <div class="kpi-summary-values">
                   <div class="kpi-summary-stat actual">
                     <span>ຕົວຈິງ</span>
@@ -925,9 +933,13 @@
                         <span><small>ແຜນ</small><strong>{{ formatMetric(plant.planTotalVolume) }} <i>MCM</i></strong></span>
                       </span>
                       <span class="combined-progress"><i :class="plant.totalVolumePerf.tone" :style="{ width: `${plant.totalVolumePerf.bar}%` }" /></span>
-                      <span class="plant-volume-components">
-                        <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(plant.mainVolume) }} <i>MCM</i></strong></span>
-                        <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(plant.diversionVolume) }} <i>MCM</i></strong></span>
+                      <span v-if="plant.hasDiversionDam" class="plant-volume-components">
+                        <span><small>{{ plant.mainDamLabel }}</small><strong>{{ formatMetric(plant.mainVolume) }} <i>MCM</i></strong></span>
+                        <span><small>{{ plant.diversionDamLabel }}</small><strong>{{ formatMetric(plant.diversionVolume) }} <i>MCM</i></strong></span>
+                      </span>
+                      <span v-else class="plant-volume-components plant-volume-yesterday" :title="yesterdayDate">
+                        <span><small><Icon name="lucide:history" size="10" /> ມື້ວານ</small><strong>{{ plant.hasYesterdayPlanTotalVolume ? formatMetric(plant.yesterdayPlanTotalVolume) : "—" }} <i>MCM</i></strong></span>
+                        <span><small><Icon name="lucide:history" size="10" /> ມື້ວານ</small><strong>{{ plant.hasYesterdayTotalVolume ? formatMetric(plant.yesterdayTotalVolume) : "—" }} <i>MCM</i></strong></span>
                       </span>
                     </span>
 
@@ -944,9 +956,13 @@
                         <span><small>ແຜນ</small><strong>{{ formatMetric(plant.planTotalUsableVolume) }} <i>MCM</i></strong></span>
                       </span>
                       <span class="combined-progress"><i :class="plant.usableVolumePerf.tone" :style="{ width: `${plant.usableVolumePerf.bar}%` }" /></span>
-                      <span class="plant-volume-components">
-                        <span><small>ເຂື່ອນຫຼັກ</small><strong>{{ formatMetric(plant.mainUsableVolume) }} <i>MCM</i></strong></span>
-                        <span><small>ເຂື່ອນອ່ວາຍນ້ຳ</small><strong>{{ formatMetric(plant.diversionUsableVolume) }} <i>MCM</i></strong></span>
+                      <span v-if="plant.hasDiversionDam" class="plant-volume-components">
+                        <span><small>{{ plant.mainDamLabel }}</small><strong>{{ formatMetric(plant.mainUsableVolume) }} <i>MCM</i></strong></span>
+                        <span><small>{{ plant.diversionDamLabel }}</small><strong>{{ formatMetric(plant.diversionUsableVolume) }} <i>MCM</i></strong></span>
+                      </span>
+                      <span v-else class="plant-volume-components plant-volume-yesterday" :title="yesterdayDate">
+                        <span><small><Icon name="lucide:history" size="10" /> ມື້ວານ</small><strong>{{ plant.hasYesterdayPlanTotalUsableVolume ? formatMetric(plant.yesterdayPlanTotalUsableVolume) : "—" }} <i>MCM</i></strong></span>
+                        <span><small><Icon name="lucide:history" size="10" /> ມື້ວານ</small><strong>{{ plant.hasYesterdayTotalUsableVolume ? formatMetric(plant.yesterdayTotalUsableVolume) : "—" }} <i>MCM</i></strong></span>
                       </span>
                     </span>
                   </span>
@@ -1221,6 +1237,15 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function metricDisplayValue(value) {
+  const numeric = toNumber(value);
+  return Math.round((numeric + Number.EPSILON) * 100) / 100;
+}
+
+function displayedComponentTotal(first, second) {
+  return metricDisplayValue(metricDisplayValue(first) + metricDisplayValue(second));
+}
+
 const requestedRange = computed(() => {
   if (selectedPeriod.value === "D") {
     if (!isValidIsoDate(selectedDate.value)) return { start: "", end: "" };
@@ -1358,6 +1383,14 @@ function dataRowCode(row) {
   return String(row.D_DAM || row.BR_CODE || row.DAM_CODE || row.dam_code || "").trim().toUpperCase();
 }
 
+function waterDamLabels(code) {
+  const normalizedCode = String(code || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (["NP", "NPC", "NPS"].includes(normalizedCode)) {
+    return { main: "ເຂື່ອນນ້ຳປາ", diversion: "ເຂື່ອນພູປົ່ງ" };
+  }
+  return { main: "ເຂື່ອນຫຼັກ", diversion: "ເຂື່ອນອ່ວາຍນ້ຳ" };
+}
+
 function yesterdayRows(code) {
   const normalizedCode = String(code || "").trim().toUpperCase();
   if (normalizedCode) return yesterdayData.value.filter(row => dataRowCode(row) === normalizedCode);
@@ -1389,6 +1422,17 @@ function yesterdayMetric(...fields) {
     const field = fields.find(name => row[name] !== undefined && row[name] !== null && row[name] !== "");
     return sum + (field ? toNumber(row[field]) : 0);
   }, 0);
+}
+
+function yesterdayDisplayedPlantMetric(...fields) {
+  const plantCodes = [...new Set(yesterdayRows().map(dataRowCode))]
+    .filter(code => code && code !== "ALL");
+  if (!plantCodes.length) return metricDisplayValue(yesterdayMetric(...fields));
+
+  return metricDisplayValue(plantCodes.reduce(
+    (sum, code) => sum + metricDisplayValue(yesterdayPlantMetric(code, ...fields)),
+    0,
+  ));
 }
 
 function yesterdaySummaryRows(code) {
@@ -1456,35 +1500,49 @@ const yesterdayPlanOutflow = computed(() => (
     ? yesterdayMetric(...yesterdayFields.planOutflow)
     : yesterdaySummaryMetric(null, ...yesterdayPlanOutflowSummaryFields)
 ));
-const yesterdayMainWaterVolume = computed(() => yesterdayMetric(...yesterdayFields.mainVolume));
-const yesterdayDiversionWaterVolume = computed(() => yesterdayMetric(...yesterdayFields.diversionVolume));
+const yesterdayMainWaterVolume = computed(() => yesterdayDisplayedPlantMetric(...yesterdayFields.mainVolume));
+const yesterdayDiversionWaterVolume = computed(() => yesterdayDisplayedPlantMetric(...yesterdayFields.diversionVolume));
 const yesterdayTotalWaterVolume = computed(() => {
-  const total = yesterdayMetric(...yesterdayFields.totalVolume);
-  return total || yesterdayMainWaterVolume.value + yesterdayDiversionWaterVolume.value;
+  if (hasYesterdayMainVolume.value || hasYesterdayDiversionVolume.value) {
+    return displayedComponentTotal(yesterdayMainWaterVolume.value, yesterdayDiversionWaterVolume.value);
+  }
+  return yesterdayDisplayedPlantMetric(...yesterdayFields.totalVolume);
 });
 const hasYesterdayPlanVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalPlanVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.mainPlanVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanVolume));
 const yesterdayPlanWaterVolume = computed(() => {
-  const total = yesterdayMetric(...yesterdayFields.totalPlanVolume);
-  return total || yesterdayMetric(...yesterdayFields.mainPlanVolume)
-    + yesterdayMetric(...yesterdayFields.diversionPlanVolume);
+  const main = yesterdayDisplayedPlantMetric(...yesterdayFields.mainPlanVolume);
+  const diversion = yesterdayDisplayedPlantMetric(...yesterdayFields.diversionPlanVolume);
+  if (hasYesterdayMetric(null, ...yesterdayFields.mainPlanVolume)
+    || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanVolume)) {
+    return displayedComponentTotal(main, diversion);
+  }
+  return yesterdayDisplayedPlantMetric(...yesterdayFields.totalPlanVolume);
 });
 const hasYesterdayUsableVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalUsableVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.mainUsableVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.diversionUsableVolume));
 const yesterdayUsableWaterVolume = computed(() => {
-  const total = yesterdayMetric(...yesterdayFields.totalUsableVolume);
-  return total || yesterdayMetric(...yesterdayFields.mainUsableVolume)
-    + yesterdayMetric(...yesterdayFields.diversionUsableVolume);
+  const main = yesterdayDisplayedPlantMetric(...yesterdayFields.mainUsableVolume);
+  const diversion = yesterdayDisplayedPlantMetric(...yesterdayFields.diversionUsableVolume);
+  if (hasYesterdayMetric(null, ...yesterdayFields.mainUsableVolume)
+    || hasYesterdayMetric(null, ...yesterdayFields.diversionUsableVolume)) {
+    return displayedComponentTotal(main, diversion);
+  }
+  return yesterdayDisplayedPlantMetric(...yesterdayFields.totalUsableVolume);
 });
 const hasYesterdayPlanUsableVolume = computed(() => hasYesterdayMetric(null, ...yesterdayFields.totalPlanUsableVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.mainPlanUsableVolume)
   || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanUsableVolume));
 const yesterdayPlanUsableWaterVolume = computed(() => {
-  const total = yesterdayMetric(...yesterdayFields.totalPlanUsableVolume);
-  return total || yesterdayMetric(...yesterdayFields.mainPlanUsableVolume)
-    + yesterdayMetric(...yesterdayFields.diversionPlanUsableVolume);
+  const main = yesterdayDisplayedPlantMetric(...yesterdayFields.mainPlanUsableVolume);
+  const diversion = yesterdayDisplayedPlantMetric(...yesterdayFields.diversionPlanUsableVolume);
+  if (hasYesterdayMetric(null, ...yesterdayFields.mainPlanUsableVolume)
+    || hasYesterdayMetric(null, ...yesterdayFields.diversionPlanUsableVolume)) {
+    return displayedComponentTotal(main, diversion);
+  }
+  return yesterdayDisplayedPlantMetric(...yesterdayFields.totalPlanUsableVolume);
 });
 
 function sumPeriodMetric(...fields) {
@@ -1644,15 +1702,23 @@ const allPlanVolumeFields = [
 ];
 
 function selectedPlanFields(fields) {
+  const current = fields.filter(field => field.startsWith("D_") || field.startsWith("DAY_"));
   const preferredPrefixes = {
     Y: ["YEAR"],
     M: ["MONTH"],
     W: ["WEEK"],
-    D: ["DAY", "D"],
+    D: [],
     Q: ["MONTH"],
   }[selectedPeriod.value] || [];
-  const preferred = fields.filter(field => preferredPrefixes.some(prefix => field.startsWith(`${prefix}_`)));
-  return [...preferred, ...fields.filter(field => !preferred.includes(field))];
+  const preferred = fields.filter(field => (
+    !current.includes(field)
+    && preferredPrefixes.some(prefix => field.startsWith(`${prefix}_`))
+  ));
+  return [
+    ...current,
+    ...preferred,
+    ...fields.filter(field => !current.includes(field) && !preferred.includes(field)),
+  ];
 }
 
 function volumeRowPlantCode(row) {
@@ -1676,12 +1742,20 @@ function rowMetricValue(row, fields) {
   return field ? toNumber(row[field]) : null;
 }
 
-function latestVolumeRowsFor(candidates, rows = volumeData.value) {
+function hasPositiveMetric(row, fields) {
+  return fields.some(field => toNumber(row?.[field]) > 0);
+}
+
+// Volume is a reservoir level, not a flow: use each plant's latest reading.
+// `requirePositive` skips placeholder rows (future dates / not yet reported)
+// that carry the volume fields as 0.
+function latestVolumeRowsFor(candidates, rows = volumeData.value, { requirePositive = false } = {}) {
   const latest = new Map();
 
   rows.forEach((row, index) => {
     const code = volumeRowPlantCode(row);
     if (!code || code === "ALL" || !hasMetricField(row, candidates)) return;
+    if (requirePositive && !hasPositiveMetric(row, candidates)) return;
     const timestamp = volumeRowTimestamp(row);
     const current = latest.get(code);
     if (!current || timestamp > current.timestamp || (timestamp === current.timestamp && index > current.index)) {
@@ -1699,19 +1773,47 @@ const latestPlantVolumeRows = computed(() => latestVolumeRowsFor([
   ...mainUsableVolumeFields,
   ...diversionUsableVolumeFields,
   ...totalUsableVolumeFields,
-]));
-const latestPlantPlanVolumeRows = computed(() => latestVolumeRowsFor([
-  ...allPlanVolumeFields,
-]));
+], volumeData.value, { requirePositive: true }));
+const currentPlanVolumeFields = allPlanVolumeFields.filter(
+  field => field.startsWith("D_") || field.startsWith("DAY_"),
+);
+const latestPlantPlanVolumeRows = computed(() => latestPlantVolumeRows.value
+  .map((actualRow) => {
+    const code = volumeRowPlantCode(actualRow);
+    if (!code) return null;
+
+    // Prefer the plan carried by the latest actual snapshot itself. This keeps
+    // current reservoir actual and plan values on the same reporting date.
+    if (hasMetricField(actualRow, currentPlanVolumeFields)) return actualRow;
+
+    const actualTimestamp = volumeRowTimestamp(actualRow);
+    const selectLatestEligible = (fields) => {
+      let selected = null;
+      volumeData.value.forEach((row, index) => {
+        if (volumeRowPlantCode(row) !== code || !hasMetricField(row, fields)) return;
+        const timestamp = volumeRowTimestamp(row);
+        if (actualTimestamp > 0 && timestamp > 0 && timestamp > actualTimestamp) return;
+        if (!selected || timestamp > selected.timestamp || (timestamp === selected.timestamp && index > selected.index)) {
+          selected = { row, timestamp, index };
+        }
+      });
+      return selected?.row || null;
+    };
+
+    return selectLatestEligible(currentPlanVolumeFields)
+      || selectLatestEligible(allPlanVolumeFields);
+  })
+  .filter(Boolean));
 
 function rowCompositeMetric(row, totalFields, firstFields, secondFields) {
   if (!row) return 0;
   const direct = rowMetricValue(row, totalFields);
   const first = rowMetricValue(row, firstFields);
   const second = rowMetricValue(row, secondFields);
-  const componentTotal = (first ?? 0) + (second ?? 0);
-  if (direct !== null && (direct !== 0 || componentTotal === 0)) return direct;
-  return componentTotal;
+  if (first !== null || second !== null) {
+    return displayedComponentTotal(first ?? 0, second ?? 0);
+  }
+  return metricDisplayValue(direct ?? 0);
 }
 
 function sumLatestSnapshotMetric(fields, rows = latestPlantVolumeRows.value) {
@@ -1720,27 +1822,36 @@ function sumLatestSnapshotMetric(fields, rows = latestPlantVolumeRows.value) {
     const value = rowMetricValue(row, fields);
     if (value === null) return sum;
     found = true;
-    return sum + value;
+    return sum + metricDisplayValue(value);
   }, 0);
-  return found ? total : null;
+  return found ? metricDisplayValue(total) : null;
 }
 
 function sumLatestSnapshotComposite(totalFields, firstFields, secondFields, rows = latestPlantVolumeRows.value) {
-  let found = false;
-  const total = rows.reduce((sum, row) => {
+  let foundComponents = false;
+  let foundDirect = false;
+  let firstTotal = 0;
+  let secondTotal = 0;
+  let directTotal = 0;
+
+  rows.forEach((row) => {
     const direct = rowMetricValue(row, totalFields);
     const first = rowMetricValue(row, firstFields);
     const second = rowMetricValue(row, secondFields);
-    const componentTotal = (first ?? 0) + (second ?? 0);
-    if (direct !== null && (direct !== 0 || componentTotal === 0)) {
-      found = true;
-      return sum + direct;
+    if (first !== null || second !== null) {
+      foundComponents = true;
+      firstTotal += metricDisplayValue(first ?? 0);
+      secondTotal += metricDisplayValue(second ?? 0);
+      return;
     }
-    if (first === null && second === null) return sum;
-    found = true;
-    return sum + componentTotal;
-  }, 0);
-  return found ? total : null;
+    if (direct !== null) {
+      foundDirect = true;
+      directTotal += metricDisplayValue(direct);
+    }
+  });
+
+  if (foundComponents) return displayedComponentTotal(firstTotal, secondTotal);
+  return foundDirect ? metricDisplayValue(directTotal) : null;
 }
 
 function waterSummaryMetric(kind, fallback) {
@@ -1786,7 +1897,12 @@ const totalUsableWaterVolume = computed(() => (
 ));
 
 function annualPlanVolumeMetric(fields, fallback = 0) {
-  const sourceFields = Array.isArray(fields) ? fields : [fields];
+  const allFields = Array.isArray(fields) ? fields : [fields];
+  // Only the year view may fall back to summary YEAR_/MONTH_/WEEK_ volume
+  // fields: they are period totals and inflate a day/week/month/quarter snapshot.
+  const sourceFields = selectedPeriod.value === "Y"
+    ? allFields
+    : allFields.filter(field => field.startsWith("D_") || field.startsWith("DAY_"));
   const plantValues = latestVolumeRowsFor(sourceFields, summaryData.value)
     .filter(row => row.IS_TOTAL !== 1 && row.IS_TOTAL !== "1")
     .map((row) => {
@@ -2006,6 +2122,45 @@ const waterVolumePlantList = computed(() => {
       const planTotalVolume = plant.planTotalVolume || plant.planMainVolume + plant.planDiversionVolume;
       const planTotalUsableVolume = plant.planTotalUsableVolume
         || plant.planMainUsableVolume + plant.planDiversionUsableVolume;
+      const yesterdayMainVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.mainVolume);
+      const yesterdayDiversionVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionVolume);
+      const hasYesterdayVolumeComponents = hasYesterdayMetric(plant.code, ...yesterdayFields.mainVolume)
+        || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionVolume);
+      const yesterdayTotalVolume = hasYesterdayVolumeComponents
+        ? displayedComponentTotal(yesterdayMainVolume, yesterdayDiversionVolume)
+        : metricDisplayValue(yesterdayPlantMetric(plant.code, ...yesterdayFields.totalVolume));
+      const yesterdayPlanMainVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.mainPlanVolume);
+      const yesterdayPlanDiversionVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionPlanVolume);
+      const hasYesterdayPlanVolumeComponents = hasYesterdayMetric(plant.code, ...yesterdayFields.mainPlanVolume)
+        || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionPlanVolume);
+      const yesterdayPlanTotalVolume = hasYesterdayPlanVolumeComponents
+        ? displayedComponentTotal(yesterdayPlanMainVolume, yesterdayPlanDiversionVolume)
+        : metricDisplayValue(yesterdayPlantMetric(plant.code, ...yesterdayFields.totalPlanVolume));
+      const yesterdayMainUsableVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.mainUsableVolume);
+      const yesterdayDiversionUsableVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionUsableVolume);
+      const hasYesterdayUsableComponents = hasYesterdayMetric(plant.code, ...yesterdayFields.mainUsableVolume)
+        || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionUsableVolume);
+      const yesterdayTotalUsableVolume = hasYesterdayUsableComponents
+        ? displayedComponentTotal(yesterdayMainUsableVolume, yesterdayDiversionUsableVolume)
+        : metricDisplayValue(yesterdayPlantMetric(plant.code, ...yesterdayFields.totalUsableVolume));
+      const yesterdayPlanMainUsableVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.mainPlanUsableVolume);
+      const yesterdayPlanDiversionUsableVolume = yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionPlanUsableVolume);
+      const hasYesterdayPlanUsableComponents = hasYesterdayMetric(plant.code, ...yesterdayFields.mainPlanUsableVolume)
+        || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionPlanUsableVolume);
+      const yesterdayPlanTotalUsableVolume = hasYesterdayPlanUsableComponents
+        ? displayedComponentTotal(yesterdayPlanMainUsableVolume, yesterdayPlanDiversionUsableVolume)
+        : metricDisplayValue(yesterdayPlantMetric(plant.code, ...yesterdayFields.totalPlanUsableVolume));
+      const hasDiversionDam = [
+        plant.diversionVolume,
+        plant.diversionUsableVolume,
+        plant.planDiversionVolume,
+        plant.planDiversionUsableVolume,
+        yesterdayDiversionVolume,
+        yesterdayDiversionUsableVolume,
+        yesterdayPlanDiversionVolume,
+        yesterdayPlanDiversionUsableVolume,
+      ].some(value => value > 0);
+      const damLabels = waterDamLabels(plant.code);
       return {
         ...plant,
         totalVolume,
@@ -2015,16 +2170,29 @@ const waterVolumePlantList = computed(() => {
         brand: getPlantBrand(plant.code),
         totalVolumePerf: performance(totalVolume, planTotalVolume),
         usableVolumePerf: performance(totalUsableVolume, planTotalUsableVolume),
+        hasDiversionDam,
+        mainDamLabel: damLabels.main,
+        diversionDamLabel: damLabels.diversion,
         hasYesterdayMainVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.mainVolume),
         hasYesterdayDiversionVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.diversionVolume),
         hasYesterdayTotalVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.totalVolume)
           || hasYesterdayMetric(plant.code, ...yesterdayFields.mainVolume)
           || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionVolume),
-        yesterdayMainVolume: yesterdayPlantMetric(plant.code, ...yesterdayFields.mainVolume),
-        yesterdayDiversionVolume: yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionVolume),
-        yesterdayTotalVolume: yesterdayPlantMetric(plant.code, ...yesterdayFields.totalVolume)
-          || yesterdayPlantMetric(plant.code, ...yesterdayFields.mainVolume)
-          + yesterdayPlantMetric(plant.code, ...yesterdayFields.diversionVolume),
+        hasYesterdayPlanTotalVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.totalPlanVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.mainPlanVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionPlanVolume),
+        hasYesterdayTotalUsableVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.totalUsableVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.mainUsableVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionUsableVolume),
+        hasYesterdayPlanTotalUsableVolume: hasYesterdayMetric(plant.code, ...yesterdayFields.totalPlanUsableVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.mainPlanUsableVolume)
+          || hasYesterdayMetric(plant.code, ...yesterdayFields.diversionPlanUsableVolume),
+        yesterdayMainVolume,
+        yesterdayDiversionVolume,
+        yesterdayTotalVolume,
+        yesterdayPlanTotalVolume,
+        yesterdayTotalUsableVolume,
+        yesterdayPlanTotalUsableVolume,
       };
     })
     .sort((a, b) => b.totalVolume - a.totalVolume);
@@ -2172,8 +2340,14 @@ function openComparisonChart(metric) {
   comparisonChartOpen.value = true;
 }
 
+// Always 2 decimals so values line up across cards (0.20, not 0.2)
+const metricFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 function formatMetric(value) {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(toNumber(value));
+  return metricFormatter.format(toNumber(value));
 }
 
 function plantDisplayName(plant) {
@@ -2243,8 +2417,18 @@ function fallbackSites() {
     .sort((a, b) => a.energy - b.energy);
 }
 
+const VOLUME_LOOKBACK_DAYS = 62;
+
+function volumeLookbackStart(start, end) {
+  const date = parseLocalDate(end);
+  date.setDate(date.getDate() - VOLUME_LOOKBACK_DAYS);
+  const lookback = toIsoDate(date);
+  return lookback < start ? lookback : start;
+}
+
+// v8: day/week/month/quarter volume rows now include the lookback window
 function dashboardCacheKey(start, end) {
-  return `energy-dashboard:v7:${yesterdayDate}:${start}:${end}`;
+  return `energy-dashboard:v8:${yesterdayDate}:${start}:${end}`;
 }
 
 function readDashboardCache(start, end) {
@@ -2381,13 +2565,26 @@ async function loadDashboard() {
   });
 
   const needsDetailedSites = !["Y", "M"].includes(selectedPeriod.value);
+  // A short period (e.g. today, before it is reported) may hold no reservoir
+  // reading, so the volume snapshot looks back for the latest one up to `end`.
+  const needsVolumeLookback = selectedPeriod.value !== "Y";
+  const volumeRequest = needsVolumeLookback
+    ? axios.get("/api/data/dam", {
+      ...requestOptions,
+      params: { start: volumeLookbackStart(start, end), end, code: "" },
+    }).then((response) => {
+      if (requestId !== requestSequence) return;
+      volumeData.value = Array.isArray(response.data?.data) ? response.data.data : [];
+      writeDashboardCache(start, end);
+    })
+    : Promise.resolve();
   const sitesRequest = axios.get("/api/data/dam", {
     ...requestOptions,
     params: { start, end, code: "" },
   }).then((response) => {
     if (requestId !== requestSequence) return;
     siteRows = Array.isArray(response.data?.data) ? response.data.data : [];
-    volumeData.value = siteRows;
+    if (!needsVolumeLookback) volumeData.value = siteRows;
 
     if (needsDetailedSites) {
         siteData.value = buildSiteData(siteRows);
@@ -2438,6 +2635,7 @@ async function loadDashboard() {
     periodRequest,
     yesterdayRequest,
     yesterdaySummaryRequest,
+    volumeRequest,
   ]);
   if (requestId !== requestSequence) return;
 
@@ -5753,6 +5951,11 @@ onBeforeUnmount(() => activeRequestController?.abort());
   white-space: nowrap;
 }
 .water-usable-volume .plant-volume-components strong { color: #82dbb9; }
+.plant-volume-yesterday small {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
 .plant-volume-components i {
   color: #6f929f;
   font-size: clamp(.49rem, .53vw, .57rem);
@@ -7635,7 +7838,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .executive-overview-card .summary-center-percentage,
-.water-executive-card .water-summary-center-percentage {
+.water-executive-card .water-summary-center-percentage,
+.water-volume-executive-card .water-summary-center-percentage {
   position: absolute;
   top: clamp(32px, 2.2vw, 38px);
   left: 50%;
@@ -7660,7 +7864,8 @@ onBeforeUnmount(() => activeRequestController?.abort());
 }
 
 .executive-overview-card .summary-center-percentage > svg,
-.water-executive-card .water-summary-center-percentage > svg {
+.water-executive-card .water-summary-center-percentage > svg,
+.water-volume-executive-card .water-summary-center-percentage > svg {
   width: clamp(11px, 0.8vw, 13px);
   height: clamp(11px, 0.8vw, 13px);
 }
@@ -8595,6 +8800,23 @@ onBeforeUnmount(() => activeRequestController?.abort());
   color: color-mix(in srgb, var(--dam-color) 55%, #f0fbfd);
 }
 
+.dual-view .plant-volume-yesterday > span,
+.console-view .plant-volume-yesterday > span {
+  --dam-color: #a3c7d3;
+}
+
+.dual-view .plant-volume-yesterday strong,
+.console-view .plant-volume-yesterday strong,
+.dual-view .water-usable-volume .plant-volume-yesterday strong,
+.console-view .water-usable-volume .plant-volume-yesterday strong {
+  color: #c7e0e6;
+}
+
+.dual-view .plant-volume-yesterday small,
+.console-view .plant-volume-yesterday small {
+  gap: 4px;
+}
+
 @media (max-width: 600px) {
   .dual-view .combined-plant-card,
   .console-view .combined-plant-card {
@@ -8657,6 +8879,42 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .dual-view .combined-performance {
     margin-left: auto;
   }
+}
+
+/* Plant metric boxes get narrow on tablets (two plants × two boxes per row):
+   let the label wrap and drop the % chip below it instead of overflowing the
+   box. Wide screens are unaffected because everything still fits on one line. */
+.combined-plant-card .combined-metric {
+  min-width: 0;
+}
+
+.combined-plant-card .combined-metric-heading {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 4px;
+  min-width: 0;
+}
+
+.combined-plant-card .combined-metric-heading > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: flex-start;
+  overflow: visible;
+  line-height: 1.3;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.combined-plant-card .combined-metric-heading > span:first-child > svg,
+.combined-plant-card .combined-metric-heading > span:first-child > .plant-volume-heading-icon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.combined-plant-card .combined-performance {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .console-volume-components {
@@ -8804,5 +9062,87 @@ onBeforeUnmount(() => activeRequestController?.abort());
   .metric-volume-components strong {
     font-size: 0.7rem;
   }
+}
+
+/* Classic comparison standard: Plan on the left, Actual on the right.
+   Keep the source data order intact and move only the presentation so every
+   summary and plant-detail box follows the same visual convention. */
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .plan,
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .plan {
+  order: 1;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .actual,
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .actual {
+  position: relative;
+  order: 2;
+  margin-left: 14px;
+  padding-left: 14px;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-summary-values > .actual {
+  align-items: flex-end;
+  text-align: right;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .kpi-yesterday-row > .actual {
+  justify-content: flex-end;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.kpi-summary-stat.plan, .kpi-yesterday-value.plan)::before {
+  display: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(137, 207, 218, 0.52) 22%, rgba(137, 207, 218, 0.52) 78%, transparent);
+  box-shadow: 0 0 5px rgba(75, 199, 211, 0.14);
+  content: "";
+  pointer-events: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .revenue-summary :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  background: linear-gradient(180deg, transparent, rgba(242, 194, 86, 0.48) 22%, rgba(242, 194, 86, 0.48) 78%, transparent);
+  box-shadow: 0 0 5px rgba(242, 194, 86, 0.12);
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) .outflow-panel :is(.kpi-summary-stat.actual, .kpi-yesterday-value.actual)::before {
+  background: linear-gradient(180deg, transparent, rgba(112, 204, 241, 0.5) 22%, rgba(112, 204, 241, 0.5) 78%, transparent);
+  box-shadow: 0 0 5px rgba(112, 204, 241, 0.13);
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span:first-child {
+  position: relative;
+  order: 2;
+  align-items: flex-end;
+  padding-left: 8px;
+  text-align: right;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span + span {
+  order: 1;
+  padding-left: 0;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span + span::before {
+  display: none;
+}
+
+:is(.kpi-grid:not(.dual-view), .details-only-grid) :is(.combined-metric-values, .combined-yesterday-values) > span:first-child::before {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--plant-metric-divider) 22%, var(--plant-metric-divider) 78%, transparent);
+  box-shadow: 0 0 5px var(--plant-metric-divider-glow);
+  content: "";
+  pointer-events: none;
 }
 </style>
