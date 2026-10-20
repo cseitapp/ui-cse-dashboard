@@ -240,7 +240,7 @@ const sortedData = computed(() =>
 
 
 const gotoDetail = (item) => {
-  router.push({ path: `/detail`, query: { item: JSON.stringify(item) } });
+  router.push({ path: `/detail`, query: { code: item.D_DAM, branch: item.branch.BR_NAME } });
 };
 
 
