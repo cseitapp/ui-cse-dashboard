@@ -28,11 +28,10 @@ const handleLogin = async () => {
 
 <template>
   <v-layout>
-    <v-container fluid class="d-flex align-center justify-center"
-      style="height: 100vh; background: url('/assets/images/DAM.jpeg') no-repeat center center; background-size: cover;">
+    <v-container fluid class="login-page d-flex align-center justify-center">
       <v-row align="center" justify="center">
         <v-col cols="10" sm="8" md="6" lg="3">
-          <v-card class="rounded-xl" style="border-width: 2px; border-style: solid; border-color: white;" color="#474a4d96">
+          <v-card class="login-card rounded-xl">
             <div class="d-flex justify-center">
               <v-img class="ms-10 mt-10 me-10 mb-3" aspect-ratio="16/9" cover src="/assets/images/logo-title.png" />
             </div>
@@ -82,3 +81,36 @@ const handleLogin = async () => {
   </v-layout>
 
 </template>
+
+<style scoped>
+.login-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-image:
+    linear-gradient(120deg, rgba(0, 55, 86, .30), rgba(0, 116, 133, .08) 52%, rgba(31, 105, 49, .16)),
+    url('/assets/images/signin-energy-future.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.login-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .72);
+  background: linear-gradient(145deg, rgba(12, 49, 66, .83), rgba(18, 73, 75, .72)) !important;
+  box-shadow: 0 24px 70px rgba(1, 38, 55, .34) !important;
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+@media (max-width: 600px) {
+  .login-page {
+    padding: 18px 6px;
+    background-position: 54% center;
+  }
+
+  .login-card {
+    background: linear-gradient(145deg, rgba(8, 43, 61, .88), rgba(14, 69, 70, .80)) !important;
+  }
+}
+</style>

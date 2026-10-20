@@ -2,15 +2,20 @@
   "name": "cse-vehicle",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --dotenv .env.local",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "nuxt start"
+    "start": "node --env-file-if-exists=.env.production .output/server/index.mjs"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.142",
+    "@iconify-json/mdi": "^1.2.3",
     "@iconify/vue": "^5.0.0",
     "@mdi/font": "^7.4.47",
     "@nuxt/icon": "^2.3.1",
