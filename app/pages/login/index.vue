@@ -16,7 +16,12 @@ const handleLogin = async () => {
   errorMsg.value = ''
   const res = await useLogin(username.value, password.value)
   if (res.success) {
-    await navigateTo('/')
+    if(res.user.ROLE_CODE === 'GENERAL'){
+      await navigateTo('/unknown')
+    }else{
+      await navigateTo('/')
+    }
+    
   } else {
     errorMsg.value = res.message
   }

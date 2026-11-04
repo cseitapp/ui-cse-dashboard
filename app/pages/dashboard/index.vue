@@ -14,7 +14,7 @@
     <v-card class="mb-3" elevation="0" rounded="lg">
       <!-- 📅 DATE RANGE -->
       <v-row class="ma-3 d-flex align-center">
-        <v-col v-if="role === 'ADMIN' || role === 'DIRECTOR'">
+        <v-col v-if="role !== 'GENERAL'">
           <v-select v-model="selected" :items="dams" item-title="BR_CODE" item-value="BR_CODE" variant="outlined"
             hide-details density="compact" color="primary" placeholder="ກະລຸນາເລືອກເຂື່ອນ" />
         </v-col>
