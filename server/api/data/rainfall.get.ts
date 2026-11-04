@@ -67,8 +67,8 @@ export default defineCachedEventHandler(async (event) => {
 }, {
   name: "dashboard-rainfall-branch-v1",
   maxAge: 120,
-  staleMaxAge: 3600,
-  swr: true,
+  // No SWR: Nitro would serve stale entries of any age (e.g. old year ranges).
+  swr: false,
   getKey: (event) => {
     const query = getQuery(event);
     return [
