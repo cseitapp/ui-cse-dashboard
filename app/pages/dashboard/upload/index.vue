@@ -13,9 +13,9 @@
             <v-spacer></v-spacer>
             <h2>ອັບໂຫຼດຂໍ້ມູນ</h2>
             <v-spacer></v-spacer>
-            <v-btn color="primary" variant="tonal" :disabled="dataList.length > 0 ? false : true" @click="onSavefile"
+            <v-btn color="success" variant="flat" :disabled="dataList.length > 0 ? false : true" @click="onSavefile"
                 class="mr-2">
-                <Icon name="material-symbols:save-rounded" class="text-primary" />
+                <Icon name="material-symbols:save-rounded"/>
                 <span>ບັນທຶກ</span>
             </v-btn>
         </v-row>
@@ -245,11 +245,9 @@ const onSavefile = async () => {
         }
 
         if (bad.length) {
-            console.log("Failed rows:", bad);
             showSnackbar(`ບັນທຶກສຳເລັດ ${ok}, ຊ້ຳ ${dup.length}, ຜິດພາດ ${bad.length}`, "error");
         } else if (dup.length) {
-            console.log("Duplicate rows:", dup);
-            showSnackbar(`ບັນທຶກສຳເລັດ ${ok}, ຂໍ້ມູນຊ້ຳ ${dup.length}`, "warning");
+            showSnackbar(`ບັນທຶກສຳເລັດ ${ok}, ຂໍ້ມູນຊ້ຳ ${dup.length}`, "success");
         } else {
             showSnackbar(`ບັນທຶກສຳເລັດ ${ok} ແຖວ`, "success");
         }

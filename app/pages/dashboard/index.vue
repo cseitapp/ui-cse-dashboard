@@ -14,7 +14,7 @@
     <v-card class="mb-3" elevation="0" rounded="lg">
       <!-- 📅 DATE RANGE -->
       <v-row class="ma-3 d-flex align-center">
-        <v-col v-if="role === 'ADMIN' || role === 'DIRECTOR'">
+        <v-col>
           <v-select v-model="selected" :items="dams" item-title="BR_CODE" item-value="BR_CODE" variant="outlined"
             hide-details density="compact" color="primary" placeholder="ກະລຸນາເລືອກເຂື່ອນ" />
         </v-col>
@@ -48,19 +48,45 @@
 
     <!-- 📊 DATA TABLE -->
     <v-data-table :headers="headers" :items="data" :loading="loading" class="elevation-0 mt-4 rounded-lg border">
-      <template #item.datetime="{ item }">{{ formatDisplay(item.datetime) }}</template>
-      <template #item.created_at="{ item }">{{ formatDisplay(item.created_at) }}</template>
-      <template #item.unit1_power="{ item }">{{ formatNumber(item.unit1_power) }}</template>
-      <template #item.unit2_power="{ item }">{{ formatNumber(item.unit2_power) }}</template>
-      <template #item.total_power="{ item }">
-        <strong>{{ formatNumber(item.total_power) }}</strong>
-      </template>
+      <template #item.D_DATE="{ item }">{{ formatDisplay(item.D_DATE) }}</template>
+
+      <!-- Main dam -->
+      <template #item.D_PLAN_WL="{ item }">{{ formatNumber(item.D_PLAN_WL) }}</template>
+      <template #item.D_MAIN="{ item }">{{ formatNumber(item.D_MAIN) }}</template>
+      <template #item.D_PLAN_MAIN_VOLUME="{ item }">{{ formatNumber(item.D_PLAN_MAIN_VOLUME) }}</template>
+      <template #item.D_MAIN_VOLUME="{ item }">{{ formatNumber(item.D_MAIN_VOLUME) }}</template>
+      <template #item.D_PLAN_MAIN_USABLE_VOLUME="{ item }">{{ formatNumber(item.D_PLAN_MAIN_USABLE_VOLUME) }}</template>
+      <template #item.D_MAIN_USE_VOLUME="{ item }">{{ formatNumber(item.D_MAIN_USE_VOLUME) }}</template>
+
+      <!-- Diversion dam -->
+      <template #item.D_PLAN_DIVERSION="{ item }">{{ formatNumber(item.D_PLAN_DIVERSION) }}</template>
+      <template #item.D_DIVERSION="{ item }">{{ formatNumber(item.D_DIVERSION) }}</template>
+      <template #item.D_PLAN_DIVERSION_VOLUME="{ item }">{{ formatNumber(item.D_PLAN_DIVERSION_VOLUME) }}</template>
+      <template #item.D_DIVERSION_VOLUME="{ item }">{{ formatNumber(item.D_DIVERSION_VOLUME) }}</template>
+      <template #item.D_PLAN_DIVERSION_USABLE_VOLUME="{ item }">{{ formatNumber(item.D_PLAN_DIVERSION_USABLE_VOLUME)
+        }}</template>
+      <template #item.D_DIVERSION_USE_VOLUME="{ item }">{{ formatNumber(item.D_DIVERSION_USE_VOLUME) }}</template>
+
+      <!-- Energy & revenue -->
+      <template #item.D_ACTUAL_ENERGY="{ item }"><strong>{{ formatNumber(item.D_ACTUAL_ENERGY) }}</strong></template>
+      <template #item.D_PLAN_ENERGY="{ item }">{{ formatNumber(item.D_PLAN_ENERGY) }}</template>
+      <template #item.D_ACTUAL_REVENUE="{ item }"><strong>{{ formatNumber(item.D_ACTUAL_REVENUE) }}</strong></template>
+      <template #item.D_PLAN_REVENUE="{ item }">{{ formatNumber(item.D_PLAN_REVENUE) }}</template>
+
+      <!-- Flow -->
+      <template #item.D_ACTUAL_INFLOW="{ item }">{{ formatNumber(item.D_ACTUAL_INFLOW) }}</template>
+      <template #item.D_INFLOW_PLAN="{ item }">{{ formatNumber(item.D_INFLOW_PLAN) }}</template>
+      <template #item.D_PLAN_TURBINE="{ item }">{{ formatNumber(item.D_PLAN_TURBINE) }}</template>
+      <template #item.D_SPAILWAY="{ item }">{{ formatNumber(item.D_SPAILWAY) }}</template>
+      <template #item.D_TAILRACE="{ item }">{{ formatNumber(item.D_TAILRACE) }}</template>
+      <template #item.D_TOTAL_OUTFLOW="{ item }">{{ formatNumber(item.D_TOTAL_OUTFLOW) }}</template>
+      <template #item.D_RAINFAILL="{ item }">{{ formatNumber(item.D_RAINFAILL) }}</template>
     </v-data-table>
   </v-container>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 import { useAuthUser } from '~~/composables/useAuth'
 
@@ -122,18 +148,18 @@ const headers = [
   // Main dam
   { title: "ແຜນລະດັບນ້ຳເຂື່ອນຫຼັກ", key: "D_PLAN_WL" },
   { title: "ເຂື່ອນຫຼັກ", key: "D_MAIN" },
-  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນຫຼັກສູງສຸດ", key: "D_PLAN_MAIN_VOLUME" },
-  { title: "ເຂື່ອນຫຼັກນຳໃຊ້ສູງສຸດ", key: "D_MAIN_VOLUME" },
-  { title: "ແຜນເຂື່ອນຫຼັກນຳໃຊ້", key: "D_PLAN_MAIN_USABLE_VOLUME" },
-  { title: "ເຂື່ອນຫຼັກນຳໃຊ້", key: "D_MAIN_USE_VOLUME" },
+  { title: "ແຜນບໍລິມາດນ້ຳເຂື່ອນຫຼັກ", key: "D_PLAN_MAIN_VOLUME" },
+  { title: "ບໍລິມາດນ້ຳເຂື່ອນຫຼັກ", key: "D_MAIN_VOLUME" },
+  { title: "ແຜນບໍລິມາດນຳໃຊ້ນ້ຳເຂື່ອນຫຼັກ", key: "D_PLAN_MAIN_USABLE_VOLUME" },
+  { title: "ບໍລິມາດນຳໃຊ້ນ້ຳເຂື່ອນຫຼັກ", key: "D_MAIN_USE_VOLUME" },
 
   // Diversion dam
   { title: "ແຜນລະດັບນ້ຳເຂື່ອນນ້ຳອ່ວາຍ", key: "D_PLAN_DIVERSION" },
   { title: "ເຂື່ອນນ້ຳອ່ວາຍ", key: "D_DIVERSION" },
-  { title: "ແຜນປະລິມານນ້ຳເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_PLAN_DIVERSION_VOLUME" },
-  { title: "ເຂື່ອນນຳໃຊ້ສູງສຸດ", key: "D_DIVERSION_VOLUME" },
-  { title: "ແຜນເຂື່ອນນຳໃຊ້", key: "D_PLAN_DIVERSION_USABLE_VOLUME" },
-  { title: "ເຂື່ອນນຳໃຊ້", key: "D_DIVERSION_USE_VOLUME" },
+  { title: "ແຜນບໍລິມາດນ້ຳເຂື່ອນອ່ວາຍ", key: "D_PLAN_DIVERSION_VOLUME" },
+  { title: "ບໍລິມາດນ້ຳເຂື່ອນອວ່າຍ", key: "D_DIVERSION_VOLUME" },
+  { title: "ແຜນບໍລິມາດນຳໃຊ້ເຂື່ອນນອ່ວາຍ", key: "D_PLAN_DIVERSION_USABLE_VOLUME" },
+  { title: "ບໍລິມາດນຳໃຊ້ເຂື່ອນອວ່າຍ", key: "D_DIVERSION_USE_VOLUME" },
 
   // Energy & revenue
   { title: "ພະລັງງານຜະລິດໄດ້", key: "D_ACTUAL_ENERGY" },
@@ -177,6 +203,7 @@ const loadData = async () => {
       },
     });
     data.value = res.data;
+    console.log(data.value)
   } catch (err) {
     console.error(err);
   } finally {
